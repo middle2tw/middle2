@@ -1,2 +1,22 @@
 <?= $this->partial('/common/header.phtml', $this) ?>
+<h2>Projects</h2>
+<hr>
+<h2>SSH Keys</h2>
+<ul>
+    <?php foreach ($this->user->keys as $key) { ?>
+    <li title="<?= $this->escape($key->key_body) ?>">
+        <?= $this->escape($key->getKeyUser()) ?>: <?= trim(chunk_split($key->key_fingerprint, 2, ':'), ':') ?>
+        <a href="/user/deletekey/<?= $key->id ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($key->getKeyUser()) ?> key">Delete</a>
+    </li>
+    <?php } ?>
+    <li>
+    Add key:
+    <form method="post" action="/user/addkey">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        <input type="text" name="key" placeholder="add ssh public key body here...">
+        <input type="submit">
+    </form>
+    </li>
+</ul>
+
 <?= $this->partial('/common/footer.phtml', $this) ?>
