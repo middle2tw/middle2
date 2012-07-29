@@ -25,5 +25,7 @@ class UserKey extends Pix_Table
 
         $this->_indexes['userid_id'] = array('type' => 'unique', 'columns' => array('user_id', 'id'));
         $this->_indexes['key_fingerprint'] = array('type' => 'unique', 'columns' => array('key_fingerprint'));
+
+        $this->_relations['user'] = array('rel' => 'has_one', 'type' => 'User', 'foreign_key' => 'user_id');
     }
 }
