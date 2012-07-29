@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL ^ E_STRICT ^ E_NOTICE);
+
 include(__DIR__ . '/stdlibs/pixframework/Pix/Loader.php');
 set_include_path(__DIR__ . '/stdlibs/pixframework/'
     . PATH_SEPARATOR . __DIR__ . '/models'
