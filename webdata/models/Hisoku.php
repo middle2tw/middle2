@@ -2,9 +2,9 @@
 
 class Hisoku
 {
-    public function getLoginUser()
+    public static function getLoginUser()
     {
-        if ($u = User::find(Pix_Session::get('user'))) {
+        if ($u = User::find(intval(Pix_Session::get('user')))) {
             return $u;
         }
         return false;
