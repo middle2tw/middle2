@@ -1,2 +1,19 @@
+<form method="post" id="post-form">
+<input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+</form>
+<script type="text/javascript"><!--
+$(function(){
+    $('body').delegate('.post-link', 'click', function(e){
+        e.preventDefault();
+
+        if ($(this).is('.confirm')) {
+            if (!confirm($(this).attr('data-confirm'))) {
+                return;
+            }
+        }
+        $('#post-form').attr('action', $(this).attr('href')).submit();
+    });
+});
+//--></script>
 </body>
 </html>
