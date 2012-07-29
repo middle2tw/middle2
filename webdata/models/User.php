@@ -34,7 +34,7 @@ class User extends Pix_Table
         $this->_rowClass = 'UserRow';
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
-        $this->_columns['name'] = array('type' => 'varchar', 'size' => 32);
+        $this->_columns['name'] = array('type' => 'varchar', 'size' => 128);
         // password_type: 1-hmac_sha256
         $this->_columns['password_type'] = array('type' => 'tinyint');
         $this->_columns['password'] = array('type' => 'char', 'size' => 64);
