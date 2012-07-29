@@ -42,7 +42,7 @@ function main()
 
     $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
     if (!file_exists($absolute_path)) {
-        //return error('Unknown repository: ' . $path);
+        system('git init --bare ' . escapeshellarg($absolute_path));
     }
 
     passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
