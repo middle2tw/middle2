@@ -1,7 +1,0 @@
-#!/usr/bin/env php
-<?php
-include(__DIR__ . '/../webdata/init.inc.php');
-
-foreach (UserKey::search(1) as $user_key) {
-    echo 'command="/srv/code/hisoku/scripts/ssh-serve ' . $user_key->user->name . '",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $user_key->key_body . "\n";
-}
