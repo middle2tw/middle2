@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+include(__DIR__ . '/../webdata/init.inc.php');
+
+if ('git' !== getenv('USER')) {
+    die('git user only' . PHP_EOL);
+}
+
+$public_key = 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAxpbN0yZRrujEJE9jY5V/k/fnhtqhOt9cZf9X+zs1dKj3vg8TChMpKO6EhU1frOfC+0O7eIZBBmJk9RS7fHI96bg6zS2effcNtfdP1geUFP7cZpEorvK/ZhuCe61tsAppKlF8j57Nz6HANUKYTzwGJHfAmt9hYaKmJWxM5kq4isxFERIhWkEyyMeM7heojzLbJsY/ta+IJKcGtS7ZXoQ4VkuI0Oht9rjkk+YfeD9UH6dqC6CKOP3RkE+tWSxvaJR074VbbweFEO0Cc3c4Evv9+gPmy7G0dikTzQHcN0IADsvqFpHAKtU/CgO9/8yltZRdMPFlDaEYxYtcWB9PEG33bQ== ec2-user@ip-10-146-23-10';
+
+$content = '### generated at ' . date('Y/m/d H:i:s') . "\n";
+$content .= "# update-keys\n";
+$content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $public_key . "\n";
+$content .= "# user keys\n";
+foreach (UserKey::search(1) as $user_key) {
+    $content .= 'command="/srv/code/hisoku/scripts/ssh-serve ' . $user_key->user->name . '",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $user_key->key_body . "\n";
+}
+
+file_put_contents($content, getenv('HOME') . '/.ssh/authorized_keys');
