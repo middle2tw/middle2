@@ -7,8 +7,8 @@ set_include_path(__DIR__ . '/stdlibs/pixframework/'
 
 Pix_Loader::registerAutoLoad();
 
-if (file_exists('config.php')) {
-    include('config.php');
+if (file_exists(__DIR__ . '/config.php')) {
+    include(__DIR__ . '/config.php');
 }
 $link = new mysqli;
 $link->connect(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASS'));
