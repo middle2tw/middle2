@@ -4,7 +4,7 @@ class UserRow extends Pix_Table_Row
 {
     public function verifyPassword($password)
     {
-        return $this->hashPassword($psasword) == $this->password;
+        return $this->hashPassword($password) == $this->password;
     }
 
     public function setPassword($password)
