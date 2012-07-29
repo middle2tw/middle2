@@ -14,4 +14,11 @@ class Project extends Pix_Table
 
         $this->_indexes['name'] = array('type' => 'unique', 'columns' => array('name'));
     }
+
+    public static function getRandomName()
+    {
+        $areas = array('taipei', 'taoyuan', 'hsinchu', 'yilan', 'hualien', 'miaoli', 'taichung', 'changhua', 'nantou', 'chiayi', 'yunlin', 'tainan', 'penghu', 'kaohiung', 'pingtung', 'kinmen', 'matsu', 'taitung');
+        $first_names = array('An', 'Chang', 'Chao', 'Chen', 'Cheng', 'Chi', 'Chiang', 'Chien', 'Chin', 'Chou', 'Chu', 'Fan', 'Fang', 'Fei', 'Feng', 'Fu', 'Han', 'Hao', 'Ho', 'Hsi', 'Hsiao', 'Hsieh', 'Hsu', 'Hsueh', 'Hua', 'Huang', 'Jen', 'Kang', 'Ko', 'Ku', 'Kung', 'Lang', 'Lei', 'Li', 'Lien', 'Liu', 'Lo', 'Lu', 'Ma', 'Meng', 'Miao', 'Mu', 'Ni', 'Pai', 'Pan', 'Pao', 'Peng', 'Pi', 'Pien', 'Ping', 'Pu', 'Shen', 'Shih', 'Shui', 'Su', 'Sun', 'Tang', 'Tao', 'Teng', 'Tou', 'Tsao', 'Tsen', 'Tsou', 'Wang', 'Wei', 'Wu', 'Yang', 'Yen', 'Yin', 'Yu', 'Yuan', 'Yueh', 'Yun');
+        return strtolower($areas[rand(0, count($areas))] . '-' . $first_names[rand(0, count($first_names))] . '-' . rand(100000, 1000000));
+    }
 }
