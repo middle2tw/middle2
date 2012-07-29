@@ -76,5 +76,6 @@ class User extends Pix_Table
         $this->_indexes['name'] = array('type' => 'unique', 'columns' => array('name'));
 
         $this->_relations['keys'] = array('rel' => 'has_many', 'type' => 'UserKey', 'foreign_key' => 'user_id', 'delete' => true);
+        $this->_relations['project_members'] = array('rel' => 'has_many', 'type' => 'ProjectMember', 'foreign_key' => 'user_id');
     }
 }
