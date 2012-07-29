@@ -4,7 +4,7 @@ class ErrorController extends Pix_Controller
 {
     public function errorAction()
     {
-        echo strval($this->exception);
+        echo var_dump($this->view->exception);
         exit;
     }
 }
