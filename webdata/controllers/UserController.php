@@ -47,4 +47,21 @@ class UserController extends Pix_Controller
         }
         return $this->redirect('/');
     }
+
+    public function addprojectAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        try {
+            $this->user->addProject(strval($_POST['name']));
+        } catch (InvalidException $e) {
+            // TODO: error
+        } catch (Pix_Table_DuplicateException $e) {
+            // TODO: error
+        }
+        return $this->redirect('/');
+    }
 }
