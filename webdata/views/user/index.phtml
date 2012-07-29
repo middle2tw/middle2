@@ -10,8 +10,8 @@
     </li>
     <?php } ?>
     <li>
-    Add key:
     <form method="post" action="/user/addkey">
+        Add key:
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
         <input type="text" name="key" placeholder="add ssh public key body here...">
         <input type="submit">
