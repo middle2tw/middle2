@@ -13,6 +13,8 @@ class Project extends Pix_Table
         $this->_columns['created_by'] = array('type' => 'int');
 
         $this->_indexes['name'] = array('type' => 'unique', 'columns' => array('name'));
+
+        $this->_relations['members'] = array('rel' => 'has_many', 'type' => 'ProjectMember', 'foreign_key' => 'project_id');
     }
 
     public static function getRandomName()
