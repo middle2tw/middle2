@@ -4,6 +4,9 @@ class IndexController extends Pix_Controller
 {
     public function indexAction()
     {
+        if (Hisoku::getLoginUser()) {
+            return $this->redirect('/user');
+        }
     }
 
     public function loginAction()
