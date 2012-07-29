@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Hisoku</title>
+</head>
+<body>
+<h1>Hisoku</h1>
+<?php if ($guest = Hisoku::getLoginUser()) { ?>
+Hi! <?= $this->escape($guest->name) ?> <a href="/logout.php">Logout</a>
+<?php } else { ?>
+<form method="post" action="/login.php">
+    <input type="text" name="user" placeholder="email">
+    <input type="password" name="password" placeholder="password">
+    <button type="submit">Login</button>
+    <a href="/register.php">Signup</a>
+</form>
+<?php } ?>
