@@ -16,4 +16,4 @@ foreach (UserKey::search(1) as $user_key) {
     $content .= 'command="/srv/code/hisoku/scripts/ssh-serve ' . $user_key->user->name . '",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $user_key->key_body . "\n";
 }
 
-file_put_contents($content, getenv('HOME') . '/.ssh/authorized_keys');
+file_put_contents(getenv('HOME') . '/.ssh/authorized_keys', $content);
