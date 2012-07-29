@@ -36,6 +36,51 @@ class UserRow extends Pix_Table_Row
 
     }
 
+    public function addProject($name = '')
+    {
+        $name = trim($name);
+        if ('' == $name) {
+            $name = null;
+        }
+
+        if (!is_null($name)) {
+            $name = strtolower($name);
+            if (!preg_match('#^[a-z][a-z0-9-]+$#', $name)) {
+                throw new InvalidArgumentException('invalid project name');
+            }
+
+            if (strlen($name) > 32 or strlen($name) < 6) {
+                throw new InvalidArgumentException('project length in 6 ~ 32');
+            }
+        }
+
+        $project = null;
+        for ($i = 0; $i < 3; $i ++) {
+            try {
+                $project = Project::insert(array(
+                    'name' => is_null($name) ? Project::getRandomName() : strval($name),
+                    'created_at' => time(),
+                    'created_by' => $this->id,
+                ));
+                break;
+            } catch (Pix_Table_DuplicateException $e) {
+                if (!is_null($name)) {
+                    throw $e;
+                }
+            }
+        }
+        if (is_null($project)) {
+            throw new Exception('generate name failed');
+        }
+
+        $project->members->insert(array(
+            'user_id' => $this->id,
+            'is_admin' => 1,
+        ));
+
+        return $project;
+    }
+
     public function verifyPassword($password)
     {
         return $this->hashPassword($password) == $this->password;
