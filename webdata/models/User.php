@@ -18,7 +18,7 @@ class UserRow extends Pix_Table_Row
     {
         switch ($this->password_type) {
         case 1:
-            return hash_hmac('sha256', $password, $this->name, true);
+            return base64_encode(hash_hmac('sha256', $password, $this->name, true));
         default:
             throw new Excpetion('unknown password_type');
         }
