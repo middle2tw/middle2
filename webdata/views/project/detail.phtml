@@ -1,0 +1,8 @@
+<?= $this->partial('/common/header.phtml', $this) ?>
+<h2><?= $this->escape($this->project->name) ?></h2>
+<h3>deployment:</h3>
+<ul>
+    <li>git remote hisoku git@git.hisoku.com:<?= $this->project->name ?></li>
+    <li>git push hisoku master</li>
+</ul>
+<?= $this->partial('/common/footer.phtml', $this) ?>
