@@ -44,7 +44,7 @@ function main()
     if (!file_exists($absolute_path)) {
         exec('git init --bare ' . escapeshellarg($absolute_path));
         // add hooks
-        link('/srv/code/hisoku/scripts/post-receive', $absolute_path . '/hooks/post-receive');
+        symlink('/srv/code/hisoku/scripts/post-receive', $absolute_path . '/hooks/post-receive');
     }
 
     passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
