@@ -1,11 +1,21 @@
 <?php
 
+class UserKeyRow extends Pix_Table_Row
+{
+    public function getKeyUser()
+    {
+        list($type, $body, $user) = explode(' ', $this->key_body);
+        return $user;
+    }
+}
+
 class UserKey extends Pix_Table
 {
     public function init()
     {
         $this->_name = 'user_key';
         $this->_primary = array('id');
+        $this->_rowClass = 'UserKeyRow';
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['user_id'] = array('type' => 'int');
