@@ -8,7 +8,16 @@ if ('git' !== getenv('USER')) {
 
 $public_key = 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAxpbN0yZRrujEJE9jY5V/k/fnhtqhOt9cZf9X+zs1dKj3vg8TChMpKO6EhU1frOfC+0O7eIZBBmJk9RS7fHI96bg6zS2effcNtfdP1geUFP7cZpEorvK/ZhuCe61tsAppKlF8j57Nz6HANUKYTzwGJHfAmt9hYaKmJWxM5kq4isxFERIhWkEyyMeM7heojzLbJsY/ta+IJKcGtS7ZXoQ4VkuI0Oht9rjkk+YfeD9UH6dqC6CKOP3RkE+tWSxvaJR074VbbweFEO0Cc3c4Evv9+gPmy7G0dikTzQHcN0IADsvqFpHAKtU/CgO9/8yltZRdMPFlDaEYxYtcWB9PEG33bQ== ec2-user@ip-10-146-23-10';
 
+$deploy_keys = array(
+    'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAomom2Z8RA5pW5sPYnhG/GlcTZrm9egkGKh9qDtayyeJmVADx29Dv3htCqU1D4rHIcdE9Kf7D6kUVplby5vPgdTo1qBE+WiiBKFt3xlUCNLBGxjaB7HjtLgK6c+0etIWORipFYWv6wK/AIOuO5glHSzbnriMCRq07a/4iJ2nspCFmVubl3CCD2kqzrQBxu3EuQ4o7n1R5TJrDbJ8LtEo7P/r7V7BZMLg141MFB4zZe8I+9lCZQHEuu1kNKnTiQ+v/lxwwRXSkY60xkstGlKnI1nmrX69vBwS2WAm1t16kFYWXiEcX8Bp2kSCh9er4I9LJGt5N9IMmGTriXaGHBdxC3w== deploy@ip-10-146-23-10',
+);
+
+
 $content = '### generated at ' . date('Y/m/d H:i:s') . "\n";
+$content .= "# deploy-keys\n";
+foreach ($deploy_keys as $deploy_key) {
+    $content .= 'command="/srv/code/hisoku/scripts/deploy-key-archive-only",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $deploy_key . "\n";
+}
 $content .= "# update-keys\n";
 $content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $public_key . "\n";
 $content .= "# user keys\n";
