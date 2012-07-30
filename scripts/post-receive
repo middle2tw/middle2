@@ -14,10 +14,12 @@ list($oldrev, $newrev, $refname) = explode(' ', trim($content));
 $path = basename(getcwd());
 if (!preg_match('#^(\d+)\.git$#', $path, $matches)) {
     // FIXME
+    error_log('invalid path name: ' . $path);
     exit;
 }
 if (!$project = Project::find(intval($matches[1]))) {
     // FIXME
+    error_log('invalid project id: ' . $matches[1]);
     exit;
 }
 
