@@ -1,1 +1,25 @@
 #!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+$fp = fopen('php://stdin', 'r');
+$content = '';
+while (false !== ($line = fgets($fp))) {
+    $content .= $line;
+}
+list($oldrev, $newrev, $refname) = explode(' ', trim($content));
+
+// {id}.git
+$path = basename(getcwd());
+if (!preg_match('#^(\d+)\.git$#', $path, $matches)) {
+    // FIXME
+    exit;
+}
+if (!$project = Project::find(intval($matches[1]))) {
+    // FIXME
+    exit;
+}
+
+// TODO: deploy to webnode
+$project->update(array('commit' => $newrev));
