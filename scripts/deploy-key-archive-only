@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+function error($message)
+{
+    error_log($message);
+}
+
+function main()
+{
+    if (!getenv('SSH_ORIGINAL_COMMAND')) {
+        return error('There is no SSH_ORIGINAL_COMMAND env');
+    }
+
+    list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
+
+    if (!in_array($command, array('git-receive-pack'))) {
+        return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
+    }
+
+    $project_name = trim($args, "' ");
+    if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
+        $project_name = $matches[1];
+    }
+    if (FALSE !== strpos($project_name, '.')) {
+        return error('invalid project name: ' . $project_name);
+    }
+
+    if (!$project = Project::find_by_name(strval($project_name))) {
+        return error('project not found: ' . $project_name);
+    }
+
+    $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
+    if (!file_exists($absolute_path)) {
+        return error('project not found: ' . $project_name);
+    }
+
+    passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
+    return;
+}
+
+main();
