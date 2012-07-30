@@ -10,10 +10,11 @@ class WebNode extends Pix_Table
         $this->_columns['ip'] = array('type' => 'int', 'unsigned' => true);
         $this->_columns['port'] = array('type' => 'int');
         $this->_columns['project_id'] = array('type' => 'int');
+        $this->_columns['commit'] = array('type' => 'char', 'size' => 32);
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int');
         $this->_columns['access_at'] = array('type' => 'int');
 
-        $this->_indexes['project_id'] = array('project_id');
+        $this->_indexes['projectid_commit'] = array('project_id', 'commit');
     }
 }
