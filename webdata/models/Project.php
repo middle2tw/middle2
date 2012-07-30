@@ -9,6 +9,7 @@ class Project extends Pix_Table
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['name'] = array('type' => 'varchar', 'size' => 64);
+        $this->_columns['commit'] = array('type' => 'char', 'size' => 32);
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['created_by'] = array('type' => 'int');
 
