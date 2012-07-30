@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+function error($message)
+{
+    error_log($message);
+}
+
+function main()
+{
+    if (!getenv('SSH_ORIGINAL_COMMAND')) {
+        return error('There is no SSH_ORIGINAL_COMMAND env');
+    }
+
+    list($project, $port) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+    exec('git clone git@git.hisoku.ronny.tw:' . $project . '.git');
+    passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
+    return;
+}
+
+main();
