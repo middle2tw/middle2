@@ -14,9 +14,33 @@ function main()
         return error('There is no SSH_ORIGINAL_COMMAND env');
     }
 
-    list($project, $port) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-    exec('git clone git@git.hisoku.ronny.tw:' . $project . '.git');
-    passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
+    $command = getenv('SSH_ORIGINAL_COMMAND');
+    list($method) = explode(' ', $command, 2);
+    switch ($method) {
+    case 'init': // init $nodes_count
+        list(, $nodes_count) = explode(' ', $command, 2);
+        $nodes_count = intval($nodes_count);
+        if (!$nodes_count) {
+            die("invalid nodes_count\n");
+        }
+
+        $view = new Pix_Partial(__DIR__ . '/../webdata/views');
+        mkdir("/srv/deploy/etc");
+        for ($i = 1; $i <= $nodes_count; $i ++) {
+            file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('php-fpm.conf', array('id' => $i)));
+            mkdir("/srv/deploy/{$i}");
+            mkdir("/srv/deploy/{$i}/srv");
+            mkdir("/srv/deploy/{$i}/srv/web");
+            mkdir("/srv/deploy/{$i}/srv/deploy");
+            symlink("/srv/deploy/{$i}/srv/deploy/{$i}", "/srv/deploy/{$i}");
+        }
+        break;
+
+    case 'clone':
+        list(, $project, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        exec("git clone git@git.hisoku.ronny.tw:{$project}.git /srv/deploy/{$i}/srv/web/");
+        break;
+    }
     return;
 }
 
