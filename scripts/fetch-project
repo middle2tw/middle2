@@ -27,7 +27,7 @@ function main()
         $view = new Pix_Partial(__DIR__ . '/../webdata/views');
         mkdir("/srv/deploy/etc");
         for ($i = 1; $i <= $nodes_count; $i ++) {
-            file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf', array('id' => $i)));
+            file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
             mkdir("/srv/deploy/{$i}");
             mkdir("/srv/deploy/{$i}/srv");
             mkdir("/srv/deploy/{$i}/srv/web");
