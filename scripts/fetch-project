@@ -46,7 +46,10 @@ function main()
 
     case 'clone':
         list(, $project, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        exec("git clone git@git.hisoku.ronny.tw:{$project}.git /srv/deploy/{$i}/srv/web/");
+        if (!$id) {
+            die("invalid $id");
+        }
+        exec("git clone git@git.hisoku.ronny.tw:{$project}.git /srv/deploy/{$id}/srv/web/");
         break;
     }
     return;
