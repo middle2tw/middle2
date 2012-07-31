@@ -28,11 +28,19 @@ function main()
         mkdir("/srv/deploy/etc");
         for ($i = 1; $i <= $nodes_count; $i ++) {
             file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
-            mkdir("/srv/deploy/{$i}");
-            mkdir("/srv/deploy/{$i}/srv");
-            mkdir("/srv/deploy/{$i}/srv/web");
-            mkdir("/srv/deploy/{$i}/srv/deploy");
-            symlink("/srv/deploy/{$i}/srv/deploy/{$i}", "/srv/deploy/{$i}");
+            if (!file_exists("/srv/deploy/{$i}")) {
+                mkdir("/srv/deploy/{$i}");
+            }
+            if (!file_exists("/srv/deploy/{$i}/srv")) {
+                mkdir("/srv/deploy/{$i}/srv");
+            }
+            if (!file_exists("/srv/deploy/{$i}/srv/web")) {
+                mkdir("/srv/deploy/{$i}/srv/web");
+            }
+            if (!file_exists("/srv/deploy/{$i}/srv/deploy")) {
+                mkdir("/srv/deploy/{$i}/srv/deploy");
+            }
+            symlink("/srv/deploy/{$i}", "/srv/deploy/{$i}/srv/deploy/{$i}");
         }
         break;
 
