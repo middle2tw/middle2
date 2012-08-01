@@ -33,6 +33,7 @@ function main()
         }
         $vhost_conf = 'DirectoryIndex index.php index.html index.htm' . PHP_EOL;
         $vhost_conf .= 'AddHandler php-fastcgi .php' . PHP_EOL;
+        $vhost_conf .= 'AllowOverride All' . PHP_EOL;
         $vhost_conf .= PHP_EOL;
         for ($i = 1; $i <= $nodes_count; $i ++) {
             file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
