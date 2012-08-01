@@ -35,6 +35,9 @@ function main()
             if (!file_exists("/srv/deploy/{$i}/srv")) {
                 mkdir("/srv/deploy/{$i}/srv");
             }
+            if (!file_exists("/srv/deploy/{$i}/logs")) {
+                mkdir("/srv/deploy/{$i}/logs");
+            }
             if (!file_exists("/srv/deploy/{$i}/srv/web")) {
                 mkdir("/srv/deploy/{$i}/srv/web");
             }
