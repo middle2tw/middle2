@@ -6,7 +6,7 @@ error_log = /srv/deploy/logs/<?= $this->id ?>/error.log
 listen = /srv/deploy/<?= $this->id ?>.sock
 chroot = /srv/deploy/<?= $this->id ?>/srv/
 user = www-user
-group = www-user
+group = nobody
 pm = dynamic
 pm.max_children = 20
 pm.start_servers = 10
