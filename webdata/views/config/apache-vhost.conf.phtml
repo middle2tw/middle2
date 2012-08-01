@@ -3,10 +3,10 @@ Listen *:<?= $this->port ?>
 
 <VirtualHost *:<?= $this->port ?>>
 DocumentRoot /srv/deploy/<?= $this->id ?>/srv/deploy/
-FastCGIExternalServer /php-fpm-handler -socket /srv/deploy/<?= $this->id ?>.sock -idle-timeout 1800 -appConnTimeout 1800
+FastCGIExternalServer /php-fpm-handler-<?= $this->id ?> -socket /srv/deploy/<?= $this->id ?>.sock -idle-timeout 1800 -appConnTimeout 1800
 AddHandler php-fastcgi .php
-Action php-fastcgi /php-fpm-handler.fcgi
-ScriptAlias /php-fpm-handler.fcgi /php-fpm-handler
+Action php-fastcgi /php-fpm-handler-<?= $this->id ?>.fcgi
+ScriptAlias /php-fpm-handler-<?= $this->id ?>.fcgi /php-fpm-handler-<?= $this->id ?> 
 
 LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
 CustomLog "|/usr/local/sbin/cronolog /srv/deploy/logs/<?= $this->id ?>/access-%Y-%m-%d.log" combined_hostname
