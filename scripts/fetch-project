@@ -26,6 +26,7 @@ function main()
 
         $view = new Pix_Partial(__DIR__ . '/../webdata/views');
         mkdir("/srv/deploy/etc");
+        $vhost_conf = '';
         for ($i = 1; $i <= $nodes_count; $i ++) {
             file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
             if (!file_exists("/srv/deploy/{$i}")) {
@@ -41,7 +42,9 @@ function main()
                 mkdir("/srv/deploy/{$i}/srv/deploy");
             }
             symlink("/srv/deploy/{$i}", "/srv/deploy/{$i}/srv/deploy/{$i}");
+            $vhost_conf .= $view->partial('config/apache-vhost.conf.phtml', array('port' => 10000 + $i, 'id' => $i));
         }
+        file_put_contents("/srv/deploy/nodes.conf", $vhost_conf);
         break;
 
     case 'clone':
