@@ -2,7 +2,7 @@ Listen *:<?= $this->port ?>
 
 
 <VirtualHost *:<?= $this->port ?>>
-DocumentRoot /srv/deploy/<?= $this->id ?>/srv/deploy/
+DocumentRoot /srv/deploy/<?= $this->id ?>/srv/web
 FastCGIExternalServer /php-fpm-handler-<?= $this->id ?> -socket /srv/deploy/<?= $this->id ?>.sock -idle-timeout 1800 -appConnTimeout 1800
 AddHandler php-fastcgi .php
 Action php-fastcgi /php-fpm-handler-<?= $this->id ?>.fcgi
