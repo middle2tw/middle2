@@ -54,7 +54,7 @@ function main()
             if (file_exists("/srv/deploy/{$i}/srv/deploy/{$i}")) {
                 unlink("/srv/deploy/{$i}/srv/deploy/{$i}");
             }
-            symlink("/srv/deploy/{$i}", "/srv/deploy/{$i}/srv/deploy/{$i}");
+            symlink("../..", "/srv/deploy/{$i}/srv/deploy/{$i}");
             $vhost_conf .= $view->partial('config/apache-vhost.conf.phtml', array('port' => 10000 + $i, 'id' => $i));
         }
         file_put_contents("/srv/deploy/nodes.conf", $vhost_conf);
