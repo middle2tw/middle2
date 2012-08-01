@@ -4,7 +4,7 @@ error_log = /srv/deploy/logs/<?= $this->id ?>/error.log
 
 [www]
 listen = /srv/deploy/<?= $this->id ?>.sock
-chroot = /srv/deploy/<?= $this->id ?>/srv/
+chroot = /srv/deploy/<?= $this->id ?>/srv/web
 user = www-user
 group = nobody
 pm = dynamic
