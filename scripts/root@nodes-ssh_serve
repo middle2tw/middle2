@@ -1,0 +1,52 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+function error($message)
+{
+    error_log($message);
+    die();
+}
+
+function main()
+{
+    if (!getenv('SSH_ORIGINAL_COMMAND')) {
+        return error('There is no SSH_ORIGINAL_COMMAND env');
+    }
+
+    $command = getenv('SSH_ORIGINAL_COMMAND');
+    list($method) = explode(' ', $command, 2);
+    switch ($method) {
+    case 'reload-apache': // init $nodes_count
+        exec('apachectl graceful');
+        break;
+
+    case 'restart-php-fpm':
+        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id = intval($id)) {
+            error('invalid id: ' . $id);
+        }
+        if (file_exists("/srv/deploy/{$id}.pid")) {
+            exec('kill ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
+        }
+        exec("php-fpm -c /srv/deploy/etc/{$id}.conf");
+        break;
+
+    case 'reload-php-fpm':
+        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id = intval($id)) {
+            error('invalid id: ' . $id);
+        }
+        if (file_exists("/srv/deploy/{$id}.pid")) {
+            exec('kill -s SIGUSR2 ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
+        } else {
+            exec("php-fpm -c /srv/deploy/etc/{$id}.conf");
+        }
+        break;
+
+    }
+    return;
+}
+
+main();
