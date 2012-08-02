@@ -68,6 +68,7 @@ function main()
         if (!$id) {
             die("invalid $id");
         }
+        exec("rm -rf /srv/deploy/{$id}/srv/web/*");
         exec("git clone git@git.hisoku.ronny.tw:{$project}.git /srv/deploy/{$id}/srv/web/");
         break;
     }
