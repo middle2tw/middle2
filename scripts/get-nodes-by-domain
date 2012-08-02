@@ -54,6 +54,7 @@ while (true) {
     $node_id = $random_node->port - 20000;
     $ip = long2ip($random_node->ip);
     exec("ssh deploy@{$ip} clone {$project->name} {$node_id}");
+    exec("ssh root@{$ip} restart-php-fpm {$node_id}");
     
     $choosed_nodes[] = $random_node;
 
