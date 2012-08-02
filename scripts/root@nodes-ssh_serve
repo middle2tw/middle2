@@ -30,7 +30,7 @@ function main()
         if (file_exists("/srv/deploy/{$id}.pid")) {
             exec('kill ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
         }
-        exec("php-fpm -c /srv/deploy/etc/{$id}.conf");
+        exec("php-fpm -y /srv/deploy/etc/{$id}.conf");
         break;
 
     case 'reload-php-fpm':
@@ -41,7 +41,7 @@ function main()
         if (file_exists("/srv/deploy/{$id}.pid")) {
             exec('kill -s SIGUSR2 ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
         } else {
-            exec("php-fpm -c /srv/deploy/etc/{$id}.conf");
+            exec("php-fpm -y /srv/deploy/etc/{$id}.conf");
         }
         break;
 
