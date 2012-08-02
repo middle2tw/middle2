@@ -24,10 +24,17 @@ if (!$project = Project::find_by_name($project_name)) {
 $nodes = WebNode::search(array('project_id' => $project->id, 'commit' => $project->commit));
 if (count($nodes)) {
     foreach ($nodes as $node) {
+        // TODO: move to background.. update access time
+        $node->update(array('access_at' => time()));
         echo long2ip($node->ip) . ':' . $node->port . "\n";
     }
     exit;
 }
+
+// TODO: move to background.. release unused nodes
+WebNode::search(array('project_id' => $project_id))->update(array('project_id' => 0));
+$time_5min = time() - 300;
+WebNode::search("`access_at` AND `access_at` < {$time_5min}")->update(array('access_at' => 0, 'project_id' => 0));
 
 // TODO: check deploying
 
