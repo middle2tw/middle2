@@ -8,7 +8,7 @@
 <body>
 <h1>Hisoku</h1>
 <?php if ($guest = Hisoku::getLoginUser()) { ?>
-Hi! <?= $this->escape($guest->name) ?> <a href="/logout.php">Logout</a>
+Hi! <?= $this->escape($guest->name) ?> <a href="/index/logout">Logout</a>
 <?php } else { ?>
 <form method="post" action="/index/login">
     <input type="text" name="user" placeholder="email">

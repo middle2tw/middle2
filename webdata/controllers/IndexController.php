@@ -19,4 +19,10 @@ class IndexController extends Pix_Controller
         Pix_Session::set('user', $u->id);
         return $this->redirect('/');
     }
+
+    public function logoutAction()
+    {
+        Pix_Session::delete('user');
+        return $this->redirect('/');
+    }
 }
