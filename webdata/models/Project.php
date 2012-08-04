@@ -1,11 +1,21 @@
 <?php
 
+class ProjectRow extends Pix_Table_Row
+{
+    public function getFirstDomain()
+    {
+        // TODO: add custom domain
+        return $this->name . USER_DOMAIN;
+    }
+}
+
 class Project extends Pix_Table
 {
     public function init()
     {
         $this->_name = 'project';
         $this->_primary = 'id';
+        $this->_rowClass = 'ProjectRow';
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['name'] = array('type' => 'varchar', 'size' => 64);
