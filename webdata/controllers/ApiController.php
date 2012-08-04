@@ -69,11 +69,11 @@ class ApiController extends Pix_Controller
             $ip = long2ip($random_node->ip);
 
             $session = ssh2_connect($ip, 22);
-            ssh2_auth_hostbased_file($session, 'deploy', '', '/srv/config/web-pub', '/srv/config/web-key');
+            ssh2_auth_hostbased_file($session, 'deploy', '', '/srv/config/web-key.pub', '/srv/config/web-key');
             ssh2_exec($session, "{$project->name} {$node_id}");
 
             $session = ssh2_connect($ip, 22);
-            ssh2_auth_hostbased_file($session, 'root', '', '/srv/config/web-pub', '/srv/config/web-key');
+            ssh2_auth_hostbased_file($session, 'root', '', '/srv/config/web-key.pub', '/srv/config/web-key');
             ssh2_exec($session, "restart-php-fpm {$node_id}");
     
             $choosed_nodes[] = $random_node;
