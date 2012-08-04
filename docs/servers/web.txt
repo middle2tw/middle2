@@ -1,0 +1,7 @@
+http://hisoku.com/
+
+package: 
+* php-pecl-ssh2.x86_64
+* php-fpm
+* php-mysql
+
