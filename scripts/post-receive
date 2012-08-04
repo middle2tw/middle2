@@ -25,3 +25,5 @@ if (!$project = Project::find(intval($matches[1]))) {
 
 // TODO: deploy to webnode
 $project->update(array('commit' => $newrev));
+
+error_log('deploy finished. visit ' . $project->getFirstDomain());
