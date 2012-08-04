@@ -12,6 +12,7 @@ Pix_Loader::registerAutoLoad();
 if (file_exists('/srv/config/config.php')) {
     include('/srv/config/config.php');
     define('GIT_SERVER', 'git.hisoku.ronny.tw');
+    define('USER_DOMAIN', '.hisoku.ronny.tw');
 } elseif (file_exists(__DIR__ . '/config.php')) {
     include(__DIR__ . '/config.php');
 }

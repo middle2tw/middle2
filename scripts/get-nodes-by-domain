@@ -11,7 +11,7 @@ $domain = strval($_SERVER['argv'][1]);
 
 // TODO: support custom domain
 list($request_host, $request_port) = explode(':', $domain);
-if (!preg_match('#(.*)\.hisoku\.ronny\.tw$#', $request_host, $matches)) {
+if (!preg_match('#(.*)' . preg_quote(USER_DOMAIN, '#') . '#', $request_host, $matches)) {
     die('unknwon domain: ' . $request_host. PHP_EOL);
 }
 
