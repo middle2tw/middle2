@@ -1,1 +1,35 @@
 Run webserver
+
+# from http://prefetch.net/articles/yumchrootlinux.html
+
+sudo yum install gcc pcre-devel zlib-devel make expat-devel
+
+sudo mkdir -p /srv/chroot/template/var/lib/rpm
+sudo rpm --root /srv/chroot/template --initdb
+sudo mkdir /srv/chroot/template/dev/
+sudo mknod /srv/chroot/template/dev/null c 1 3
+sudo mknod /srv/chroot/template/dev/random c 1 8
+sudo mknod /srv/chroot/template/dev/urandom c 1 9
+
+sudo yum --installroot=/srv/chroot/template install -y basesystem
+cd /srv/chroot/template
+sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
+
+yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl
+sudo rpm --root /srv/chroot/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm
+
+cd /var/tmp
+wget http://ftp.tc.edu.tw/pub/Apache//httpd/httpd-2.4.2.tar.gz
+tar zxvf httpd-2.4.2.tar.gz
+cd httpd-2.4.2
+cd srclib
+wget http://apache.cdpa.nsysu.edu.tw//apr/apr-1.4.6.tar.gz
+tar zxvf apr-1.4.6.tar.gz
+mv apr-1.4.6 apr
+wget http://apache.cdpa.nsysu.edu.tw//apr/apr-util-1.4.1.tar.gz
+tar zxvf apr-util-1.4.1.tar.gz
+mv apr-util-1.4.1 apr-util
+cd ..
+./configure --enable-deflate --with-included-apr --with-mpm=worker
+sudo make DESTDIR=/srv/chroot/template install
+sudo chown -R deploy:nobody /srv/chroot/template
