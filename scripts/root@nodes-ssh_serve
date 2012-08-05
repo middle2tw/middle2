@@ -31,6 +31,7 @@ function main()
             exec('kill ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
         }
         exec("php-fpm -y /srv/deploy/etc/{$id}.conf");
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl start");
         break;
 
     case 'reload-php-fpm':
@@ -43,6 +44,7 @@ function main()
         } else {
             exec("php-fpm -y /srv/deploy/etc/{$id}.conf");
         }
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl graceful");
         break;
 
     }
