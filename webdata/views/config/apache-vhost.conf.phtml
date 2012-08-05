@@ -1,14 +1,19 @@
+DirectoryIndex index.php index.html index.htm
+AddHandler php-fastcgi .php
+<Directory /srv/web>
+AllowOverride All
+</Directory>
+
 Listen *:<?= $this->port ?>
 
-
 <VirtualHost *:<?= $this->port ?>>
-DocumentRoot /srv/deploy/<?= $this->id ?>/srv/web
-FastCGIExternalServer /php-fpm-handler-<?= $this->id ?> -socket /srv/deploy/<?= $this->id ?>.sock -idle-timeout 1800 -appConnTimeout 1800
-Action php-fastcgi /php-fpm-handler-<?= $this->id ?>.fcgi
-ScriptAlias /php-fpm-handler-<?= $this->id ?>.fcgi /php-fpm-handler-<?= $this->id ?> 
+DocumentRoot /srv/web
+FastCGIExternalServer /php-fpm-handler -socket /tmp/php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
+Action php-fastcgi /php-fpm-handler.fcgi
+ScriptAlias /php-fpm-handler.fcgi /php-fpm-handler
 
-LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
-CustomLog "|/usr/local/sbin/cronolog /srv/deploy/logs/<?= $this->id ?>/access-%Y-%m-%d.log" combined_hostname
-ErrorLog "|/usr/local/sbin/cronolog /srv/deploy/logs/<?= $this->id ?>/error-%Y-%m-%d.log"
+#LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
+#CustomLog "|/usr/local/sbin/cronolog /srv/logs/access-%Y-%m-%d.log" combined_hostname
+#ErrorLog "|/usr/local/sbin/cronolog /srv/logs/error-%Y-%m-%d.log"
+
 </VirtualHost>
-

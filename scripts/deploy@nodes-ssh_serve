@@ -25,42 +25,16 @@ function main()
         }
 
         $view = new Pix_Partial(__DIR__ . '/../webdata/views');
-        if (!file_exists("/srv/deploy/etc")) {
-            mkdir("/srv/deploy/etc");
-        }
-        if (!file_exists("/srv/deploy/logs")) {
-            mkdir("/srv/deploy/logs");
-        }
-        $vhost_conf = 'DirectoryIndex index.php index.html index.htm' . PHP_EOL;
-        $vhost_conf .= 'AddHandler php-fastcgi .php' . PHP_EOL;
-        $vhost_conf .= '<Directory /srv/deploy>' . PHP_EOL;
-        $vhost_conf .= 'AllowOverride All' . PHP_EOL;
-        $vhost_conf .= '</Directory>' . PHP_EOL;
-        $vhost_conf .= PHP_EOL;
         for ($i = 1; $i <= $nodes_count; $i ++) {
-            file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
-            if (!file_exists("/srv/deploy/{$i}")) {
-                mkdir("/srv/deploy/{$i}");
+            exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$i}");
+            // comment Listen 80
+            exec("sed -i 's/^Listen 80$/#Listen 80/' /srv/chroot/{$i}/etc/httpd/conf/httpd.conf");
+            if (!file_exists("/srv/chroot/{$i}/srv/web")) {
+                mkdir("/srv/chroot/{$i}/srv/web");
             }
-            if (!file_exists("/srv/deploy/{$i}/srv")) {
-                mkdir("/srv/deploy/{$i}/srv");
-            }
-            if (!file_exists("/srv/deploy/logs/{$i}")) {
-                mkdir("/srv/deploy/logs/{$i}");
-            }
-            if (!file_exists("/srv/deploy/{$i}/srv/web")) {
-                mkdir("/srv/deploy/{$i}/srv/web");
-            }
-            if (!file_exists("/srv/deploy/{$i}/srv/deploy")) {
-                mkdir("/srv/deploy/{$i}/srv/deploy");
-            }
-            if (file_exists("/srv/deploy/{$i}/srv/deploy/{$i}")) {
-                unlink("/srv/deploy/{$i}/srv/deploy/{$i}");
-            }
-            symlink("../..", "/srv/deploy/{$i}/srv/deploy/{$i}");
-            $vhost_conf .= $view->partial('config/apache-vhost.conf.phtml', array('port' => 20000 + $i, 'id' => $i));
+            $vhost_conf = $view->partial('config/apache-vhost.conf.phtml', array('port' => 20000 + $i, 'id' => $i));
+            file_put_contents("/srv/chroot/{$i}/etc/httpd/conf.d/node.conf", $vhost_conf);
         }
-        file_put_contents("/srv/deploy/nodes.conf", $vhost_conf);
         break;
 
     case 'clone':
@@ -68,8 +42,8 @@ function main()
         if (!$id) {
             die("invalid $id");
         }
-        exec("rm -rf /srv/deploy/{$id}/srv/web");
-        exec("git clone git@" . GIT_SERVER . ":{$project}.git /srv/deploy/{$id}/srv/web");
+        exec("rm -rf /srv/chroot/{$id}/srv/web");
+        exec("git clone git@" . GIT_SERVER . ":{$project}.git /srv/chroot/{$id}/srv/web");
         break;
     }
     return;
