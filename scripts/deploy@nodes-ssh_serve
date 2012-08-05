@@ -26,6 +26,7 @@ function main()
 
         $view = new Pix_Partial(__DIR__ . '/../webdata/views');
         for ($i = 1; $i <= $nodes_count; $i ++) {
+            file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
             exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$i}");
             // comment Listen 80
             exec("sed -i 's/^Listen 80$/#Listen 80/' /srv/chroot/{$i}/etc/httpd/conf/httpd.conf");

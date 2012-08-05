@@ -8,7 +8,7 @@ Listen *:<?= $this->port ?>
 
 <VirtualHost *:<?= $this->port ?>>
 DocumentRoot /srv/web
-FastCGIExternalServer /php-fpm-handler -socket /tmp/php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
+FastCGIExternalServer /php-fpm-handler -socket /php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
 Action php-fastcgi /php-fpm-handler.fcgi
 ScriptAlias /php-fpm-handler.fcgi /php-fpm-handler
 

@@ -3,8 +3,8 @@ pid = /srv/deploy/<?= $this->id ?>.pid
 error_log = /srv/deploy/logs/<?= $this->id ?>/error.log
 
 [www]
-listen = /srv/deploy/<?= $this->id ?>.sock
-chroot = /srv/deploy/<?= $this->id ?>/
+listen = /srv/chroot/<?= $this->id ?>/php-fpm.sock
+chroot = /srv/chroot/<?= $this->id ?>/
 user = www-user
 group = nobody
 pm = dynamic
