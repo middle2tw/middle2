@@ -4,9 +4,9 @@ AddHandler php-fastcgi .php
 AllowOverride All
 </Directory>
 
-Listen *:<?= $this->port ?>
+Listen *:<?php echo $this->port ?>
 
-<VirtualHost *:<?= $this->port ?>>
+<VirtualHost *:<?php echo $this->port ?>>
 DocumentRoot /srv/web
 FastCGIExternalServer /php-fpm-handler -socket /php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
 Action php-fastcgi /php-fpm-handler.fcgi
