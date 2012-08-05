@@ -29,12 +29,13 @@ function main()
             file_put_contents("/srv/deploy/etc/{$i}.conf", $view->partial('config/php-fpm.conf.phtml', array('id' => $i)));
             exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$i}");
             // comment Listen 80
-            exec("sed -i 's/^Listen 80$/#Listen 80/' /srv/chroot/{$i}/etc/httpd/conf/httpd.conf");
+            exec("sed -i 's/^Listen 80$/#Listen 80/' /srv/chroot/{$i}/usr/local/apache2/conf/httpd.conf");
+            file_put_contents("/srv/chroot/{$i}/usr/local/apache2/conf/httpd.conf", "\nInclude conf/extra/node.conf\n", FILE_APPEND);
             if (!file_exists("/srv/chroot/{$i}/srv/web")) {
                 mkdir("/srv/chroot/{$i}/srv/web");
             }
             $vhost_conf = $view->partial('config/apache-vhost.conf.phtml', array('port' => 20000 + $i, 'id' => $i));
-            file_put_contents("/srv/chroot/{$i}/etc/httpd/conf.d/node.conf", $vhost_conf);
+            file_put_contents("/srv/chroot/{$i}/usr/local/apache2/conf/extra/node.conf", $vhost_conf);
         }
         break;
 
