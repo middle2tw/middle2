@@ -12,7 +12,7 @@ sudo yum --installroot=/srv/chroot/template install -y basesystem
 cd /srv/chroot/template
 sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
 
-yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl zlib
+yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl zlib libgcc
 sudo rpm --root /srv/chroot/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm
 
 cd /var/tmp
