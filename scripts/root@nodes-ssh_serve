@@ -37,7 +37,7 @@ function main()
             exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
             exec("chmod 666 /srv/chroot/{$id}/dev/*");
         }
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl start");
+        exec("chroot --userspec=10002:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl start");
         break;
 
     case 'reload-php-fpm':
