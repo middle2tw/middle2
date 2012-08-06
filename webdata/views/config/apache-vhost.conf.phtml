@@ -5,6 +5,8 @@ AllowOverride All
 </Directory>
 
 Listen *:<?php echo $this->port ?>
+LoadModule fastcgi_module modules/mod_fastcgi.so
+ServerName localhost
 
 <VirtualHost *:<?php echo $this->port ?>>
 DocumentRoot /srv/web
