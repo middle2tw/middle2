@@ -7,21 +7,19 @@ sudo yum install gcc pcre-devel zlib-devel make expat-devel
 sudo mkdir -p /srv/chroot/template/var/lib/rpm
 sudo rpm --root /srv/chroot/template --initdb
 sudo mkdir /srv/chroot/template/dev/
-sudo mknod /srv/chroot/template/dev/null c 1 3
-sudo mknod /srv/chroot/template/dev/random c 1 8
-sudo mknod /srv/chroot/template/dev/urandom c 1 9
 
 sudo yum --installroot=/srv/chroot/template install -y basesystem
 cd /srv/chroot/template
 sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
 
-yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl
+yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl zlib
 sudo rpm --root /srv/chroot/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm
 
 cd /var/tmp
-wget http://ftp.tc.edu.tw/pub/Apache//httpd/httpd-2.4.2.tar.gz
-tar zxvf httpd-2.4.2.tar.gz
-cd httpd-2.4.2
+wget http://ftp.tc.edu.tw/pub/Apache//httpd/httpd-2.2.22.tar.gz
+tar zxvf httpd-2.2.22.tar.gz
+cd httpd-2.2.22
+
 cd srclib
 wget http://apache.cdpa.nsysu.edu.tw//apr/apr-1.4.6.tar.gz
 tar zxvf apr-1.4.6.tar.gz
@@ -30,6 +28,19 @@ wget http://apache.cdpa.nsysu.edu.tw//apr/apr-util-1.4.1.tar.gz
 tar zxvf apr-util-1.4.1.tar.gz
 mv apr-util-1.4.1 apr-util
 cd ..
+
 ./configure --enable-deflate --with-included-apr --with-mpm=worker
+make DESTDIR=/srv/chroot/template
 sudo make DESTDIR=/srv/chroot/template install
+
+cd modules
+wget http://www.fastcgi.com/dist/mod_fastcgi-2.4.6.tar.gz
+tar zxvf mod_fastcgi-2.4.6.tar.gz
+mv mod_fastcgi-2.4.6 fastcgi
+cd fastcgi
+cp Makefile.AP2 Makefile
+make top_dir=../../
+sudo cp .libs/mod_fastcgi.so /srv/chroot/template/usr/local/apache2/modules/mod_fastcgi.so
+
 sudo chown -R deploy:nobody /srv/chroot/template
+sudo rm /srv/chroot/template/etc/shadow /srv/chroot/template/etc/gshadow
