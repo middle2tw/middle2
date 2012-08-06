@@ -1,10 +1,10 @@
 [global]
-pid = /srv/deploy/<?= $this->id ?>.pid
-error_log = /srv/deploy/logs/<?= $this->id ?>/error.log
+pid = /srv/deploy/<?php echo $this->id ?>.pid
+error_log = /srv/deploy/logs/<?php echo $this->id ?>/error.log
 
 [www]
-listen = /srv/chroot/<?= $this->id ?>/php-fpm.sock
-chroot = /srv/chroot/<?= $this->id ?>/
+listen = /srv/chroot/<?php echo $this->id ?>/php-fpm.sock
+chroot = /srv/chroot/<?php echo $this->id ?>/
 user = www-user
 group = nobody
 pm = dynamic
