@@ -38,8 +38,7 @@ function main()
             exec("chmod 666 /srv/chroot/{$id}/dev/*");
         }
         exec("mkdir -p /srv/chroot/{$id}/usr/local/apache2/logs/fastcgi/dynamic");
-        exec("chown www-user /srv/chroot/{$id}/usr/local/apache2/logs/fastcgi/dynamic");
-        exec("chmod 700 /srv/chroot/{$id}/usr/local/apache2/logs/fastcgi/dynamic");
+	exec("chown www-user /srv/chroot/{$id}/usr/local/apache2/logs/");
         exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl start");
         break;
 
