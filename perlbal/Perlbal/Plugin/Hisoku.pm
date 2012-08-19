@@ -28,6 +28,7 @@ sub register {
             return 0 unless $hds;
 
             my ($vhost_ip, $vhost_port) = split(':', $hds->header("Host"));
+            $vhost_port = 80 unless defined $vhost_port;
 
             my $curl = WWW::Curl::Easy->new;
             $curl->setopt(CURLOPT_HEADER,1);
