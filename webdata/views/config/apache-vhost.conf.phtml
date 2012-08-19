@@ -1,6 +1,11 @@
 DirectoryIndex index.php index.html index.htm
+
+FastCGIExternalServer /php-fpm-handler -socket /php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
 AddHandler php-fastcgi .php
-<Directory /srv/web>
+Action php-fastcgi /php-fpm-handler.fcgi
+ScriptAlias /php-fpm-handler.fcgi /php-fpm-handler
+
+<Directory />
 AllowOverride All
 Allow from all
 </Directory>
@@ -11,9 +16,6 @@ ServerName localhost
 
 <VirtualHost *:<?php echo $this->port ?>>
 DocumentRoot /srv/web
-FastCGIExternalServer /php-fpm-handler -socket /php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
-Action php-fastcgi /php-fpm-handler.fcgi
-ScriptAlias /php-fpm-handler.fcgi /php-fpm-handler
 
 #LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
 #CustomLog "|/usr/local/sbin/cronolog /srv/logs/access-%Y-%m-%d.log" combined_hostname
