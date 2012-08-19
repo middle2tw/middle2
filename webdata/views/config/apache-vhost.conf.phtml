@@ -2,6 +2,7 @@ DirectoryIndex index.php index.html index.htm
 AddHandler php-fastcgi .php
 <Directory /srv/web>
 AllowOverride All
+Allow from all
 </Directory>
 
 Listen *:<?php echo $this->port ?> 
