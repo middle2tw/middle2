@@ -55,6 +55,19 @@ function main()
         exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl graceful");
         break;
 
+    case 'shutdown':
+        list(, $nodes_count) = explode(' ', $command, 2);
+        for ($i = 1; $i <= $nodes_count; $i ++) {
+            if (file_exists("/srv/deploy/{$i}.pid")) {
+                exec('kill ' . intval(file_get_contents("/srv/deploy/{$i}.pid")));
+            }
+            if (file_exists("/srv/chroot/{$i}/usr/local/apache2/logs/httpd.pid")) {
+                exec('kill ' . intval(file_get_contents("/srv/chroot/{$i}/usr/local/apache2/logs/httpd.pid")));
+            }
+            exec("rm -rf /srv/chroot/{$i}");
+        }
+        break;
+
     }
     return;
 }
