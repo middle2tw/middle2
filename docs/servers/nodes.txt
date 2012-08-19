@@ -29,7 +29,7 @@ tar zxvf apr-util-1.4.1.tar.gz
 mv apr-util-1.4.1 apr-util
 cd ..
 
-./configure --enable-deflate --with-included-apr --with-mpm=worker
+./configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker
 make DESTDIR=/srv/chroot/template
 sudo make DESTDIR=/srv/chroot/template install
 
