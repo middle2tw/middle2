@@ -16,7 +16,7 @@ function main()
 
     list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
 
-    if (!in_array($command, array('git-upload-pack', 'git-receive-pack', 'git-upload-archive'))) {
+    if (!in_array($command, array('git-upload-pack', 'git-receive-pack'))) {
         return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
     }
 
