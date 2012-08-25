@@ -41,6 +41,13 @@ sub register {
 
             my $json;
             $json = from_json($response_body, {utf8 => 1});
+            if (!length($json->{'nodes'})) {
+                $client->send_full_response(302, [
+                        'Location' => 'http://hisoku.ronny.tw/error/notfound',
+                        'Content-Length' => 0
+                    ], "");
+                return 0;
+            }
             my $ip = $json->{'nodes'}[0][0];
             my $port = $json->{'nodes'}[0][1];
 
