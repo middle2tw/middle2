@@ -45,7 +45,8 @@ function main()
             die("invalid $id");
         }
         exec("rm -rf /srv/chroot/{$id}/srv/web");
-        exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project}.git master | tar -xf /srv/chroot{$id}/srv/web");
+	mkdir("/srv/chroot/{$id}/srv/web");
+        exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
         break;
     }
     return;
