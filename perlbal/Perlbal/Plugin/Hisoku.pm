@@ -41,7 +41,7 @@ sub register {
 
             my $json;
             $json = from_json($response_body, {utf8 => 1});
-            if (!length($json->{'nodes'})) {
+            if ($json->{'error'} || !length($json->{'nodes'})) {
                 $client->send_full_response(302, [
                         'Location' => 'http://hisoku.ronny.tw/error/notfound',
                         'Content-Length' => 0
