@@ -7,4 +7,8 @@ class ErrorController extends Pix_Controller
         echo var_dump($this->view->exception);
         exit;
     }
+
+    public function notfoundAction()
+    {
+    }
 }
