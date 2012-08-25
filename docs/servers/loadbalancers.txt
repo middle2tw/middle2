@@ -1,6 +1,8 @@
+yum:
+* libcurl-devel.x86_64
+* perl-WWW-Curl.x86_64
 cpan: 
 * perlbal
-* WWW:Curl
 * JSON
 
 
