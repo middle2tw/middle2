@@ -41,6 +41,13 @@ cd fastcgi
 cp Makefile.AP2 Makefile
 make top_dir=../../
 sudo cp .libs/mod_fastcgi.so /srv/chroot/template/usr/local/apache2/modules/mod_fastcgi.so
+cd ../
+wget 'http://stderr.net/apache/rpaf/download/mod_rpaf-0.6.tar.gz'
+tar zxvf mod_rpaf-0.6.tar.gz
+mv mod_rpaf-0.6 mod_rpaf
+cd mod_rpaf
+make APXS2=/usr/sbin/apxs rpaf-2.0
+sudo cp .libs/mod_rpaf-2.0.so /srv/chroot/template/usr/local/apache2/modules/mod_rpaf.so
 
 sudo chown -R deploy:nobody /srv/chroot/template
 sudo rm /srv/chroot/template/etc/shadow /srv/chroot/template/etc/gshadow
