@@ -22,3 +22,9 @@ DocumentRoot /srv/web
 #ErrorLog "|/usr/local/sbin/cronolog /srv/logs/error-%Y-%m-%d.log"
 
 </VirtualHost>
+
+LoadModule rpaf_module modules/mod_rpaf.so
+RPAFenable On
+RPAFsethostname On
+RPAFproxy_ips 127.0.0.1 10.146.23.10
+RPAFheader X-Forwarded-For
