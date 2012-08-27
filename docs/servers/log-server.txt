@@ -3,7 +3,7 @@ yum install boost-devel.x86_64 libevent-devel.x86_64 openssl-devel.x86_64 byacc.
 wget https://dist.apache.org/repos/dist/release/thrift/0.8.0/thrift-0.8.0.tar.gz
 tar zxvf thrift-0.8.0.tar.gz
 cd thrift-0.8.0/
-./configure --with-cpp --without-csharp --without-erlang --without-haskell --without-java --without-perl --without-php --without-php_extension --without-python --without-ruby
+./configure --with-cpp --without-csharp --without-erlang --without-haskell --without-java --without-perl --without-php --without-php_extension --without-ruby
 
 make
 sudo make all install
