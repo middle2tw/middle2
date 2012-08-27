@@ -17,9 +17,9 @@ ServerName localhost
 <VirtualHost *:<?php echo $this->port ?>>
 DocumentRoot /srv/web
 
-#LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
-#CustomLog "|/usr/local/sbin/cronolog /srv/logs/access-%Y-%m-%d.log" combined_hostname
-#ErrorLog "|/usr/local/sbin/cronolog /srv/logs/error-%Y-%m-%d.log"
+LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
+CustomLog "|/usr/local/sbin/scribelogger 10.146.23.10 <?php echo $this->port ?> 
+ErrorLog "|/usr/local/sbin/scribelogger 10.146.23.10 <?php echo $this->port ?> 
 
 </VirtualHost>
 
