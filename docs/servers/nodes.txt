@@ -12,7 +12,7 @@ sudo yum --installroot=/srv/chroot/template install -y basesystem
 cd /srv/chroot/template
 sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
 
-yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl zlib libgcc
+yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl zlib libgcc python27
 sudo rpm --root /srv/chroot/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm
 
 cd /var/tmp
@@ -48,6 +48,8 @@ mv mod_rpaf-0.6 mod_rpaf
 cd mod_rpaf
 make APXS2=/usr/sbin/apxs rpaf-2.0
 sudo cp .libs/mod_rpaf-2.0.so /srv/chroot/template/usr/local/apache2/modules/mod_rpaf.so
+
+# thrift...
 
 sudo chown -R deploy:nobody /srv/chroot/template
 sudo rm /srv/chroot/template/etc/shadow /srv/chroot/template/etc/gshadow
