@@ -5,4 +5,12 @@
     <li>git remote hisoku git@<?= GIT_SERVER ?>:<?= $this->project->name ?></li>
     <li>git push hisoku master</li>
 </ul>
+<hr>
+Log
+<pre>
+<?php
+$cmd = "tail -n 100 /srv/logs/scribed/app-" . $this->project->getLoggerCategory() . "/app-" . $this->project->getLoggerCategory() . '_current';
+echo `$cmd`;
+?>
+</pre>
 <?= $this->partial('/common/footer.phtml', $this) ?>
