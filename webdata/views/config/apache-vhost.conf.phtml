@@ -18,8 +18,8 @@ ServerName localhost
 DocumentRoot /srv/web
 
 LogFormat "%h %l %u %t %v \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
-CustomLog "|/usr/local/bin/scribelogger 10.146.23.10 <?php echo $this->port ?>" combined_hostname
-ErrorLog "|/usr/local/bin/scribelogger 10.146.23.10 <?php echo $this->port ?>"
+CustomLog "|/usr/local/bin/scribelogger <?php echo $this->port ?> 10.146.23.10" combined_hostname
+ErrorLog "|/usr/local/bin/scribelogger <?php echo $this->port ?> 10.146.23.10"
 
 </VirtualHost>
 
