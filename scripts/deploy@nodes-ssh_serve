@@ -50,11 +50,11 @@ function main()
 	mkdir("/srv/chroot/{$id}/srv/web");
         exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
         $vhost_conf = $view->partial('config/apache-vhost.conf.phtml', array(
-            'port' => 20000 + $i,
+            'port' => 20000 + $id,
             'id' => $id,
             'project' => $project,
         ));
-        file_put_contents("/srv/chroot/{$i}/usr/local/apache2/conf/extra/node.conf", $vhost_conf);
+        file_put_contents("/srv/chroot/{$id}/usr/local/apache2/conf/extra/node.conf", $vhost_conf);
         break;
     }
     return;
