@@ -7,6 +7,11 @@ class ProjectRow extends Pix_Table_Row
         // TODO: add custom domain
         return $this->name . USER_DOMAIN;
     }
+
+    public function getLoggerCategory()
+    {
+        return $this->name . '_' . hash_hmac('sha256', $this->name, getenv('LOG_SECRET'));
+    }
 }
 
 class Project extends Pix_Table
