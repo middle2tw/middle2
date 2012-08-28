@@ -28,15 +28,22 @@ category = sys.argv[1]
 host = sys.argv[2]
 port = 1463
 
-log_entry = scribe.LogEntry(category=category, message=sys.stdin.read())
-
 socket = TSocket.TSocket(host=host, port=port)
 transport = TTransport.TFramedTransport(socket)
 protocol = TBinaryProtocol.TBinaryProtocol(trans=transport, strictRead=False, strictWrite=False)
 client = scribe.Client(iprot=protocol, oprot=protocol)
-
 transport.open()
-result = client.Log(messages=[log_entry])
+
+while 1:
+    message=sys.stdin.readline()
+    message=message.rstrip('\r\n')
+
+    if not message: break
+
+    log_entry=scribe.LogEntry(dict(category=category, message=message))
+
+    result = client.Log(messages=[log_entry])
+
 transport.close()
 
 if result == scribe.ResultCode.OK:
