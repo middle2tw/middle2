@@ -50,7 +50,7 @@ function main()
         if (file_exists("/srv/deploy/{$id}.pid")) {
             exec('kill -s SIGUSR2 ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
         } else {
-            exec("php-fpm -y /srv/deploy/etc/{$id}.conf");
+            exec("php-fpm -y /srv/deploy/etc/{$id}.conf --php-ini /srv/code/hisoku/config/php.ini");
         }
         exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl graceful");
         break;
