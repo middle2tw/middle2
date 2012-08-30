@@ -23,10 +23,9 @@ function main()
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
-        if (file_exists("/srv/deploy/{$id}.pid")) {
-            exec('kill ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
-        }
-        exec("php-fpm -y /srv/deploy/etc/{$id}.conf");
+	if (file_exists("/srv/chroot/{$id}/var/run/php-fpm.pid")) {
+		exec('kill ' . intval(file_get_contents("/srv/chroot/{$id}/var/run/php-fpm.pid")));
+	}
         if (!file_exists("/srv/chroot/{$id}/dev/null")) {
             exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
             exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
@@ -34,17 +33,20 @@ function main()
             exec("chmod 666 /srv/chroot/{$id}/dev/*");
         }
         exec("mkdir -p /srv/chroot/{$id}/usr/local/apache2/logs/fastcgi/dynamic");
+	copy("/srv/code/hisoku/config/php-fpm.conf", "/srv/chroot/{$id}/etc/php-fpm.conf");
         copy("/srv/code/hisoku/scripts/init.sh", "/srv/chroot/{$id}/init.sh");
         copy("/srv/code/hisoku/scripts/scribelogger", "/srv/chroot/{$id}/usr/local/bin/scribelogger");
 	exec("chown www-user /srv/chroot/{$id}/usr/local/apache2/logs/");
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /init.sh");
+	exec("chown www-user /srv/chroot/{$id}/var/run");
+	exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/sbin/php-fpm");
+	exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl graceful");
         break;
 
     case 'shutdown':
         list(, $nodes_count) = explode(' ', $command, 2);
         for ($i = 1; $i <= $nodes_count; $i ++) {
-            if (file_exists("/srv/deploy/{$i}.pid")) {
-                exec('kill ' . intval(file_get_contents("/srv/deploy/{$i}.pid")));
+            if (file_exists("/srv/chroot/{$i}/var/run/php-fpm.pid")) {
+                exec('kill ' . intval(file_get_contents("/srv/chroot/{$i}/var/run/php-fpm.pid")));
             }
             if (file_exists("/srv/chroot/{$i}/usr/local/apache2/logs/httpd.pid")) {
                 exec('kill ' . intval(file_get_contents("/srv/chroot/{$i}/usr/local/apache2/logs/httpd.pid")));
