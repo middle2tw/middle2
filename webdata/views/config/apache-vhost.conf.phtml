@@ -1,6 +1,6 @@
 DirectoryIndex index.php index.html index.htm
 
-FastCGIExternalServer /php-fpm-handler -socket /php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
+FastCGIExternalServer /php-fpm-handler -socket /var/run/php-fpm.sock -idle-timeout 1800 -appConnTimeout 1800
 AddHandler php-fastcgi .php
 Action php-fastcgi /php-fpm-handler.fcgi
 ScriptAlias /php-fpm-handler.fcgi /php-fpm-handler
