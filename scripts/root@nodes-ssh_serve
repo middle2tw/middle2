@@ -18,10 +18,6 @@ function main()
     $command = getenv('SSH_ORIGINAL_COMMAND');
     list($method) = explode(' ', $command, 2);
     switch ($method) {
-    case 'reload-apache': // init $nodes_count
-        exec('apachectl graceful');
-        break;
-
     case 'restart-php-fpm':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
@@ -38,21 +34,10 @@ function main()
             exec("chmod 666 /srv/chroot/{$id}/dev/*");
         }
         exec("mkdir -p /srv/chroot/{$id}/usr/local/apache2/logs/fastcgi/dynamic");
+        copy("/srv/code/hisoku/scripts/init.sh", "/srv/chroot/{$id}/init.sh");
+        copy("/srv/code/hisoku/scripts/scribelogger", "/srv/chroot/{$id}/usr/local/bin/scribelogger");
 	exec("chown www-user /srv/chroot/{$id}/usr/local/apache2/logs/");
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl start");
-        break;
-
-    case 'reload-php-fpm':
-        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        if (!$id = intval($id)) {
-            error('invalid id: ' . $id);
-        }
-        if (file_exists("/srv/deploy/{$id}.pid")) {
-            exec('kill -s SIGUSR2 ' . intval(file_get_contents("/srv/deploy/{$id}.pid")));
-        } else {
-            exec("php-fpm -y /srv/deploy/etc/{$id}.conf --php-ini /srv/code/hisoku/config/php.ini");
-        }
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl graceful");
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /init.sh");
         break;
 
     case 'shutdown':
