@@ -1,11 +1,25 @@
 <?php
 
+class ProjectVariableRow extends Pix_Table_Row
+{
+    public function postSave()
+    {
+        foreach ($this->project->webnodes as $webnode) {
+            $webnode->update(array(
+                'project_id' => 0,
+                'commit' => '',
+            ));
+        }
+    }
+}
+
 class ProjectVariable extends Pix_Table
 {
     public function init()
     {
         $this->_name = 'project_variable';
         $this->_primary = array('project_id', 'key');
+        $this->_rowClass = 'ProjectVariableRow';
 
         $this->_columns['project_id'] = array('type' => 'int');
         $this->_columns['key'] = array('type' => 'varchar', 'size' => 32);
