@@ -23,6 +23,29 @@
     </li>
 </ul>
 <hr>
+<h3>Variable: </h3>
+<ul>
+    <?php foreach ($this->project->variables as $variable) { ?>
+    <li>
+    <form method="post" action="/project/editvariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        <?= $this->escape($variable->key) ?>
+        <input type="text" name="value" value="<?= $this->escape($variable->value) ?>">
+        <button type="submit">EDIT</button>
+    </form>
+    <a href="/project/deletevariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($variable->key) ?> variable">Delete</a>
+    </li>
+    <?php } ?>
+    <li>
+    <form method="post" action="/project/addvariable/<?= $this->project->name ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        Variable key: <input type="text" name="key"><br>
+        Variable value: <input type="text" name="value">
+        <input type="submit">
+    </form>
+    </li>
+</ul>
+<hr>
 Log
 <pre>
 <?php

@@ -1,1 +1,4 @@
 env[project] = <?= $this->project->name ?> 
+<?php foreach ($this->project->variables as $variable) { ?>
+env[<?= $variable->key ?>] = <?= $variable->value ?> 
+<?php } ?>
