@@ -6,6 +6,23 @@
     <li>git push hisoku master</li>
 </ul>
 <hr>
+<h3>Custom domains: </h3>
+<ul>
+    <?php foreach ($this->project->custom_domains as $custom_domain) { ?>
+    <li>
+    <?= $this->escape($custom_domain->domain) ?>
+    <a href="/project/deletedomain/<?= $this->project->name ?>?domain=<?= urlencode($custom_domain->domain) ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($custom_domain->domain) ?> key">Delete</a>
+    </li>
+    <?php } ?>
+    <li>
+    <form method="post" action="/project/adddomain/<?= $this->project->name ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        Add domain: <input type="text" name="domain">
+        <input type="submit">
+    </form>
+    </li>
+</ul>
+<hr>
 Log
 <pre>
 <?php
