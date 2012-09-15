@@ -31,7 +31,7 @@ class Project extends Pix_Table
         $this->_indexes['name'] = array('type' => 'unique', 'columns' => array('name'));
 
         $this->_relations['members'] = array('rel' => 'has_many', 'type' => 'ProjectMember', 'foreign_key' => 'project_id');
-        $this->_domains['custom_domains'] = array('rel' => 'has_many', 'type' => 'CustomDomain', 'foreign_key' => 'project_id');
+        $this->_relations['custom_domains'] = array('rel' => 'has_many', 'type' => 'CustomDomain', 'foreign_key' => 'project_id');
 
     }
 
