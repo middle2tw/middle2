@@ -2,7 +2,7 @@
 
 class ProjectVariableRow extends Pix_Table_Row
 {
-    public function postSave()
+    protected function _releaseNodes()
     {
         foreach ($this->project->webnodes as $webnode) {
             $webnode->update(array(
@@ -10,6 +10,16 @@ class ProjectVariableRow extends Pix_Table_Row
                 'commit' => '',
             ));
         }
+    }
+
+    public function postSave()
+    {
+        $this->_releaseNodes();
+    }
+
+    public function postDelete()
+    {
+        $this->_releaseNodes();
     }
 }
 
