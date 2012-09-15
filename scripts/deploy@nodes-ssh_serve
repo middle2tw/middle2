@@ -28,6 +28,7 @@ function main()
 
         for ($i = 1; $i <= $nodes_count; $i ++) {
             exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$i}");
+            copy('/srv/code/hisoku/config/php.ini', "/srv/chroot/{$i}/etc/");
             // comment Listen 80
             exec("sed -i 's/^Listen 80$/#Listen 80/' /srv/chroot/{$i}/usr/local/apache2/conf/httpd.conf");
             file_put_contents("/srv/chroot/{$i}/usr/local/apache2/conf/httpd.conf", "\nInclude conf/extra/node.conf\n", FILE_APPEND);
