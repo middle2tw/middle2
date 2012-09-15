@@ -46,6 +46,9 @@ function main()
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
+        if (file_exists("/srv/chroot/{$id}/srv/env.conf")) {
+            unlink("/srv/chroot/{$id}/srv/env.conf");
+        }
         exec("rm -rf /srv/chroot/{$id}/srv/web");
 	mkdir("/srv/chroot/{$id}/srv/web");
         exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
@@ -55,6 +58,11 @@ function main()
             'project' => $project,
         ));
         file_put_contents("/srv/chroot/{$id}/usr/local/apache2/conf/extra/node.conf", $vhost_conf);
+        $env_conf = $view->partial('config/php-env.phtml', array(
+            'project' => $project,
+        ));
+        file_put_contents("/srv/chroot/{$id}/srv/env.conf", $env_conf);
+
         break;
     }
     return;
