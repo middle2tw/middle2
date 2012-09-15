@@ -15,7 +15,7 @@ class ApiController extends Pix_Controller
 
         if (preg_match('#(.*)' . preg_quote(USER_DOMAIN, '#') . '#', $request_host, $matches)) {
             $project = Project::find_by_name($matches[1]);
-        } elseif ($domain = UserDomain::find($request_host)) {
+        } elseif ($domain = CustomDomain::find($request_host)) {
             $project = $domain->project;
         } else {
             return $this->json(array(
