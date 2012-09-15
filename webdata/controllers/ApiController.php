@@ -11,15 +11,20 @@ class ApiController extends Pix_Controller
         $request_host = strval($_GET['domain']);
         $request_port = intval($_GET['port']);
 
-        if (!preg_match('#(.*)' . preg_quote(USER_DOMAIN, '#') . '#', $request_host, $matches)) {
+        $project = null;
+
+        if (preg_match('#(.*)' . preg_quote(USER_DOMAIN, '#') . '#', $request_host, $matches)) {
+            $project = Project::find_by_name($matches[1]);
+        } elseif ($domain = UserDomain::find($request_host)) {
+            $project = $domain->project;
+        } else {
             return $this->json(array(
                 'error' => true,
                 'message' => 'Unknown domain: ' . $request_host,
             ));
         }
 
-        $project_name = $matches[1];
-        if (!$project = Project::find_by_name($project_name)) {
+        if (is_null($project)) {
             return $this->json(array(
                 'error' => true,
                 'message' => 'Unknown domain: ' . $request_host,
