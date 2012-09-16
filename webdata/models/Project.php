@@ -12,6 +12,11 @@ class ProjectRow extends Pix_Table_Row
     {
         return $this->name . '_' . hash_hmac('sha256', $this->name, getenv('LOG_SECRET'));
     }
+
+    public function getEAVs()
+    {
+        return EAV::search(array('table' => 'Project', 'id' => $this->id));
+    }
 }
 
 class Project extends Pix_Table
@@ -34,6 +39,10 @@ class Project extends Pix_Table
         $this->_relations['custom_domains'] = array('rel' => 'has_many', 'type' => 'CustomDomain', 'foreign_key' => 'project_id');
         $this->_relations['variables'] = array('rel' => 'has_many', 'type' => 'ProjectVariable', 'foreign_key' => 'project_id');
         $this->_relations['webnodes'] = array('rel' => 'has_many', 'type' => 'WebNode', 'foreign_key' => 'project_id');
+
+        $this->_hooks['eavs'] = array('get' => 'getEAVs');
+
+        $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
 
     }
 
