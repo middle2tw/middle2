@@ -120,6 +120,23 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function editnoteAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*editnote*/, $name, $key) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        $project->setEAV('note', strval($_POST['note']));
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
     public function editvariableAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {

@@ -1,5 +1,10 @@
 <?= $this->partial('/common/header.phtml', $this) ?>
 <h2><?= $this->escape($this->project->name) ?></h2>
+<form method="post" action="/project/editnote/<?= $this->project->name ?>">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    Note: <input type="text" name="note" value="<?= $this->escape($this->project->getEAV('note')) ?>">
+    <button type="submit">SAVE</button>
+</form>
 <h3>deployment:</h3>
 <ul>
     <li>git remote hisoku git@<?= GIT_SERVER ?>:<?= $this->project->name ?></li>

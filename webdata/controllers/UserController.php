@@ -56,12 +56,17 @@ class UserController extends Pix_Controller
         }
 
         try {
-            $this->user->addProject(strval($_POST['name']));
+            $project = $this->user->addProject();
         } catch (InvalidException $e) {
             // TODO: error
+            return $this->redirect('/');
         } catch (Pix_Table_DuplicateException $e) {
             // TODO: error
+            return $this->redirect('/');
         }
+
+        $project->setEAV('note', strval($_POST['name']));
+
         return $this->redirect('/');
     }
 }
