@@ -63,8 +63,8 @@ class ProjectController extends Pix_Controller
             return $this->redirect('/');
         }
 
-        // from http://myregexp.com/examples.html
-        if (!preg_match('#^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$#', $_POST['domain'])) {
+        // from http://regexlib.com/REDetails.aspx?regexp_id=306
+        if (!preg_match('#^(([\w][\w\-\.]*)\.)?([\w][\w\-]+)(\.([\w][\w\.]*))?$#', $_POST['domain'])) {
             // TODO: 404
             return $this->redirect('/');
         }
