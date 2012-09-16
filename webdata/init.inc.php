@@ -11,11 +11,13 @@ Pix_Loader::registerAutoLoad();
 
 if (file_exists('/srv/config/config.php')) {
     include('/srv/config/config.php');
-    define('GIT_SERVER', 'git.hisoku.ronny.tw');
-    define('USER_DOMAIN', '.hisokuapp.ronny.tw');
 } elseif (file_exists(__DIR__ . '/config.php')) {
     include(__DIR__ . '/config.php');
 }
+define('GIT_SERVER', 'git.hisoku.ronny.tw');
+define('USER_DOMAIN', '.hisokuapp.ronny.tw');
+define('USERDB_DOMAIN', 'userdb.hisoku.ronny.tw');
+
 $link = new mysqli;
 $link->connect(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASS'));
 $link->select_db(getenv('MYSQL_DATABASE'));
