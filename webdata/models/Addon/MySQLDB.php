@@ -1,10 +1,22 @@
 <?php
 
+class Addon_MySQLDBRow extends Pix_Table_Row
+{
+    public function saveProjectVariable()
+    {
+        $this->project->variables->insert(array(
+            'key' => 'DATABASE_URL',
+            'value' => "mysql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+        ));
+    }
+}
+
 class Addon_MySQLDB extends Pix_Table
 {
     public function init()
     {
         $this->_name = 'addon_mysqldb';
+        $this->_rowClass = 'Addon_MySQLDBRow';
 
         $this->_primary = array('id');
 
@@ -15,12 +27,15 @@ class Addon_MySQLDB extends Pix_Table
         $this->_columns['password'] = array('type' => 'varchar', 'size' => 32);
         $this->_columns['database'] = array('type' => 'varchar', 'size' => 32);
 
+        $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
+
         $this->addIndex('project_id', array('project_id'));
     }
 
     public static function addDB($project)
     {
-        if (self::search(array('project_id' => $project->id))->count()) {
+        if ($addon = self::search(array('project_id' => $project->id))->first()) {
+            $addon->saveProjectVariable();
             return;
         }
 
@@ -35,17 +50,14 @@ class Addon_MySQLDB extends Pix_Table
         $db->query("CREATE DATABASE IF NOT EXISTS`{$database}`");
         $db->query("GRANT ALL PRIVILEGES ON  `{$database}` . * TO  '{$user_name}'@'%'");
 
-        self::insert(array(
+        $addon = self::insert(array(
             'project_id' => $project->id,
             'host' => $host,
             'user_name' => $user_name,
             'password' => $password,
             'database' => $database,
         ));
+        $addon->saveProjectVariable();
 
-        $project->variables->insert(array(
-            'key' => 'DATABASE_URL',
-            'value' => "mysql://{$user_name}:{$password}@{$host}/{$database}",
-        ));
     }
 }
