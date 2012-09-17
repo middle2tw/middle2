@@ -2,6 +2,24 @@
 
 class UserKeyRow extends Pix_Table_Row
 {
+    public function postSave()
+    {
+        $this->_updateGitKey();
+    }
+
+    public function postDelete()
+    {
+        $this->_updateGitKey();
+    }
+
+    protected function _updateGitKey()
+    {
+        $ip = GIT_SERVER;
+        $session = ssh2_connect($ip, 22);
+        ssh2_auth_pubkey_file($session, 'git', '/srv/config/web-key.pub', '/srv/config/web-key');
+        ssh2_exec($session, "update-keys");
+    }
+
     public function getKeyUser()
     {
         list($type, $body, $user) = explode(' ', $this->key_body);
