@@ -6,6 +6,7 @@
     <li>
     <a href="/project/detail/<?= $project->name ?>"><?= $this->escape($project->name) ?></a>
     <?= $this->escape($project->getEAV('note')) ?>
+    <a href="http://<?= $project->getFirstDomain() ?>" target="_blank">[new window]</a>
     </li>
     <?php } ?>
     <li>
