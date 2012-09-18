@@ -45,7 +45,7 @@ function main()
     case 'shutdown':
         list(, $nodes_count) = explode(' ', $command, 2);
         $curl = curl_init();
-        curl_setopt($curl, 'http://169.254.169.254/latest/meta-data/local-hostname');
+        curl_setopt($curl, CURLOPT_URL, 'http://169.254.169.254/latest/meta-data/local-hostname');
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         if (!$hostname = curl_exec($curl)) {
