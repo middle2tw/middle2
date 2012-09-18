@@ -48,7 +48,9 @@ function main()
         curl_setopt($curl, 'http://169.254.169.254/latest/meta-data/local-hostname');
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        $hostname = curl_exec($curl);
+        if (!$hostname = curl_exec($curl)) {
+            trigger_error(curl_error($curl));
+        }
         curl_close($curl);
 
         if (!$hostname) {
