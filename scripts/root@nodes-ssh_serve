@@ -57,7 +57,7 @@ function main()
             die("local-hostname is not found");
         }
 
-        if ($ip = gethostbyname($hostname)) {
+        if (!$ip = gethostbyname($hostname)) {
             die("local-hostname {$hostname} error");
         }
 
