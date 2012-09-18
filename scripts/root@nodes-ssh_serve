@@ -44,7 +44,26 @@ function main()
 
     case 'shutdown':
         list(, $nodes_count) = explode(' ', $command, 2);
+        $curl = curl_init();
+        curl_setopt($curl, 'http://169.254.169.254/latest/meta-data/local-hostname');
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        $hostname = curl_exec($curl);
+        curl_close($curl);
+
+        if (!$hostname) {
+            die("local-hostname is not found");
+        }
+
+        if ($ip = gethostbyname($hostname)) {
+            die("local-hostname {$hostname} error");
+        }
+
         for ($i = 1; $i <= $nodes_count; $i ++) {
+            if ($node = WebNode::find(array(ip2long($ip), 20000 + $i))) {
+                $node->delete();
+            }
+
             if (file_exists("/srv/chroot/{$i}/var/run/php-fpm.pid")) {
                 exec('kill ' . intval(file_get_contents("/srv/chroot/{$i}/var/run/php-fpm.pid")));
             }
