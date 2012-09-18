@@ -44,15 +44,6 @@ function main()
         }
 
         for ($i = 1; $i <= $nodes_count; $i ++) {
-            WebNode::insert(array(
-                'ip' => ip2long($ip),
-                'port' => 20000 + $i,
-                'project_id' => 0,
-                'commit' => '',
-                'created_at' => 0,
-                'start_at' => 0,
-                'access_at' => 0,
-            ));
             exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$i}");
             copy('/srv/code/hisoku/config/php.ini', "/srv/chroot/{$i}/etc/php.ini");
             // comment Listen 80
@@ -61,6 +52,16 @@ function main()
             if (!file_exists("/srv/chroot/{$i}/srv/web")) {
                 mkdir("/srv/chroot/{$i}/srv/web");
             }
+
+            WebNode::insert(array(
+                'ip' => ip2long($ip),
+                'port' => 20000 + $i,
+                'project_id' => 0,
+                'commit' => '',
+                'created_at' => time(),
+                'start_at' => 0,
+                'access_at' => 0,
+            ));
         }
         break;
 
