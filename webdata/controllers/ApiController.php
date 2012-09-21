@@ -32,7 +32,14 @@ class ApiController extends Pix_Controller
         }
 
         // find current
-        $nodes = WebNode::search(array('project_id' => $project->id, 'commit' => $project->commit));
+        $nodes = WebNode::search(array(
+            'project_id' => $project->id,
+            'status' => WebNode::STATUS_WEBNODE,
+            'commit' => $project->commit,
+        ));
+
+        // TODO: find STATUS_WEBPROCESSING
+
         if (count($nodes)) {
             $ret = new StdClass;
             $ret->error = false;
@@ -47,7 +54,13 @@ class ApiController extends Pix_Controller
         }
 
         // TODO: move to background.. release unused nodes
-        WebNode::search(array('project_id' => $project_id))->update(array('project_id' => 0));
+        WebNode::search(array(
+            'project_id' => $project_id,
+            'status' => WebNode::STATUS_WEBNODE,
+        ))->update(array(
+            'project_id' => 0,
+            'status' => WebNode::STATUS_UNUSED,
+        ));
         $time_5min = time() - 300;
         WebNode::search("`access_at` AND `access_at` < {$time_5min}")->update(array('access_at' => 0, 'project_id' => 0));
 
@@ -68,7 +81,11 @@ class ApiController extends Pix_Controller
                 continue;
             }
 
-            $random_node->update(array('project_id' => $project->id, 'commit' => $project->commit));
+            $random_node->update(array(
+                'project_id' => $project->id,
+                'commit' => $project->commit,
+                'status' => WebNode::STATUS_WEBPROCESSING,
+            ));
 
             $node_id = $random_node->port - 20000;
             $ip = long2ip($random_node->ip);
@@ -80,6 +97,10 @@ class ApiController extends Pix_Controller
             $session = ssh2_connect($ip, 22);
             ssh2_auth_pubkey_file($session, 'root', '/srv/config/web-key.pub', '/srv/config/web-key');
             ssh2_exec($session, "restart-php-fpm {$node_id}");
+
+            $random_node->update(array(
+                'status' => WebNode::STATUS_WEBNODE,
+            ));
     
             $choosed_nodes[] = $random_node;
 
