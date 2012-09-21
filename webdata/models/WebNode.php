@@ -3,7 +3,8 @@
 class WebNode extends Pix_Table
 {
     const STATUS_UNUSED = 0;
-    const STATUS_PROCESSING = 1;
+    const STATUS_WEBPROCESSING = 1;
+    const STATUS_CRONPROCESSING = 2;
     const STATUS_WEBNODE = 10;
     const STATUS_CRONNODE = 11;
 
@@ -16,7 +17,8 @@ class WebNode extends Pix_Table
         $this->_columns['port'] = array('type' => 'int');
         $this->_columns['project_id'] = array('type' => 'int');
         $this->_columns['commit'] = array('type' => 'char', 'size' => 32);
-        // status: 0-unused, 1-processing
+        // status: 0-unused,
+        //         1-webprocessing, 2-cronprocessing
         //         10-webnode, 11-cronnode
         $this->_columns['status'] = array('type' => 'tinyint');
         $this->_columns['created_at'] = array('type' => 'int');
