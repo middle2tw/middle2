@@ -2,6 +2,11 @@
 
 class WebNode extends Pix_Table
 {
+    const STATUS_UNUSED = 0;
+    const STATUS_PROCESSING = 1;
+    const STATUS_WEBNODE = 10;
+    const STATUS_CRONNODE = 11;
+
     public function init()
     {
         $this->_name = 'webnode';
@@ -18,6 +23,10 @@ class WebNode extends Pix_Table
         $this->_columns['start_at'] = array('type' => 'int');
         $this->_columns['access_at'] = array('type' => 'int');
 
-        $this->_indexes['projectid_commit'] = array('project_id', 'commit');
+        $this->addIndex('projectid_status_commit', array(
+            'project_id',
+            'status',
+            'commit',
+        ));
     }
 }
