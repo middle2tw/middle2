@@ -12,11 +12,6 @@ hisoku.getBackendHost = function(host, port, callback){
         return callback('localhost', 9999);
     }
 
-    if (hisoku.cache[host + ':' + port]) {
-	    var json = hisoku.cache[host + ':' + port];
-            return callback(json.nodes[0][0], json.nodes[0][1]);
-    }
-
     var selector_request = http.request({
         host: 'localhost',
         port: 9999,
@@ -32,7 +27,6 @@ hisoku.getBackendHost = function(host, port, callback){
             if (json.error) {
 	    // TODO: error
 	    }
-	    hisoku.cache[host + ':' + port] = json;
             return callback(json.nodes[0][0], json.nodes[0][1]);
 	});
         selector_response.on('close', function(){
