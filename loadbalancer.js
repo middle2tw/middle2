@@ -32,7 +32,7 @@ hisoku.getBackendHost = function(host, port, callback){
             if (json.error) {
                 return callback({success: false});
             }
-            return callback({success: true, host: json.nodes[0][0], port: json.nodes[0][1]);
+            return callback({success: true, host: json.nodes[0][0], port: json.nodes[0][1]});
         });
         selector_response.on('close', function(){
             // TODO : error
