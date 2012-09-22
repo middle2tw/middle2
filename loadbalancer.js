@@ -22,17 +22,17 @@ hisoku.getBackendHost = function(host, port, callback){
             data += chunk;
         });
         selector_response.on('end', function(){
-   	    // { error: false, nodes: [ [ '10.146.23.10', '20006' ] ] }
-   	    var json = JSON.parse(data);
+            // { error: false, nodes: [ [ '10.146.23.10', '20006' ] ] }
+            var json = JSON.parse(data);
             if (json.error) {
-	    // TODO: error
-	    }
+                // TODO: error
+            }
             return callback(json.nodes[0][0], json.nodes[0][1]);
-	});
+        });
         selector_response.on('close', function(){
-	    // TODO : error
+            // TODO : error
             console.log(JSON.parse(data));
-	});
+        });
     }).end();
 };
 
@@ -69,7 +69,7 @@ main_request.on('request', function(main_request, main_response){
 
     hisoku.getBackendHost(host, port, function(backend_host, backend_port){
         console.log(host + ' ' + backend_host + ' ' + backend_port);
-	delete(main_request.headers['host']);
+        delete(main_request.headers['host']);
 
         var backend_request = http.request({
             host: backend_host,
@@ -78,9 +78,9 @@ main_request.on('request', function(main_request, main_response){
             method: main_request.method,
             path: main_request.url,
             headers: main_request.headers,
-	    agent: false
+            agent: false
         }, function(backend_response){
-	    main_response.writeHead(backend_response.statusCode, backend_response.headers);
+            main_response.writeHead(backend_response.statusCode, backend_response.headers);
             backend_response.on('data', function(chunk){
                 main_response.write(chunk);
             });
@@ -97,20 +97,20 @@ main_request.on('request', function(main_request, main_response){
         backend_request.on('error', function(e){
             // TODO: log error
             console.log('error');
-	    main_response.end();
+            main_response.end();
         });
 
         main_request_data = function(chunk){
-	    backend_request.write(chunk);
-	};
+            backend_request.write(chunk);
+        };
         main_request_end = function(){
-  	    backend_request.end();
-	};
-	main_request_data(main_request_pending_data);
+            backend_request.end();
+        };
+        main_request_data(main_request_pending_data);
 
         if (main_request_is_end) {
             main_request_end();
-	}
+        }
 
         return;
     });
