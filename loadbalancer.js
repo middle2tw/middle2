@@ -9,7 +9,7 @@ hisoku.cache = {};
 
 hisoku.getBackendHost = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
-        return callback('localhost', 9999);
+        return callback({success: true, host: 'localhost', port: 9999});
     }
 
     var selector_request = http.request({
@@ -23,11 +23,16 @@ hisoku.getBackendHost = function(host, port, callback){
         });
         selector_response.on('end', function(){
             // { error: false, nodes: [ [ '10.146.23.10', '20006' ] ] }
-            var json = JSON.parse(data);
-            if (json.error) {
-                // TODO: error
+            var json;
+            try {
+                json = JSON.parse(data);
+            } catch (e) {
+                return callback({success: false});
             }
-            return callback(json.nodes[0][0], json.nodes[0][1]);
+            if (json.error) {
+                return callback({success: false});
+            }
+            return callback({success: true, host: json.nodes[0][0], port: json.nodes[0][1]);
         });
         selector_response.on('close', function(){
             // TODO : error
@@ -67,7 +72,15 @@ main_request.on('request', function(main_request, main_response){
     main_request.on('close', function(){
     });
 
-    hisoku.getBackendHost(host, port, function(backend_host, backend_port){
+    hisoku.getBackendHost(host, port, function(options){
+        if (!options.success) {
+            main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
+            main_response.end();
+            return;
+        }
+
+        var backend_host = options.host;
+        var backend_port = options.port;
         console.log(host + ' ' + backend_host + ' ' + backend_port);
         delete(main_request.headers['host']);
 
