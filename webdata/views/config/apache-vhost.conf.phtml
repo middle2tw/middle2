@@ -18,13 +18,13 @@ ServerName localhost
 DocumentRoot /srv/web
 
 LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" combined_hostname
-CustomLog "|/usr/local/bin/scribelogger app-<?php echo $this->project->getLoggerCategory() ?> 10.146.23.10" combined_hostname
-ErrorLog "|/usr/local/bin/scribelogger app-<?php echo $this->project->getLoggerCategory() ?> 10.146.23.10"
+CustomLog "|/usr/local/bin/scribelogger app-<?php echo $this->project->getLoggerCategory() ?> scribe.hisoku.ronny.tw" combined_hostname
+ErrorLog "|/usr/local/bin/scribelogger app-<?php echo $this->project->getLoggerCategory() ?> scribe.hisoku.ronny.tw"
 
 </VirtualHost>
 
 LoadModule rpaf_module modules/mod_rpaf.so
 RPAFenable On
 RPAFsethostname On
-RPAFproxy_ips 127.0.0.1 10.146.23.10
+RPAFproxy_ips 127.0.0.1 10.158.125.215
 RPAFheader X-Forwarded-For
