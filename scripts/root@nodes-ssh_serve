@@ -18,7 +18,7 @@ function main()
     $command = getenv('SSH_ORIGINAL_COMMAND');
     list($method) = explode(' ', $command, 2);
     switch ($method) {
-    case 'restart-php-fpm':
+    case 'restart-web':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);

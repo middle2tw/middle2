@@ -96,7 +96,7 @@ class ApiController extends Pix_Controller
 
             $session = ssh2_connect($ip, 22);
             ssh2_auth_pubkey_file($session, 'root', '/srv/config/web-key.pub', '/srv/config/web-key');
-            ssh2_exec($session, "restart-php-fpm {$node_id}");
+            ssh2_exec($session, "restart-web {$node_id}");
 
             $random_node->update(array(
                 'status' => WebNode::STATUS_WEBNODE,
