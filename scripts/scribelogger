@@ -24,8 +24,12 @@ from scribe import scribe
 from thrift.transport import TTransport, TSocket
 from thrift.protocol import TBinaryProtocol
 
-category = sys.argv[1]
-host = sys.argv[2]
+def file_get_contents(filename):
+    with open(filename) as f:
+        return f.read()
+
+category = file_get_contents('/srv/log_category')
+host = sys.argv[1]
 port = 1463
 
 socket = TSocket.TSocket(host=host, port=port)
