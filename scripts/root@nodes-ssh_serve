@@ -31,7 +31,7 @@ function main()
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
 
         $port = 20000 + $id;
-        exec("chroot /srv/chroot/{$id}/ init.sh {$port}");
+        exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
         break;
 
     case 'clone':
