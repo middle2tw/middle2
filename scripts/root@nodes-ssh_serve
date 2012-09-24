@@ -36,7 +36,7 @@ function main()
         $ip = AWS::getHostIP();
         try {
             WebNode::insert(array(
-                'ip' => ip2long($ip),
+                'ip' => $ip,
                 'port' => $port,
                 'status' => WebNode::STATUS_UNUSED,
             ));
