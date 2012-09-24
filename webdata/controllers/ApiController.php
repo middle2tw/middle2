@@ -91,7 +91,7 @@ class ApiController extends Pix_Controller
             $ip = long2ip($random_node->ip);
 
             $session = ssh2_connect($ip, 22);
-            ssh2_auth_pubkey_file($session, 'deploy', '/srv/config/web-key.pub', '/srv/config/web-key');
+            ssh2_auth_pubkey_file($session, 'root', '/srv/config/web-key.pub', '/srv/config/web-key');
             ssh2_exec($session, "clone {$project->name} {$node_id}");
 
             $session = ssh2_connect($ip, 22);
