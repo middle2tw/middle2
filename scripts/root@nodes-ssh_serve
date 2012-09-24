@@ -33,6 +33,15 @@ function main()
 
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
+        $ip = AWS::getHostIP();
+        try {
+            WebNode::insert(array(
+                'ip' => ip2long($ip),
+                'port' => $port,
+                'status' => WebNode::STATUS_UNUSED,
+            ));
+        } catch (Pix_Table_DuplicateException $e) {
+        }
         break;
 
     case 'clone':
