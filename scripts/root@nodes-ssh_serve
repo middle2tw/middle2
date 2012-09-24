@@ -29,6 +29,7 @@ function main()
         exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
         exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
+        exec("chmod 10003:99 /srv");
 
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
