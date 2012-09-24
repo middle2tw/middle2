@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env HOME=/srv/ /usr/bin/python
 
 ##  Copyright (c) 2007-2008 Facebook
 ##
@@ -28,7 +28,7 @@ def file_get_contents(filename):
     with open(filename) as f:
         return f.read()
 
-category = file_get_contents('/srv/log_category')
+category = file_get_contents('/srv/log_category').strip()
 host = sys.argv[1]
 port = 1463
 
