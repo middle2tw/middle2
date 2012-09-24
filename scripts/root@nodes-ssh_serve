@@ -18,28 +18,49 @@ function main()
     $command = getenv('SSH_ORIGINAL_COMMAND');
     list($method) = explode(' ', $command, 2);
     switch ($method) {
+    case 'init':
+        list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
+        }
+        exec("rm -rf /srv/chroot/{$id}/");
+        exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$i}");
+        exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
+        exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
+        exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
+        exec("chmod 666 /srv/chroot/{$id}/dev/*");
+
+        $port = 20000 + $id;
+        exec("chroot /srv/chroot/{$id}/ init.sh {$port}");
+        break;
+
+    case 'clone':
+        list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id) {
+            die("invalid $id");
+        }
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return error('project not found: ' . $project_name);
+        }
+        exec("rm -rf /srv/chroot/{$id}/srv/web");
+	mkdir("/srv/chroot/{$id}/srv/web");
+        exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
+        break;
+
     case 'restart-web':
-        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
-	if (file_exists("/srv/chroot/{$id}/var/run/php-fpm.pid")) {
-		exec('kill ' . intval(file_get_contents("/srv/chroot/{$id}/var/run/php-fpm.pid")));
-	}
-        if (!file_exists("/srv/chroot/{$id}/dev/null")) {
-            exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
-            exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
-            exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
-            exec("chmod 666 /srv/chroot/{$id}/dev/*");
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return error('project not found: ' . $project_name);
         }
-        exec("mkdir -p /srv/chroot/{$id}/usr/local/apache2/logs/fastcgi/dynamic");
-	copy("/srv/code/hisoku/config/php-fpm.conf", "/srv/chroot/{$id}/etc/php-fpm.conf");
-        copy("/srv/code/hisoku/scripts/init.sh", "/srv/chroot/{$id}/init.sh");
-        copy("/srv/code/hisoku/scripts/scribelogger", "/srv/chroot/{$id}/usr/local/bin/scribelogger");
-	exec("chown www-user /srv/chroot/{$id}/usr/local/apache2/logs/");
-	exec("chown www-user /srv/chroot/{$id}/var/run");
-	exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/sbin/php-fpm");
-	exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /usr/local/apache2/bin/apachectl graceful");
+
+        $params = array('project=' . escapeshellcmd($project->name));
+        foreach ($project->variables as $variable) {
+            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
+        }
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh {$project->getLoggerCategory()} ");
         break;
 
     case 'shutdown':
@@ -66,12 +87,7 @@ function main()
                 $node->delete();
             }
 
-            if (file_exists("/srv/chroot/{$i}/var/run/php-fpm.pid")) {
-                exec('kill ' . intval(file_get_contents("/srv/chroot/{$i}/var/run/php-fpm.pid")));
-            }
-            if (file_exists("/srv/chroot/{$i}/usr/local/apache2/logs/httpd.pid")) {
-                exec('kill ' . intval(file_get_contents("/srv/chroot/{$i}/usr/local/apache2/logs/httpd.pid")));
-            }
+            exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /shutdown.sh");
             exec("rm -rf /srv/chroot/{$i}");
         }
         break;
