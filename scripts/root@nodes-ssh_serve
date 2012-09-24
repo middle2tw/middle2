@@ -70,7 +70,7 @@ function main()
         foreach ($project->variables as $variable) {
             $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
         }
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh {$project->getLoggerCategory()} ");
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh app-{$project->getLoggerCategory()} ");
         break;
 
     case 'shutdown':
