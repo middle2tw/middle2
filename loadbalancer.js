@@ -61,6 +61,7 @@ main_request.on('request', function(main_request, main_response){
         main_request_is_end = true;
     };
     main_request.headers['X-Forwarded-For'] = main_request.socket.remoteAddress;
+    main_request.headers['X-Forwarded-Port'] = main_request.socket.remotePort;
     console.log(host + ' ' + main_request.url);
 
     main_request.on('data', function(chunk){
