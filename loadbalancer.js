@@ -46,6 +46,12 @@ var main_request = http.createServer();
 main_request.on('request', function(main_request, main_response){
     var host = main_request.headers['host'];
     var port = 80;
+    if (!host) {
+        main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
+        main_response.end();
+        return;
+    }
+
     if (host.match(/:/)) {
         port = parseInt(host.split(':')[1]);
         host = host.split(':')[0];
