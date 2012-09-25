@@ -89,7 +89,6 @@ main_request.on('request', function(main_request, main_response){
         var backend_host = options.host;
         var backend_port = options.port;
         console.log(host + ' ' + backend_host + ' ' + backend_port);
-        delete(main_request.headers['host']);
 
         var backend_request = http.request({
             host: backend_host,
