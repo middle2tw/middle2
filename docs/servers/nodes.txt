@@ -69,6 +69,7 @@ sudo cp /srv/code/hisoku/config/template/php/php-fpm.conf /srv/chroot/template/e
 sudo cp /srv/code/hisoku/config/template/php/node.conf /srv/chroot/template/usr/local/apache2/conf/extra/
 sudo cp --preserve=mode /srv/code/hisoku/config/template/php/*.sh /srv/chroot/template/
 sudo sh -c 'echo -e "\nInclude conf/extra/node.conf" >> /srv/chroot/template/usr/local/apache2/conf/httpd.conf'
+sudo sh -c 'echo -e "\nwww-user:x:10003:99::/srv/deploy:/sbin/nologin" >> /srv/chroot/template/etc/passwd'
 sudo mkdir -p /srv/chroot/template/usr/local/apache2/logs/fastcgi/dynamic
 sudo chown -R deploy:nobody /srv/chroot/template
 sudo chown -R www-user /srv/chroot/template/usr/local/apache2/logs /srv/chroot/template/var/run
