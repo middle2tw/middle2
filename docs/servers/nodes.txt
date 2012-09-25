@@ -49,8 +49,8 @@ wget 'https://github.com/ronnywang/mod_rpaf/tarball/master'
 tar zxvf master
 mv ronnywang-mod_rpaf-* mod_rpaf
 cd mod_rpaf
-make APXS2=/usr/sbin/apxs rpaf-2.0
-sudo cp .libs/mod_rpaf-2.0.so /srv/chroot/template/usr/local/apache2/modules/mod_rpaf.so
+make
+sudo cp .libs/mod_rpaf.so /srv/chroot/template/usr/local/apache2/modules/mod_rpaf.so
 
 # thrift...
 sudo make DESTDIR=/srv/chroot/template install
