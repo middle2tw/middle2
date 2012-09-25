@@ -74,34 +74,16 @@ function main()
         break;
 
     case 'shutdown':
-        list(, $nodes_count) = explode(' ', $command, 2);
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'http://169.254.169.254/latest/meta-data/local-hostname');
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        if (!$hostname = curl_exec($curl)) {
-            trigger_error(curl_error($curl));
-        }
-        curl_close($curl);
+        list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        $ip = AWS::getHostIP();
 
-        if (!$hostname) {
-            die("local-hostname is not found");
+        if ($node = WebNode::find(array($ip, 20000 + $id))) {
+            $node->delete();
         }
 
-        if (!$ip = gethostbyname($hostname)) {
-            die("local-hostname {$hostname} error");
-        }
-
-        for ($i = 1; $i <= $nodes_count; $i ++) {
-            if ($node = WebNode::find(array(ip2long($ip), 20000 + $i))) {
-                $node->delete();
-            }
-
-            exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /shutdown.sh");
-            exec("rm -rf /srv/chroot/{$i}");
-        }
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /shutdown.sh");
+        exec("rm -rf /srv/chroot/{$id}");
         break;
-
     }
     return;
 }
