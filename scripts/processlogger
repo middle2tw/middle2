@@ -37,10 +37,11 @@ client = scribe.Client(iprot=protocol, oprot=protocol)
 transport.open()
 
 while 1:
-    message='[' + formatdate() + '][' + group + ']' + sys.stdin.readline()
+    message=sys.stdin.readline()
     message=message.rstrip('\r\n')
 
     if not message: break
+    message='[' + formatdate() + '][' + group + ']' + message
 
     log_entry=scribe.LogEntry(category=category, message=message)
 
