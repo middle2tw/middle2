@@ -73,6 +73,24 @@ function main()
         exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh app-{$project->getLoggerCategory()} ");
         break;
 
+    case 'run':
+        list(, $project_name, $id, $cmd) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id = intval($id)) {
+            error('invalid id: ' . $id);
+        }
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return error('project not found: ' . $project_name);
+        }
+        $params = array('project=' . escapeshellcmd($project->name));
+        foreach ($project->variables as $variable) {
+            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
+        }
+        $cmd = urldecode($cmd);
+
+        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($cmd) . " &");
+        break;
+
+
     case 'shutdown':
         list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         $ip = AWS::getHostIP();
