@@ -39,6 +39,7 @@ class Project extends Pix_Table
         $this->_relations['custom_domains'] = array('rel' => 'has_many', 'type' => 'CustomDomain', 'foreign_key' => 'project_id');
         $this->_relations['variables'] = array('rel' => 'has_many', 'type' => 'ProjectVariable', 'foreign_key' => 'project_id');
         $this->_relations['webnodes'] = array('rel' => 'has_many', 'type' => 'WebNode', 'foreign_key' => 'project_id');
+        $this->_relations['cronjobs'] = array('rel' => 'has_many', 'type' => 'CronJob', 'foreign_key' => 'project_id');
 
         $this->_hooks['eavs'] = array('get' => 'getEAVs');
 
