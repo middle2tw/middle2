@@ -115,7 +115,7 @@ main_request.on('request', function(main_request, main_response){
 
         backend_request.on('error', function(e){
             // TODO: log error
-            console.log('error');
+            console.log('error: ' + e + '(host: ' + host + ', backend_host: ' + backend_host + ', backend_port: ' + backend_port + ')');
             main_response.end();
         });
 
