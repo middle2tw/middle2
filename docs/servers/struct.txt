@@ -1,0 +1,30 @@
+* perlbal.hisoku.ronny.tw
+  * m1.small x 2
+  * scale by Amazon ELB
+  * internal IP
+  * service: perlbal
+  * Price: 0.092 * 24 * 30 * 2 = 132.48$
+* sysdb.hisoku.ronny.tw
+  * m1.small x 2
+  * internal IP
+  * service: mysql
+  * Price: 0.092 * 24 * 30 * 2 = 132.48$
+* userdb.hisoku.ronny.tw
+  * m1.small x 2
+  * internal IP
+  * service: mysql
+  * Price: 0.092 * 24 * 30 * 2 = 132.48$
+* git.hisoku.ronny.tw
+  * m1.small x 1
+  * public IP
+  * service: ssh
+  * Price: 0.092 * 24 * 30 * 2 = 132.48$
+* sysweb.hisoku.ronny.tw
+  * m1.small x 1
+  * internal IP
+  * service: apache + php (for api.hisoku.ronny.tw, www.hisoku.ronny.tw ...)
+* nodes.hisoku.ronny.tw
+  * m1.small x n
+  * internal IP
+  * service: nodes...
+
