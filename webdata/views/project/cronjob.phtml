@@ -1,0 +1,50 @@
+<?php
+$period_map = array(
+    1 => '10 minutes',
+    2 => 'Hourly',
+    3 => 'Daily',
+);
+
+?>
+<h3>CronJob: </h3>
+<ol>
+    <?php foreach ($this->project->cronjobs as $cronjob) { ?>
+    <li>
+    <form method="post" action="/project/editcronjob/<?= $this->project->name ?>/<?= $cronjob->id ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        <ul>
+            <li>Command: <input type="text" name="job" value="<?= $this->escape($cronjob->job) ?>"></li>
+            <li>Period: 
+            <select name="period">
+                <?php foreach ($period_map as $id => $name) { ?>
+                <option value="<?= $id ?>"<?= ($id == $cronjob->period) ? ' selected="selected"' : '' ?>><?= $this->escape($name) ?></option>
+                <?php } ?>
+            </select>
+            </li>
+            <li>Last run at: <?= date('Y/m/d H:i:s', $cronjob->last_run_at) ?></li>
+            <li>Next run at: <?= date('Y/m/d H:i:s', $cronjob->getNextRunAt()) ?></li>
+            <li>
+            <button href="/project/deletecronjob/<?= $this->project->name ?>/<?= $cronjob->id ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($cronjob->job) ?> cron job">DELETE</button>
+            <button type="submit">EDIT</button>
+            </li>
+        </ul>
+    </form>
+    </li>
+    <?php } ?>
+    <li>
+    <form method="post" action="/project/addcronjob/<?= $this->project->name ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        <ul>
+            <li>Command: <input type="text" name="job"></li>
+            <li>Period: 
+                <select name="period">
+                    <?php foreach ($period_map as $id => $name) { ?>
+                    <option value="<?= $id ?>"><?= $this->escape($name) ?></option>
+                    <?php } ?>
+                </select>
+            </li>
+            <li><button type="submit">ADD</button></li>
+        </ul>
+    </form>
+    </li>
+</ol>

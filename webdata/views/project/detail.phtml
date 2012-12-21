@@ -29,6 +29,8 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
     </li>
 </ul>
 <hr>
+<?= $this->partial('/project/cronjob.phtml', array('project' => $this->project)) ?>
+<hr>
 <h3>Variable: </h3>
 <ul>
     <?php foreach ($this->project->variables as $variable) { ?>

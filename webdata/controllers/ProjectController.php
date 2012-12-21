@@ -177,4 +177,72 @@ class ProjectController extends Pix_Controller
         ));
         return $this->redirect('/project/detail/' . $project->name);
     }
+
+    public function addcronjobAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*addcronjob*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        $project->cronjobs->insert(array(
+            'job' => strval($_POST['job']),
+            'period' => intval($_POST['period']),
+        ));
+
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
+    public function deletecronjobAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*deletecronjob*/, $name, $id) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        if (!$cronjob = $project->cronjobs->search(array('id' => $id))->first()) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        $cronjob->delete();
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
+    public function editcronjobAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*editcronjob*/, $name, $id) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        if (!$cronjob = $project->cronjobs->search(array('id' => $id))->first()) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        $cronjob->update(array(
+            'job' => strval($_POST['job']),
+            'period' => intval($_POST['period']),
+        ));
+        return $this->redirect('/project/detail/' . $project->name);
+    }
 }
