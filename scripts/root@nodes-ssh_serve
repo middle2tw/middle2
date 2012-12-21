@@ -74,20 +74,21 @@ function main()
         break;
 
     case 'run':
-        list(, $project_name, $id, $cmd) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        list(, $project_name, $id, $run_cmd) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
-        $params = array('project=' . escapeshellcmd($project->name));
+        $params = array('project=' . escapeshellarg($project->name));
         foreach ($project->variables as $variable) {
-            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
+            $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->value);
         }
-        $cmd = urldecode($cmd);
+        $run_cmd = urldecode($run_cmd);
 
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($cmd) . " &");
+	$cmd = "chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
+	passthru($cmd . ' | /srv/code/hisoku/scripts/processlogger app-' . escapeshellarg($project->getLoggerCategory()) . ' run > /dev/null 2>&1 & ');
         break;
 
 
