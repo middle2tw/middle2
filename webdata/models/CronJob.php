@@ -2,6 +2,14 @@
 
 class CronJobRow extends Pix_Table_Row
 {
+    public function runJob()
+    {
+        echo $this->id . "\n";
+    //    $this->update(array('last_run_at' => time()));
+
+        $node = WebNode::getUnusedNode($this->project);
+    }
+
     public function getNextRunAt()
     {
         if ($this->start_at > time()) {
@@ -39,6 +47,8 @@ class CronJob extends Pix_Table
         $this->_columns['last_run_at'] = array('type' => 'int');
         $this->_columns['job'] = array('type' => 'text');
 
+        $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
+
         $this->addIndex('project', array('project_id'));
         $this->addIndex('period_lastrunat', array('period', 'last_run_at'));
     }
@@ -46,5 +56,18 @@ class CronJob extends Pix_Table
     public static function getPeriodTime($period_id)
     {
         return self::$_period_map[$period_id];
+    }
+
+    public static function runPendingJobs()
+    {
+        foreach (self::$_period_map as $period_id => $time) {
+            foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (time() - $time)) as $cronjob) {
+                try {
+                    $cronjob->runJob();
+                } catch (Exception $e) {
+                    // TODO: log it ...
+                }
+            }
+        }
     }
 }
