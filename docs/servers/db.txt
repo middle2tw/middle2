@@ -1,0 +1,40 @@
+====init====
+http://dev.mysql.com/doc/refman/5.5/en/binary-installation.html
+1. 設定 proxy
+在 ~/.wgetrc 加上
+http_proxy = http://proxy.hisoku.ronny.tw:80/
+use_proxy = on
+wait = 15
+
+2. 抓下原始檔
+cd /tmp
+wget 'http://www.percona.com/redir/downloads/Percona-Server-5.5/LATEST/binary/linux/x86_64/Percona-Server-5.5.28-rel29.2-360.Linux.x86_64.tar.gz'
+tar zxvf Percona-Server-5.5.28-rel29.2-360.Linux.x86_64.tar.gz
+
+3. 開帳號
+sudo groupadd mysql
+sudo useradd -u 3306 -r -g mysql mysql
+sudo mkdir /srv/db/
+sudo cp -R Percona-Server-5.5.28-rel29.2-360.Linux.x86_64 /srv/db/
+cd /srv/db/
+sudo ln -s Percona-Server-5.5.28-rel29.2-360.Linux.x86_64 mysql
+cd mysql
+sudo chown -R mysql .
+sudo chgrp -R mysql .
+
+...中略... 下次有需要再寫
+
+5. cd /etc/init.d
+6. sudo ln -s /srv/db/mysql/support-files/mysql.server
+7. 修改 mysql.server ，只要把 /usr/local/Percona-Server... 都換成 /srv/db/mysl
+
+
+====load ebs====
+* sudo groupadd mysql
+* sudo useradd -u 3306 -r -g mysql mysql
++ 在網頁上將 ebs volumes 連結到 instance 上，會得到 /dev/sdf 之類的 mount point
+* sudo mkdir /srv/db
++ 在 /etc/fstab 加上
+/dev/sdf    /srv/db     ext4    defaults,noatime        0       0
+* sudo mount /srv/db
+就好了
