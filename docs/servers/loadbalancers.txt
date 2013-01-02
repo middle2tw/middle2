@@ -1,8 +1,9 @@
-yum:
-* libcurl-devel.x86_64
-* perl-WWW-Curl.x86_64
-cpan: 
-* perlbal
-* JSON
-
-
+* 在 /etc/yum.conf 加上
+proxy=http://proxy.hisoku.ronny.tw:80
+* 在 ~/.wgetrc 加上
+http_proxy = http://proxy.hisoku.ronny.tw:80/
+use_proxy = on
+wait = 15
+* wget 'http://nodejs.org/dist/v0.8.16/node-v0.8.16-linux-x64.tar.gz'
+* tar zxvf node-v0.8.16-linux-x64.tar.gz
+* wait deploy...
