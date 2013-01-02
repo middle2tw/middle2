@@ -9,11 +9,11 @@ hisoku.cache = {};
 
 hisoku.getBackendHost = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
-        return callback({success: true, host: 'localhost', port: 9999});
+        return callback({success: true, host: 'main-p.hisoku.ronny.tw', port: 9999});
     }
 
     var selector_request = http.request({
-        host: 'localhost',
+        host: 'main-p.hisoku.ronny.tw',
         port: 9999,
         path: '/api/getnodes?domain=' + encodeURIComponent(host) + '&port=' + parseInt(port)
     }, function(selector_response) {
