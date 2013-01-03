@@ -1,0 +1,10 @@
+init
+====
+1. 開 ebs, Ex: /dev/sdg
+2. sudo mkfs.ext3 /dev/sdg
+3. sudo groupadd -g 917 git
+3. sudo useradd -u 917 -d /srv/git -r -g git git
+4. sudo mkdir /srv/git
+5. sudo chown git:git /srv/git
+6. fstab
+/dev/sdf    /srv/git    ext4    defaults,noatime        0       0
