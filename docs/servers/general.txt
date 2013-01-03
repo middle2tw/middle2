@@ -1,0 +1,8 @@
+code
+====
+sudo groupadd -g 888 code
+sudo useradd -u 888 -d /srv/code -r -g code code
+sudo mkdir -p ~code/.ssh/
+sudo vim ~code/.ssh/authorized_keys
+* 把 dev 上面現在 user 的 ssh key 丟進去
+sudo chown -R code:code ~code/
