@@ -1,8 +1,8 @@
-Run webserver
-
+Build Image
+===========
 # from http://prefetch.net/articles/yumchrootlinux.html
 
-sudo yum install gcc pcre-devel zlib-devel make expat-devel
+sudo yum install gcc-c++ gcc pcre-devel zlib-devel make expat-devel httpd-devel autoconf automake boost-devel openssl-devel python26-devel byacc flex
 
 sudo mkdir -p /srv/chroot/template/var/lib/rpm
 sudo rpm --root /srv/chroot/template --initdb
@@ -53,13 +53,31 @@ make
 sudo cp .libs/mod_rpaf.so /srv/chroot/template/usr/local/apache2/modules/mod_rpaf.so
 
 # thrift...
+cd /var/tmp/
+wget https://dist.apache.org/repos/dist/release/thrift/0.9.0/thrift-0.9.0.tar.gz
+tar zxvf thrift-0.9.0.tar.gz
+cd thrift-0.9.0
+./configure
+sudo make DESTDIR=/srv/chroot/template install
+sudo make install
+
+# thrift/contrib/fb303
+cd contrib/fb303
+./bootstrap.sh
+./configure CPPFLAGS="-DHAVE_INTTYPES_H -DHAVE_NETINET_IN_H"
 sudo make DESTDIR=/srv/chroot/template install
 
 # scribe
+cd /var/tmp
+rm -f master
+wget 'https://github.com/facebook/scribe/tarball/master'
+tar zxvf master
+mv facebook-scribe-* scribe
+cd scribe
+./bootstrap.sh --with-boost-filesystem=boost_filesystem
+./configure --with-boost-filesystem=boost_filesystem CPPFLAGS="-DHAVE_INTTYPES_H -DHAVE_NETINET_IN_H"
 sudo make DESTDIR=/srv/chroot/template install
-
-# thrift/contribute/fb303
-sudo make DESTDIR=/srv/chroot/template install
+sudo make all install
 
 sudo cp /etc/resolv.conf /srv/chroot/template/etc/
 sudo cp /srv/code/hisoku/scripts/scribelogger /srv/chroot/template/usr/local/bin/
@@ -71,6 +89,33 @@ sudo cp --preserve=mode /srv/code/hisoku/config/template/php/*.sh /srv/chroot/te
 sudo sh -c 'echo -e "\nInclude conf/extra/node.conf" >> /srv/chroot/template/usr/local/apache2/conf/httpd.conf'
 sudo sh -c 'echo -e "\nwww-user:x:10003:99::/srv/deploy:/sbin/nologin" >> /srv/chroot/template/etc/passwd'
 sudo mkdir -p /srv/chroot/template/usr/local/apache2/logs/fastcgi/dynamic
-sudo chown -R deploy:nobody /srv/chroot/template
-sudo chown -R www-user /srv/chroot/template/usr/local/apache2/logs /srv/chroot/template/srv
 
+
+New Node Server
+===============
+開 deploy 帳號(不需要能被登入)
+------------------------------
+sudo groupadd -g 10002 deploy
+sudo useradd -u 10002 -r -g deploy -d /srv/deploy deploy 
+sudo mkdir -p ~deploy/
+sudo chown -R deploy:deploy /srv/deploy
+
+在 root 帳號開洞
+----------------
+sudo vim ~root/.ssh/authorized_keys
+* 放入 command="/srv/code/hisoku/scripts/root@nodes-ssh_serve",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {key}
+
+安裝 git
+--------
+sudo yum install git php
+* git 抓原始檔用
+* php 執行 script 用
+
+解開 template
+-------------
+sudo chown -R deploy:nobody /srv/chroot/template
+sudo chown -R 10003 /srv/chroot/template/usr/local/apache2/logs /srv/chroot/template/srv
+
+開新的 node
+===========
+ssh root@{ip} 
