@@ -104,6 +104,9 @@ sudo chown -R deploy:deploy /srv/deploy
 ----------------
 sudo vim ~root/.ssh/authorized_keys
 * 放入 command="/srv/code/hisoku/scripts/root@nodes-ssh_serve",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {key}
+sudo ssh-keygen
+sudo cat ~root/.ssh/id_rsa.pub
+* 將產生的 key 放進 hisoku-repo/scripts/update-keys 的 $deploy_keys 裡面
 
 安裝 git
 --------
