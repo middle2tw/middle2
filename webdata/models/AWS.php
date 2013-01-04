@@ -14,6 +14,11 @@ class AWS
         }
         curl_close($curl);
 
+        // match ip-10-0-0-xx
+        if (preg_match('#^ip-([0-9-]*)$#', $hostname, $matches)) {
+            return ip2long(str_replace('-', '.', $matches[1]));
+        }
+
         if (!$ip = gethostbyname($hostname)) {
             return false;
         }
