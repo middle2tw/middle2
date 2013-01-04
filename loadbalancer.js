@@ -91,9 +91,9 @@ main_request.on('request', function(main_request, main_response){
         console.log(host + ' ' + backend_host + ' ' + backend_port);
 
         var backend_request = http.request({
-            host: backend_host,
+            hostname: backend_host,
             port: backend_port,
-            hostname: host,
+            host: host,
             method: main_request.method,
             path: main_request.url,
             headers: main_request.headers,
