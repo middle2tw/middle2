@@ -2,7 +2,7 @@
 
 class AWS
 {
-    public function getHostIP()
+    public static function getHostIP()
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, 'http://169.254.169.254/latest/meta-data/local-hostname');
