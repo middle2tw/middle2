@@ -103,8 +103,12 @@ function main()
         exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /shutdown.sh");
         exec("rm -rf /srv/chroot/{$id}");
         break;
+
+    default:
+        return error('unknown command: ' . $method);
     }
     return;
+
 }
 
 main();
