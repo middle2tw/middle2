@@ -15,6 +15,7 @@ if (file_exists('/srv/config/config.php')) {
     include(__DIR__ . '/config.php');
 }
 define('GIT_SERVER', 'git.hisoku.ronny.tw');
+define('GIT_PRIVATE_SERVER', 'git-p.hisoku.ronny.tw');
 define('USER_DOMAIN', '.hisokuapp.ronny.tw');
 define('USERDB_DOMAIN', 'userdb.hisoku.ronny.tw');
 
