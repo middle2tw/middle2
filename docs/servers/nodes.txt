@@ -107,6 +107,8 @@ sudo vim ~root/.ssh/authorized_keys
 sudo ssh-keygen
 sudo cat ~root/.ssh/id_rsa.pub
 * 將產生的 key 放進 hisoku-repo/scripts/update-keys 的 $deploy_keys 裡面
+sudo ssh git@git-p.hisoku.ronny.tw
+* 上面是讓 node server 記住 git-p.hisoku.ronny.tw 的 sign
 
 安裝 git
 --------
@@ -121,4 +123,5 @@ sudo chown -R 10003 /srv/chroot/template/usr/local/apache2/logs /srv/chroot/temp
 
 開新的 node
 ===========
-ssh root@{ip} 
+ssh root@{ip} init {id}
+* id 可以是任意數字
