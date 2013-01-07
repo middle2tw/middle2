@@ -18,6 +18,8 @@ define('GIT_SERVER', 'git.hisoku.ronny.tw');
 define('GIT_PRIVATE_SERVER', 'git-p.hisoku.ronny.tw');
 define('USER_DOMAIN', '.hisokuapp.ronny.tw');
 define('USERDB_DOMAIN', 'userdb.hisoku.ronny.tw');
+define('WEB_KEYFILE', '/srv/config/web-key');
+define('WEB_PUBLIC_KEYFILE', '/srv/config/web-key.pub');
 
 $link = new mysqli;
 $link->connect(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASS'));
