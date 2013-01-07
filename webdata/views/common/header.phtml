@@ -15,6 +15,9 @@
             <?php if ($guest = Hisoku::getLoginUser()) { ?>
             <li><a href="/"><?= $this->escape($guest->name) ?></a></li>
             <li><a href="/index/logout">Logout</a></li>
+            <?php if ($guest->isAdmin()) { ?>
+            <li><a href="/admin">Admin</a></li>
+            <?php } ?>
             <?php } else { ?>
             <li>
             <form method="post" action="/index/login" class="navbar-form">
