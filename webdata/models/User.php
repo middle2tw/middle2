@@ -102,6 +102,11 @@ class UserRow extends Pix_Table_Row
             throw new Excpetion('unknown password_type');
         }
     }
+
+    public function isAdmin()
+    {
+        return Admin::find($this->id) ? true : false;
+    }
 }
 
 class User extends Pix_Table
