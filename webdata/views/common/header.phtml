@@ -1,3 +1,11 @@
+<?php
+$body_append = '';
+if ($this->body_tags) {
+    foreach ($this->body_tags as $k => $v) {
+        $body_append .= ' ' . $this->escape($k) . '="' . $this->escape($v) . '"';
+    }
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,7 +15,7 @@
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/js/bootstrap.min.js"></script>
 </head>
-<body>
+<body<?= $body_append ?>>
 <div class="navbar">
     <div class="navbar-inner">
         <a class="brand" href="/">Hisoku</a>
