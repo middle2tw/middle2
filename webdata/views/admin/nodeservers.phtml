@@ -1,3 +1,65 @@
+<?php
+$grouped_nodes = WebNode::getGroupedNodes();
+$this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
+$node_status = array(
+    0 => 'unused',
+    1 => 'WebNode processing',
+    2 => 'CronNode processing',
+    10 => 'WebNode',
+    11 => 'CronNode',
+);
+?>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <?= $this->partial('/admin/header.phtml', $this) ?>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2 bs-docs-sidebar">
+            <!--Sidebar content-->
+            <ul class="nav nav-list affix bs-docs-sidenav">
+                <?php foreach ($grouped_nodes as $ip => $nodes) { ?>
+                <li>
+                <a href="#node-<?= $ip ?>">
+                    <i class="icon-chevron-right"></i>
+                    <?= long2ip($ip) ?>(<?= count($nodes) ?>)
+                </a>
+                </li>
+                <?php } ?>
+            </ul>
+        </div>
+        <div class="span10">
+            <!--Body content-->
+            <?php foreach ($grouped_nodes as $ip => $nodes) { ?>
+            <div id="node-<?= $ip ?>">
+                <h3><?= long2ip($ip) ?>(<?= count($nodes) ?>)</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>port</td>
+                            <td>project</td>
+                            <td>status</td>
+                            <td>start at</td>
+                            <td>access at</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($nodes as $node) { ?>
+                    <tr>
+                        <td><?= $node->port ?></td>
+                        <td>
+                            <?php if ($node->project) { ?>
+                            <a href="/admin/project/<?= $node->project_id ?>" title="<?= $this->escape($node->project->getEAV('note')) ?>"><?= $node->project->name ?></a>
+                            <?php } ?>
+                        </td>
+                        <td><?= isset($node_status[$node->status]) ? $node_status[$node->status] : 'Unknown' ?></td>
+                        <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?></td>
+                        <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->access_at)) ?></td>
+                    </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
 <?= $this->partial('/common/footer.phtml', $this) ?>
