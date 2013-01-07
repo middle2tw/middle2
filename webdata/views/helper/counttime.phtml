@@ -1,0 +1,16 @@
+<?php
+$delta = time() - $this->time;
+?>
+<span data-timestamp="<?= $this->time ?>" class="counttime" title="<?= date('Y/m/d H:i:s', $this->time) ?>">
+    <?php if ($delta < 60) { ?>
+    <?= 10 * ceil($delta / 10) ?>s
+    <?php } elseif ($delta < 60 * 60) { ?>
+    <?= floor($delta / 60) ?>m
+    <?php } elseif ($delta < 60 * 60 * 24) { ?>
+    <?= floor($delta / 60 / 60) ?>h
+    <?php } elseif ($delta < 60 * 60 * 24 * 365) { ?>
+    <?= floor($delta / 60 / 60 / 24) ?>d
+    <?php } else { ?>
+    over 1 year
+    <?php } ?>
+</span>
