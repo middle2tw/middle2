@@ -16,7 +16,7 @@ class UserKeyRow extends Pix_Table_Row
     {
         $ip = GIT_SERVER;
         $session = ssh2_connect($ip, 22);
-        ssh2_auth_pubkey_file($session, 'git', '/srv/config/web-key.pub', '/srv/config/web-key');
+        ssh2_auth_pubkey_file($session, 'git', WEB_KEYFILE, WEB_PUBLIC_KEYFILE);
         ssh2_exec($session, "update-keys");
     }
 
