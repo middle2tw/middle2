@@ -25,6 +25,8 @@ class WebNode extends Pix_Table
         $this->_columns['start_at'] = array('type' => 'int');
         $this->_columns['access_at'] = array('type' => 'int');
 
+        $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
+
         $this->addIndex('projectid_status_commit', array(
             'project_id',
             'status',
