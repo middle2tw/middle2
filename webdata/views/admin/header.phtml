@@ -1,0 +1,16 @@
+<?php
+$navs = array(
+    'nodeservers' => 'Node Servers',
+    'projects' => 'Projects',
+);
+?>
+<div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+        <ul class="nav">
+            <?php foreach ($navs as $action => $name) { ?>
+            <li<?= $action == $this->action ? ' class="active"' : '' ?>><a href="/admin/<?= $action ?>"><?= $this->escape($name) ?></a></li>
+            <?php } ?>
+        </ul>
+    </div>
+</div>
+

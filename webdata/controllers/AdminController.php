@@ -12,9 +12,15 @@ class AdminController extends Pix_Controller
             return $this->rediect('/');
         }
         $this->view->user = $this->user;
+        $this->view->action = $this->getActionName();
     }
 
     public function indexAction()
+    {
+        return $this->redirect('/admin/nodeservers');
+    }
+
+    public function nodeserversAction()
     {
     }
 }
