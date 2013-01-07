@@ -60,4 +60,15 @@ class WebNode extends Pix_Table
 
         return $random_node;
     }
+
+    public static function getGroupedNodes()
+    {
+        $return = array();
+
+        foreach (WebNode::search(1)->order(array('ip', 'port')) as $node) {
+            $return[$node->ip][] = $node;
+        }
+
+        return $return;
+    }
 }
