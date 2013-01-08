@@ -1,10 +1,5 @@
 ====init====
 http://dev.mysql.com/doc/refman/5.5/en/binary-installation.html
-1. 設定 proxy
-在 ~/.wgetrc 加上
-http_proxy = http://proxy.hisoku.ronny.tw:80/
-use_proxy = on
-wait = 15
 
 2. 抓下原始檔
 cd /tmp

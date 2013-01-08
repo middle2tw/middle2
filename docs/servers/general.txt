@@ -11,3 +11,10 @@ yum
 ===
 * 在 /etc/yum.conf 加上
 proxy=http://proxy.hisoku.ronny.tw:80
+
+wget
+====
+* 在 ~/.wgetrc 加上
+http_proxy = http://proxy.hisoku.ronny.tw:80/
+use_proxy = on
+wait = 15
