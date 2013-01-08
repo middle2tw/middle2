@@ -26,6 +26,7 @@ class Project extends Pix_Table
         $this->_name = 'project';
         $this->_primary = 'id';
         $this->_rowClass = 'ProjectRow';
+        $this->enableTableCache();
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['name'] = array('type' => 'varchar', 'size' => 64);
