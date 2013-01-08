@@ -4,20 +4,12 @@ class UserKeyRow extends Pix_Table_Row
 {
     public function postSave()
     {
-        $this->_updateGitKey();
+        UserKey::updateKey();
     }
 
     public function postDelete()
     {
-        $this->_updateGitKey();
-    }
-
-    protected function _updateGitKey()
-    {
-        $ip = GIT_SERVER;
-        $session = ssh2_connect($ip, 22);
-        ssh2_auth_pubkey_file($session, 'git', WEB_KEYFILE, WEB_PUBLIC_KEYFILE);
-        ssh2_exec($session, "update-keys");
+        UserKey::updateKey();
     }
 
     public function getKeyUser()
@@ -45,5 +37,13 @@ class UserKey extends Pix_Table
         $this->_indexes['key_fingerprint'] = array('type' => 'unique', 'columns' => array('key_fingerprint'));
 
         $this->_relations['user'] = array('rel' => 'has_one', 'type' => 'User', 'foreign_key' => 'user_id');
+    }
+
+    public static function updateKey()
+    {
+        $ip = GIT_SERVER;
+        $session = ssh2_connect($ip, 22);
+        ssh2_auth_pubkey_file($session, 'git', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        ssh2_exec($session, "update-keys");
     }
 }
