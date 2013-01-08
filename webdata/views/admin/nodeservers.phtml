@@ -39,6 +39,7 @@ $node_status = array(
                             <td>status</td>
                             <td>start at</td>
                             <td>access at</td>
+                            <td>action</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,6 +54,9 @@ $node_status = array(
                         <td><?= isset($node_status[$node->status]) ? $node_status[$node->status] : 'Unknown' ?></td>
                         <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?></td>
                         <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->access_at)) ?></td>
+                        <td>
+                            <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverdeleteport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Delete</button>
+                        </td>
                     </tr>
                     <?php } ?>
                     </tbody>
@@ -64,7 +68,14 @@ $node_status = array(
                     <button type="submit">New port</button>
                 </form>
             </div>
+            <hr>
             <?php } ?>
+            <form method="post" action="/admin/nodeserveraddport/" class="form-nodeserveraddport-withhost">
+                <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+                IP: <input type="text" name="ip"><br>
+                Port: 20000 + <input type="text" name="port">
+                <button type="submit">New port</button>
+            </form>
         </div>
     </div>
 </div>
@@ -72,6 +83,10 @@ $node_status = array(
 $('.form-nodeserveraddport').submit(function(e){
     var form = $(this);
     form.attr('action', form.attr('action') + form.find('input[name="port"]').val());
+});
+$('.form-nodeserveraddport-withhost').submit(function(e){
+    var form = $(this);
+    form.attr('action', form.attr('action') + form.find('input[name="ip"]').val() + '/' + form.find('input[name="port"]').val());
 });
 //--></script>
 <?= $this->partial('/common/footer.phtml', $this) ?>

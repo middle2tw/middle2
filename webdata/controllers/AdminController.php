@@ -52,4 +52,29 @@ class AdminController extends Pix_Controller
 
         return $this->alert('done', '/admin');
     }
+
+    public function nodeserverdeleteportAction()
+    {
+        list(, /*admin*/, /*nodeserverdeleteport*/, $ip, $port) = explode('/', $this->getURI());
+
+        if ($_POST['sToken'] != Hisoku::getStoken()) {
+            return $this->alert('wrong stoken', '/admin');
+        }
+
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $this->alert('wrong ip', '/admin');
+        }
+
+        $port = intval($port);
+        if ($port <= 0 or $port > 100) {
+            return $this->alert('port must in 1 ~ 100', '/admin');
+        }
+
+        if (!$node = WebNode::find(array(ip2long($ip), 20000 + $port))) {
+            return $this->alert('port ' . (20000 + $port) . ' is not found', '/admin');
+        }
+        $node->delete();
+
+        return $this->alert('done', '/admin');
+    }
 }
