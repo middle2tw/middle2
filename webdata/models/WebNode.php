@@ -43,6 +43,7 @@ class WebNode extends Pix_Table
         $this->_name = 'webnode';
         $this->_primary = array('ip', 'port');
         $this->_rowClass = 'WebNodeRow';
+        $this->enableTableCache();
 
         $this->_columns['ip'] = array('type' => 'int', 'unsigned' => true);
         $this->_columns['port'] = array('type' => 'int');

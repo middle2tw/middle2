@@ -5,6 +5,7 @@ class CustomDomain extends Pix_Table
     public function init()
     {
         $this->_name = 'custom_domain';
+        $this->enableTableCache();
 
         $this->_primary = array('domain');
 
