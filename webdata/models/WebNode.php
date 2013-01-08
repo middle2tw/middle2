@@ -1,5 +1,35 @@
 <?php
 
+class WebNodeRow extends Pix_Table_Row
+{
+    protected function _sshDeletePort()
+    {
+        $session = ssh2_connect(long2ip($this->ip), 22);
+        if (false === $session) {
+            return false;
+        }
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        if (false === $session) {
+            return false;
+        }
+        $stream = ssh2_exec($session, "shutdown $port");
+        stream_set_blocking($stream, true);
+        $ret = stream_get_contents($stream);
+        if (!$ret = json_decode($ret)) {
+            return false;
+        }
+        if ($ret->error) {
+            return false;
+        }
+        return true;
+    }
+
+    public function postDelete()
+    {
+        $this->_sshDeletePort();
+    }
+}
+
 class WebNode extends Pix_Table
 {
     const STATUS_UNUSED = 0;
@@ -12,6 +42,7 @@ class WebNode extends Pix_Table
     {
         $this->_name = 'webnode';
         $this->_primary = array('ip', 'port');
+        $this->_rowClass = 'WebNodeRow';
 
         $this->_columns['ip'] = array('type' => 'int', 'unsigned' => true);
         $this->_columns['port'] = array('type' => 'int');
