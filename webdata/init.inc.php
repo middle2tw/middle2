@@ -9,10 +9,10 @@ set_include_path(__DIR__ . '/stdlibs/pixframework/'
 
 Pix_Loader::registerAutoLoad();
 
-if (file_exists('/srv/config/config.php')) {
-    include('/srv/config/config.php');
-} elseif (file_exists(__DIR__ . '/config.php')) {
+if (file_exists(__DIR__ . '/config.php')) {
     include(__DIR__ . '/config.php');
+} elseif (file_exists('/srv/config/config.php')) {
+    include('/srv/config/config.php');
 }
 define('GIT_SERVER', 'git.hisoku.ronny.tw');
 define('GIT_PRIVATE_SERVER', 'git-p.hisoku.ronny.tw');
