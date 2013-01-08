@@ -27,8 +27,12 @@ Pix_Cache::addServer('Pix_Cache_Adapter_Memcache', array(
     ),
 ));
 
-$link = new mysqli;
-$link->connect(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASS'));
-$link->select_db(getenv('MYSQL_DATABASE'));
-Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_Mysqli($link));
+$db = new StdClass;
+$db->host = getenv('MYSQL_HOST');
+$db->username = getenv('MYSQL_USER');
+$db->password = getenv('MYSQL_PASS');
+$db->dbname = getenv('MYSQL_DATABASE');
+$config = new StdClass;
+$config->master = $config->slave = $db;
+Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_MysqlConf(array($config)));
 Pix_Table::setCache(new Pix_Cache);
