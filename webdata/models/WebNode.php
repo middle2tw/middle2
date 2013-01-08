@@ -73,4 +73,11 @@ class WebNode extends Pix_Table
 
         return $return;
     }
+
+    public static function initNode($ip, $port)
+    {
+        $session = ssh2_connect($ip, 22);
+        ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        $stream = ssh2_exec($session, "init $port");
+    }
 }
