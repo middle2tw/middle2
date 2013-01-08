@@ -112,9 +112,22 @@ sudo ssh git@git-p.hisoku.ronny.tw
 
 安裝 git
 --------
-sudo yum install git php
+sudo yum install git php php-mysql
 * git 抓原始檔用
 * php 執行 script 用
+
+安裝 s3cmd
+----------
+wget 'http://downloads.sourceforge.net/project/s3tools/s3cmd/1.1.0-beta3/s3cmd-1.1.0-beta3.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fs3tools%2Ffiles%2F&ts=1357620359&use_mirror=nchc'
+unzip s3cmd-1.1.0-beta3.zip
+./s3cmd-1.1.0-beta3/s3cmd --configure
+* 輸入 access key / secret / proxy
+
+抓下 images
+-----------
+./s3cmd-1.1.0-beta3/s3cmd get s3://hisoku/images/php53.tgz
+sudo cp php53.tgz /srv/chroot
+sudo tar zxvf php53.tgz
 
 解開 template
 -------------
