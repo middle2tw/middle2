@@ -1,0 +1,6 @@
+安裝 memcached
+==============
+sudo yum install memcacehd
+sudo vim /etc/sysconfig/memcached
+* 修改 CACHESIZE
+sudo /etc/init.d/memcached start
