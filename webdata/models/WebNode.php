@@ -77,7 +77,26 @@ class WebNode extends Pix_Table
     public static function initNode($ip, $port)
     {
         $session = ssh2_connect($ip, 22);
-        ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        if (false === $session) {
+            throw new Exception('connect failed');
+        }
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        if (false === $session) {
+            throw new Exception('ssh key is wrong');
+        }
         $stream = ssh2_exec($session, "init $port");
+        stream_set_blocking($stream, true);
+        $ret = stream_get_contents($stream);
+        if (!$ret = json_decode($ret)) {
+            throw new Exception('result is not json');
+        }
+        if ($ret->error) {
+            throw new Exception('init failed, message: ' . $ret->message);
+        }
+        WebNode::insert(array(
+            'ip' => ip2long($ip),
+            'port' => $port + 20000,
+            'status' => WebNode::STATUS_UNUSED,
+        )); 
     }
 }
