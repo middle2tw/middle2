@@ -56,6 +56,7 @@ $node_status = array(
                         <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->getAccessAt())) ?></td>
                         <td>
                             <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverdeleteport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Delete</button>
+                            <button class="btn post-link confirm" data-confirm="確定要放出 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverreleaseport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Release</button>
                         </td>
                     </tr>
                     <?php } ?>
