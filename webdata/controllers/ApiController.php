@@ -31,6 +31,10 @@ class ApiController extends Pix_Controller
             ));
         }
 
+        $c = new Pix_Cache;
+        $c->inc('Project:access_count:' . $project->id);
+        $c->set('Project:access_at:' . $project->id, time());
+
         // find current
         $nodes = WebNode::search(array(
             'project_id' => $project->id,
@@ -46,8 +50,9 @@ class ApiController extends Pix_Controller
             $ret->nodes = array();
             
             foreach ($nodes as $node) {
-                // TODO: move to background.. update access time
-                $node->update(array('access_at' => time()));
+                $c->inc("WebNode:access_count:{$node->ip}:{$node->port}");
+                $c->set("WebNode:access_at:{$node->ip}:{$node->port}", time());
+
                 $ret->nodes[] = array(long2ip($node->ip), $node->port);
             }
             return $this->json($ret);
