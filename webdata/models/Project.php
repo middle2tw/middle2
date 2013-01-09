@@ -32,19 +32,26 @@ class ProjectRow extends Pix_Table_Row
             'commit' => $this->commit,
         ));
 
-        // TODO: find STATUS_WEBPROCESSING
-
         if (count($nodes)) {
             return $nodes;
         }
 
-        // TODO: check deploying
+        $c = new Pix_Cache;
+        // 如果處理中就等 0.1 秒後再說
+        if ($c->get("Project:processing:{$this->id}")) {
+            // sleep 0.1s
+            usleep(100000);
+            return $this->getWebNodes();
+        }
+
+        $c->set("Project:processing:{$this->id}", time());
 
         $choosed_nodes = array();
         while (true) {
             $free_nodes_count = count(WebNode::search(array('project_id' => 0)));
             if (!$free_nodes_count) {
                 // TODO; log it
+                $c->delete("Project:processing:{$this->id}");
                 throw new Exception('No free nodes');
             }
 
@@ -62,12 +69,16 @@ class ProjectRow extends Pix_Table_Row
             $ip = long2ip($random_node->ip);
 
             $session = ssh2_connect($ip, 22);
-            ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
-            ssh2_exec($session, "clone {$this->name} {$node_id}");
+            $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+            $stream = ssh2_exec($session, "clone {$this->name} {$node_id}");
+            stream_set_blocking($stream, true);
+            $ret = stream_get_contents($stream);
 
             $session = ssh2_connect($ip, 22);
             ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
-            ssh2_exec($session, "restart-web {$this->name} {$node_id}");
+            $stream = ssh2_exec($session, "restart-web {$this->name} {$node_id}");
+            stream_set_blocking($stream, true);
+            $ret = stream_get_contents($stream);
 
             $random_node->update(array(
                 'status' => WebNode::STATUS_WEBNODE,
@@ -79,7 +90,7 @@ class ProjectRow extends Pix_Table_Row
                 break;
             }
         }
-
+        $c->delete("Project:processing:{$this->id}");
         return $choosed_nodes;
     }
 }
