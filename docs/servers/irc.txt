@@ -1,0 +1,2 @@
+#
+env IRC_HOST=irc.freenode.org IRC_USER=hisoku_bot IRC_CHANNELS="#hisoku_log {channel key}" PORT=30001 node web.js
