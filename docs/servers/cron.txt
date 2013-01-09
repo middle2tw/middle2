@@ -1,0 +1,2 @@
+在 /etc/crontab 增加
+* * * * * /srv/code/hisoku/cron/cron.php 1min
