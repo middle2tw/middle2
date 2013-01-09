@@ -18,6 +18,11 @@ class ProjectRow extends Pix_Table_Row
         return EAV::search(array('table' => 'Project', 'id' => $this->id));
     }
 
+    public function preSave()
+    {
+        $this->commit = substr($this->commit, 0, 32);
+    }
+
     /**
      * getWebNodes 取得現在 Project 有哪些 Web node, 如果沒有會自動產生
      *
