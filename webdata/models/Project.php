@@ -17,6 +17,71 @@ class ProjectRow extends Pix_Table_Row
     {
         return EAV::search(array('table' => 'Project', 'id' => $this->id));
     }
+
+    /**
+     * getWebNodes 取得現在 Project 有哪些 Web node, 如果沒有會自動產生
+     *
+     * @return array WebNode
+     */
+    public function getWebNodes()
+    {
+        // find current
+        $nodes = WebNode::search(array(
+            'project_id' => $this->id,
+            'status' => WebNode::STATUS_WEBNODE,
+            'commit' => $this->commit,
+        ));
+
+        // TODO: find STATUS_WEBPROCESSING
+
+        if (count($nodes)) {
+            return $nodes;
+        }
+
+        // TODO: check deploying
+
+        $choosed_nodes = array();
+        while (true) {
+            $free_nodes_count = count(WebNode::search(array('project_id' => 0)));
+            if (!$free_nodes_count) {
+                // TODO; log it
+                throw new Exception('No free nodes');
+            }
+
+            if (!$random_node = WebNode::search(array('project_id' => 0))->offset(rand(0, $free_nodes_count - 1))->first()) {
+                continue;
+            }
+
+            $random_node->update(array(
+                'project_id' => $this->id,
+                'commit' => $this->commit,
+                'status' => WebNode::STATUS_WEBPROCESSING,
+            ));
+
+            $node_id = $random_node->port - 20000;
+            $ip = long2ip($random_node->ip);
+
+            $session = ssh2_connect($ip, 22);
+            ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+            ssh2_exec($session, "clone {$this->name} {$node_id}");
+
+            $session = ssh2_connect($ip, 22);
+            ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+            ssh2_exec($session, "restart-web {$this->name} {$node_id}");
+
+            $random_node->update(array(
+                'status' => WebNode::STATUS_WEBNODE,
+            ));
+    
+            $choosed_nodes[] = $random_node;
+
+            if (count($choosed_nodes) >= 1) {
+                break;
+            }
+        }
+
+        return $choosed_nodes;
+    }
 }
 
 class Project extends Pix_Table
