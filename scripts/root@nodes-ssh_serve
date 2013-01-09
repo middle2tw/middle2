@@ -92,12 +92,6 @@ function main()
 
     case 'shutdown':
         list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        $ip = AWS::getHostIP();
-
-        if ($node = WebNode::find(array($ip, 20000 + $id))) {
-            $node->delete();
-        }
-
         exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /shutdown.sh");
         exec("rm -rf /srv/chroot/{$id}");
         break;
