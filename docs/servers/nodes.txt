@@ -12,7 +12,7 @@ sudo yum --installroot=/srv/chroot/template install -y basesystem
 cd /srv/chroot/template
 sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
 
-yumdownloader --destdir=/var/tmp glibc bash ncurses-libs pcre expat nss-softokn-freebl zlib libgcc python26 python26-libs libxml2-devel php php-cli libedit gmp bzip2-libs libxml2 krb5-libs libcom_err openssl keyutils-libs libselinux php-mysql mysql55-libs libstdc++ php-pdo php-curl php-pecl-memcached php-pecl-memcache php-pear libmemcached php-common libcurl libidn openldap info nss nss-util nspr libssh2 cyrus-sasl-lib php-mbstring php-pecl-imagick ImageMagick lcms-libs libtiff freetype libjpeg fontconfig libXext libXt libgomp libtool-ltdl libSM libICE libX11 libuuid libxcb libXau php-fpm coreutils grep tzdata sed gawk
+yumdownloader --destdir=/var/tmp glibc bash ncurses-base ncurses-libs pcre expat nss-softokn-freebl zlib libgcc python26 python26-libs libxml2-devel php php-cli libedit gmp bzip2-libs libxml2 krb5-libs libcom_err openssl keyutils-libs libselinux php-mysql mysql55-libs libstdc++ php-pdo php-curl php-pecl-memcached php-pecl-memcache php-pear libmemcached php-common libcurl libidn openldap info nss nss-util nspr libssh2 cyrus-sasl-lib php-mbstring php-pecl-imagick ImageMagick lcms-libs libtiff freetype libjpeg fontconfig libXext libXt libgomp libtool-ltdl libSM libICE libX11 libuuid libxcb libXau php-fpm coreutils grep tzdata sed gawk
 sudo rpm --root /srv/chroot/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm
 sudo rm /srv/chroot/template/etc/php.d/pdo_sqlite.ini /srv/chroot/template/etc/php.d/sqlite3.ini
 cd /srv/chroot/template/usr/bin
