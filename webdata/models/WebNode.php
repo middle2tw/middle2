@@ -142,4 +142,16 @@ class WebNode extends Pix_Table
             'status' => WebNode::STATUS_UNUSED,
         )); 
     }
+
+    /**
+     * updateNodeInfo 把所有的 WebNode 檢查一次，把 cache 的時間和 counter 更新到 db，清除異常的 node 等
+     *
+     * @return void
+     */
+    public static function updateNodeInfo()
+    {
+        foreach (WebNode::search(1) as $node) {
+            $node->update(array('access_at' => $node->getAccessAt()));
+        }
+    }
 }
