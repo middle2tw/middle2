@@ -112,7 +112,7 @@ sudo ssh git@git-p.hisoku.ronny.tw
 
 安裝 git
 --------
-sudo yum install git php php-mysql
+sudo yum install git php php-mysql php-pecl-memcached
 * git 抓原始檔用
 * php 執行 script 用
 
