@@ -53,14 +53,14 @@ class ProjectRow extends Pix_Table_Row
 
         $choosed_nodes = array();
         while (true) {
-            $free_nodes_count = count(WebNode::search(array('project_id' => 0)));
+            $free_nodes_count = count(WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)));
             if (!$free_nodes_count) {
                 // TODO; log it
                 $c->delete("Project:processing:{$this->id}");
                 throw new Exception('No free nodes');
             }
 
-            if (!$random_node = WebNode::search(array('project_id' => 0))->offset(rand(0, $free_nodes_count - 1))->first()) {
+            if (!$random_node = WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED))->offset(rand(0, $free_nodes_count - 1))->first()) {
                 continue;
             }
 
