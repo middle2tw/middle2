@@ -126,7 +126,10 @@ unzip s3cmd-1.1.0-beta3.zip
 抓下 images
 -----------
 ./s3cmd-1.1.0-beta3/s3cmd get s3://hisoku/images/php53.tgz
+sudo mkdir /srv/chroot
+sudo chown -R deploy:deploy /srv/chroot
 sudo cp php53.tgz /srv/chroot
+cd /srv/chroot
 sudo tar zxvf php53.tgz
 
 解開 template
