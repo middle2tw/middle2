@@ -12,7 +12,7 @@ class WebNodeRow extends Pix_Table_Row
         if (false === $session) {
             return false;
         }
-        $stream = ssh2_exec($session, "shutdown $port");
+        $stream = ssh2_exec($session, "shutdown " . ($this->port - 20000));
         stream_set_blocking($stream, true);
         $ret = stream_get_contents($stream);
         if (!$ret = json_decode($ret)) {
