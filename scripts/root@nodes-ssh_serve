@@ -83,10 +83,10 @@ function main()
         foreach ($project->variables as $variable) {
             $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->value);
         }
-        $run_cmd = urldecode($run_cmd);
+        $run_cmd = 'cd /srv/web; ' . urldecode($run_cmd);
 
 	$cmd = "chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
-	passthru($cmd . ' | /srv/code/hisoku/scripts/processlogger app-' . escapeshellarg($project->getLoggerCategory()) . ' run > /dev/null 2>&1 & ');
+        passthru($cmd);
         break;
 
 
