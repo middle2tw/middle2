@@ -28,6 +28,17 @@ class WebNodeRow extends Pix_Table_Row
     {
         $this->_sshDeletePort();
     }
+
+    /**
+     * getAccessAt 取得 access at ，如果 cache 有就取比較新的時間
+     *
+     * @return int timestamp
+     */
+    public function getAccessAt()
+    {
+        $c = new Pix_Cache;
+        return max($this->access_at, intval($c->get("WebNode:access_at:{$this->ip}:{$this->port}")));
+    }
 }
 
 class WebNode extends Pix_Table
