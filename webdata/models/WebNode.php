@@ -151,7 +151,15 @@ class WebNode extends Pix_Table
     public static function updateNodeInfo()
     {
         foreach (WebNode::search(1) as $node) {
+            // 更新 access_at
             $node->update(array('access_at' => $node->getAccessAt()));
+
+            // 放出 commit 版本不正確的 commit
+            if ($project = $node->project) {
+                if ($node->status == WebNode::STATUS_WEBNODE and $project->commit != $node->commit) {
+                    $node->update(array('status' => WebNode::STATUS_UNUSED, 'commit' => 0, 'project_id' => 0));
+                }
+            }
         }
     }
 }
