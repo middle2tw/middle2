@@ -20,6 +20,11 @@ function main()
     switch ($method) {
     case 'init':
         list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id) {
+            echo json_encode(array('error' => true, 'message' => 'id is not found'));
+            break;
+        }
+
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
