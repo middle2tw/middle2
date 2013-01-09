@@ -1,0 +1,6 @@
+80 - http
+3128 - proxy
+3306 - memcache
+11211 - memcache
+20000-30000 - node server port
+30001 - hisoku irc bot
