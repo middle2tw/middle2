@@ -59,13 +59,6 @@ class ApiController extends Pix_Controller
         }
 
         // TODO: move to background.. release unused nodes
-        WebNode::search(array(
-            'project_id' => $project_id,
-            'status' => WebNode::STATUS_WEBNODE,
-        ))->update(array(
-            'project_id' => 0,
-            'status' => WebNode::STATUS_UNUSED,
-        ));
         $time_5min = time() - 300;
         WebNode::search("`access_at` AND `access_at` < {$time_5min}")->update(array('access_at' => 0, 'project_id' => 0));
 
