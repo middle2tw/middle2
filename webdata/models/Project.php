@@ -67,6 +67,7 @@ class ProjectRow extends Pix_Table_Row
             $random_node->update(array(
                 'project_id' => $this->id,
                 'commit' => $this->commit,
+                'start_at' => time(),
                 'status' => WebNode::STATUS_WEBPROCESSING,
             ));
 
