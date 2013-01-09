@@ -33,9 +33,9 @@ function main()
         exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
         exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
         exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
-        exec("mknod /srv/chtoor/{$id}/dev/stdin c 5 0");
-        exec("mknod /srv/chtoor/{$id}/dev/stdout c 5 1");
-        exec("mknod /srv/chtoor/{$id}/dev/stderr c 5 2");
+        exec("mknod /srv/chroot/{$id}/dev/stdin c 5 0");
+        exec("mknod /srv/chroot/{$id}/dev/stdout c 5 1");
+        exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
         exec("chown 10003:99 /srv/chroot/{$id}/srv");
         exec("chown 10003:99 /srv/chroot/{$id}/var/run");
