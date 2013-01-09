@@ -1,13 +1,7 @@
 <?php
 $grouped_nodes = WebNode::getGroupedNodes();
 $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
-$node_status = array(
-    0 => 'unused',
-    1 => 'WebNode processing',
-    2 => 'CronNode processing',
-    10 => 'WebNode',
-    11 => 'CronNode',
-);
+$node_status = WebNode::getTable()->_columns['status']['note'];
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <?= $this->partial('/admin/header.phtml', $this) ?>

@@ -48,6 +48,7 @@ class WebNode extends Pix_Table
     const STATUS_CRONPROCESSING = 2;
     const STATUS_WEBNODE = 10;
     const STATUS_CRONNODE = 11;
+    const STATUS_STOP = 100;
 
     public function init()
     {
@@ -63,7 +64,14 @@ class WebNode extends Pix_Table
         // status: 0-unused,
         //         1-webprocessing, 2-cronprocessing
         //         10-webnode, 11-cronnode
-        $this->_columns['status'] = array('type' => 'tinyint');
+        $this->_columns['status'] = array('type' => 'tinyint', 'note' => array(
+            0 => 'unused',
+            1 => 'WebNode processing',
+            2 => 'CronNode processing',
+            10 => 'WebNode',
+            11 => 'CronNode',
+            100 => 'Stop',
+        ));
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int');
         $this->_columns['access_at'] = array('type' => 'int');
