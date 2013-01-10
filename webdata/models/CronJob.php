@@ -70,12 +70,23 @@ class CronJob extends Pix_Table
     {
         foreach (self::$_period_map as $period_id => $time) {
             foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (time() - $time)) as $cronjob) {
+                $pid = pcntl_fork();
+
+                if ($pid) {
+                    continue;
+                }
+
+                error_log('child run : ' . $cronjob->job);
                 try {
                     $cronjob->runJob();
                 } catch (Exception $e) {
                     // TODO: log it ...
                 }
+                error_log('child done : ' . $cronjob->job);
+                exit;
             }
         }
+        $status = 0;
+        pcntl_wait($status);
     }
 }
