@@ -37,8 +37,10 @@ function main()
         exec("mknod /srv/chroot/{$id}/dev/stdout c 5 1");
         exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
-        exec("chown 10003:99 /srv/chroot/{$id}/srv");
-        exec("chown 10003:99 /srv/chroot/{$id}/var/run");
+        $uid = 20000 + $id;
+        exec("chown {$uid}:99 /srv/chroot/{$id}/srv");
+        exec("chown {$uid}:99 /srv/chroot/{$id}/var/run");
+        exec("sed -i 's/^www-user:x:10003$/www-user:x:{$uid}/' /srv/chroot/{$id}/etc/passwd");
 
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
@@ -71,7 +73,8 @@ function main()
         foreach ($project->variables as $variable) {
             $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
         }
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh app-{$project->getLoggerCategory()} ");
+        $uid = 20000 + $id;
+        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh app-{$project->getLoggerCategory()} ");
         break;
 
     case 'run':
@@ -88,7 +91,8 @@ function main()
         }
         $run_cmd = 'cd /srv/web; ' . urldecode($run_cmd);
 
-	$cmd = "chroot --userspec=10003:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
+        $uid = 20000 + $id;
+	$cmd = "chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         passthru($cmd);
         break;
 
@@ -98,7 +102,8 @@ function main()
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
-        exec("chroot --userspec=10003:99 /srv/chroot/{$id}/ /shutdown.sh");
+        $uid = 20000 + $id;
+        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ /shutdown.sh");
         exec("rm -rf /srv/chroot/{$id}");
         break;
 
