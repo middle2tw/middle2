@@ -38,6 +38,7 @@ class CronJob extends Pix_Table
         1 => 600,
         2 => 3600,
         3 => 86400,
+        4 => 60,
     );
 
     public function init()
@@ -49,7 +50,7 @@ class CronJob extends Pix_Table
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['project_id'] = array('type' => 'int');
-        // 1 - 10minutes, 2 - hourly, 3 - daily
+        // 1 - 10minutes, 2 - hourly, 3 - daily, 4 - 1munute
         $this->_columns['period'] = array('type' => 'tinyint');
         $this->_columns['start_at'] = array('type' => 'int');
         $this->_columns['last_run_at'] = array('type' => 'int');
