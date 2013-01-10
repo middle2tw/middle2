@@ -6,7 +6,15 @@ class CronJobRow extends Pix_Table_Row
     {
         $this->update(array('last_run_at' => time()));
         $node = $this->project->getCronNode();
-        $node->runJob($this->job);
+        $ret = $node->runJob($this->job);
+
+        stream_set_blocking($ret->stdout, true);
+        stream_set_blocking($ret->stderr, true);
+        stream_set_blocking($ret->stdio, true);
+        // TODO: log error/stdout
+        $output = (stream_get_contents($ret->stdout));
+        $output = (stream_get_contents($ret->stderr));
+        $output = (stream_get_contents($ret->stdio));
         $node->markAsUnused();
     }
 
