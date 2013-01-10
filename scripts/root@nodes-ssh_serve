@@ -38,8 +38,6 @@ function main()
         exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
         $uid = 20000 + $id;
-        exec("chown {$uid}:99 /srv/chroot/{$id}/srv");
-        exec("chown {$uid}:99 /srv/chroot/{$id}/var/run");
         exec("sed -i 's/^www-user:x:10003/www-user:x:{$uid}/' /srv/chroot/{$id}/etc/passwd");
 
         $port = 20000 + $id;
@@ -55,8 +53,8 @@ function main()
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
-        exec("rm -rf /srv/chroot/{$id}/srv/web");
-	mkdir("/srv/chroot/{$id}/srv/web");
+        $port = 20000 + $id;
+        exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
         exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
         break;
 
