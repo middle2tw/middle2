@@ -58,6 +58,7 @@ function main()
         }
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
+        mkdir("/srv/chroot/{$id}/srv/web");
         exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
         break;
 
