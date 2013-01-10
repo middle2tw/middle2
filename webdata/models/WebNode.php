@@ -48,6 +48,27 @@ class WebNodeRow extends Pix_Table_Row
         $c = new Pix_Cache;
         return max($this->access_at, intval($c->get("WebNode:access_at:{$this->ip}:{$this->port}")));
     }
+
+    public function runJob($command)
+    {
+        $session = ssh2_connect(long2ip($this->ip), 22);
+        if (false === $session) {
+            throw new Exception('connect failed');
+        }
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        if (false === $ret) {
+            throw new Exception('ssh key is wrong');
+        }
+        $node_id = $this->port - 20000;
+        $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command));
+        $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+        stream_set_blocking($stream, true);
+        stream_set_blocking($errorStream, true);
+        echo "stdout:\n";
+        var_dump(stream_get_contents($stream));
+        echo "stderr:\n";
+        var_dump(stream_get_contents($errorStream));
+    }
 }
 
 class WebNode extends Pix_Table
