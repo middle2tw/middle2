@@ -135,7 +135,6 @@ sudo tar zxvf php53.tgz
 解開 template
 -------------
 sudo chown -R deploy:nobody /srv/chroot/template
-sudo chown -R 10003 /srv/chroot/template/usr/local/apache2/logs /srv/chroot/template/srv
 
 開新的 node
 ===========
