@@ -94,35 +94,6 @@ class WebNode extends Pix_Table
         ));
     }
 
-    public static function getUnusedNode($project = null)
-    {
-        $free_nodes_count = count(WebNode::search(array('project_id' => 0)));
-        if (!$free_nodes_count) {
-            // TODO; log it
-            throw new Exception('no free nods');
-        }
-
-        if (!$random_node = WebNode::search(array('project_id' => 0))->offset(rand(0, $free_nodes_count - 1))->first()) {
-            // TODO: log it
-            throw new Exception('no free nods');
-        }
-
-        $random_node->update(array(
-            'project_id' => $project->id,
-            'commit' => $project->commit,
-            'status' => WebNode::STATUS_WEBPROCESSING,
-        ));
-
-        $node_id = $random_node->port - 20000;
-        $ip = long2ip($random_node->ip);
-
-        $session = ssh2_connect($ip, 22);
-        ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
-        ssh2_exec($session, "clone {$project->name} {$node_id}");
-
-        return $random_node;
-    }
-
     public static function getGroupedNodes()
     {
         $return = array();
