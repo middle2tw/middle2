@@ -21,7 +21,7 @@ $period_map = array(
                 <?php } ?>
             </select>
             </li>
-            <li>Last run at: <?= date('Y/m/d H:i:s', $cronjob->last_run_at) ?></li>
+            <li>Last run at: <?= $this->partial('/helper/counttime.phtml', array('time' => $cronjob->last_run_at)) ?></li>
             <li>Next run at: <?= date('Y/m/d H:i:s', $cronjob->getNextRunAt()) ?></li>
             <li>
             <button href="/project/deletecronjob/<?= $this->project->name ?>/<?= $cronjob->id ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($cronjob->job) ?> cron job">DELETE</button>
