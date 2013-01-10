@@ -24,6 +24,47 @@ class ProjectRow extends Pix_Table_Row
     }
 
     /**
+     * getCronNode 取得一個新的 Cron node
+     * 
+     * @access public
+     * @return void
+     */
+    public function getCronNode()
+    {
+        $free_nodes_count = count(WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)));
+        if (!$free_nodes_count) {
+            // TODO; log it
+            throw new Exception('No free nodes');
+        }
+
+        if (!$random_node = WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED))->offset(rand(0, $free_nodes_count - 1))->first()) {
+            continue;
+        }
+
+        $random_node->update(array(
+            'project_id' => $this->id,
+            'commit' => $this->commit,
+            'start_at' => time(),
+            'status' => WebNode::STATUS_CRONPROCESSING,
+        ));
+
+        $node_id = $random_node->port - 20000;
+        $ip = long2ip($random_node->ip);
+
+        $session = ssh2_connect($ip, 22);
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        $stream = ssh2_exec($session, "clone {$this->name} {$node_id}");
+        stream_set_blocking($stream, true);
+        $ret = stream_get_contents($stream);
+
+        $random_node->update(array(
+            'status' => WebNode::STATUS_CRONNODE,
+        ));
+
+        return $random_node;
+    }
+
+    /**
      * getWebNodes 取得現在 Project 有哪些 Web node, 如果沒有會自動產生
      *
      * @return array WebNode
