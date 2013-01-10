@@ -2,6 +2,15 @@
 
 class WebNodeRow extends Pix_Table_Row
 {
+    public function markAsUnused()
+    {
+        $this->update(array(
+            'project_id' => 0,
+            'commit' => '',
+            'status' => WebNode::STATUS_UNUSED,
+        ));
+    }
+
     protected function _sshDeletePort()
     {
         $session = ssh2_connect(long2ip($this->ip), 22);
@@ -165,7 +174,7 @@ class WebNode extends Pix_Table
             // 放出 commit 版本不正確的 commit
             if ($project = $node->project) {
                 if ($node->status == WebNode::STATUS_WEBNODE and $project->commit != $node->commit) {
-                    $node->update(array('status' => WebNode::STATUS_UNUSED, 'commit' => 0, 'project_id' => 0));
+                    $node->markAsUnused();
                 }
             }
         }
