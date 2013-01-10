@@ -53,6 +53,9 @@ function main()
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
+        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
+        }
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
         exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
@@ -100,8 +103,9 @@ function main()
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
-        $uid = 20000 + $id;
-        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ /shutdown.sh");
+        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
+        }
         exec("rm -rf /srv/chroot/{$id}");
         break;
 
