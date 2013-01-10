@@ -40,7 +40,7 @@ function main()
         $uid = 20000 + $id;
         exec("chown {$uid}:99 /srv/chroot/{$id}/srv");
         exec("chown {$uid}:99 /srv/chroot/{$id}/var/run");
-        exec("sed -i 's/^www-user:x:10003$/www-user:x:{$uid}/' /srv/chroot/{$id}/etc/passwd");
+        exec("sed -i 's/^www-user:x:10003/www-user:x:{$uid}/' /srv/chroot/{$id}/etc/passwd");
 
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
