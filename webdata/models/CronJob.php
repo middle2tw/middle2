@@ -4,10 +4,10 @@ class CronJobRow extends Pix_Table_Row
 {
     public function runJob()
     {
-        echo $this->id . "\n";
-    //    $this->update(array('last_run_at' => time()));
-
-        $node = WebNode::getUnusedNode($this->project);
+        $this->update(array('last_run_at' => time()));
+        $node = $this->project->getCronNode();
+        $node->runJob($this->job);
+        $node->markAsUnused();
     }
 
     public function getNextRunAt()
