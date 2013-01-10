@@ -67,12 +67,11 @@ class WebNodeRow extends Pix_Table_Row
         $node_id = $this->port - 20000;
         $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command));
         $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
-        stream_set_blocking($stream, true);
-        stream_set_blocking($errorStream, true);
-        echo "stdout:\n";
-        var_dump(stream_get_contents($stream));
-        echo "stderr:\n";
-        var_dump(stream_get_contents($errorStream));
+        $ret = new StdClass;
+        $ret->stdout = $stream;
+        $ret->stdio = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+        $ret->stderr = $errorStream;
+        return $ret;
     }
 }
 
