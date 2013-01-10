@@ -21,6 +21,9 @@ define('USERDB_DOMAIN', 'userdb.hisoku.ronny.tw');
 define('WEB_KEYFILE', '/srv/config/web-key');
 define('WEB_PUBLIC_KEYFILE', '/srv/config/web-key.pub');
 
+// TODO: 之後要搭配 geoip
+date_default_timezone_set('Asia/Taipei');
+
 Pix_Cache::addServer('Pix_Cache_Adapter_Memcached', array(
     'servers' => array(
         array('host' => 'memcache-p-1.hisoku.ronny.tw', 'port' => 11211, 'weight' => 1), // 256M
