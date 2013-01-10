@@ -69,7 +69,8 @@ class CronJob extends Pix_Table
     public static function runPendingJobs()
     {
         foreach (self::$_period_map as $period_id => $time) {
-            foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (time() - $time)) as $cronjob) {
+            // 多給 5 秒的彈性..這樣才不會 10 分鐘 cron 跑到 11 分鐘
+            foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (5 + time() - $time)) as $cronjob) {
                 $pid = pcntl_fork();
 
                 if ($pid) {
