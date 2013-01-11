@@ -1,0 +1,57 @@
+<?php
+$database_hosts = array(
+    'userdb.hisoku.ronny.tw',
+);
+$this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<?php foreach ($database_hosts as $database_host) { ?>
+<h1><?= $this->escape($database_host) ?></h1>
+<?php
+$link = new mysqli($database_host, getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
+$res = $link->query("SELECT `table_schema`, SUM(`data_length` + `index_length`) AS `size`, SUM(`table_rows`) AS `rows`, COUNT(*) AS `tables` FROM information_schema.TABLES GROUP BY table_schema");
+$db_sizes = array();
+while ($row = $res->fetch_assoc()) {
+    if (strpos($row['table_schema'], 'user_') !== 0) {
+        continue;
+    }
+    $db_sizes[$row['table_schema']] = $row['size'];
+    $db_rows[$row['table_schema']] = $row['rows'];
+    $db_tables[$row['table_schema']] = $row['tables'];
+}
+$res->free_result();
+
+$res = $link->query("SHOW DATABASES LIKE 'user_%'");
+$databases = array();
+while ($row = $res->fetch_row()) {
+    $databases[] = $row[0];
+}
+$res->free_result();
+?>
+<table class="table">
+    <tr>
+        <td>Database</td>
+        <td>Project</td>
+        <td>Usage</td>
+        <td>Tables</td>
+        <td>Rows(~)</td>
+    </tr>
+    <?php foreach ($databases as $db) { ?>
+    <?php list(, $user) = explode('_', $db); ?>
+    <tr>
+        <td><?= $this->escape($db) ?></td>
+        <td>
+            <?php if ($user and $project = Project::search(array('name' => $user))->first()) { ?>
+            <a href="/admin/project/<?= $project->id ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
+            <?php } ?>
+        </td>
+        <td><?= number_format(intval($db_sizes[$db])) ?></td>
+        <td><?= intval($db_tables[$db]) ?></td>
+        <td><?= number_format(intval($db_rows[$db])) ?></td>
+    </tr>
+    <?php } ?>
+</table>
+<hr>
+<?php } ?>
+<?= $this->partial('/common/footer.phtml', $this) ?>
