@@ -98,6 +98,32 @@ function main()
         passthru($cmd);
         break;
 
+    case 'check_alive':
+        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id = intval($id)) {
+            error('invalid id: ' . $id);
+        }
+        $uid = 20000 + $id;
+        $output = trim(`ps -u {$uid} -opid | grep -v PID`);
+        if ('' == $output) {
+            echo json_encode(array());
+            return;
+        }
+        $pids = explode("\n", $output);
+        $jobs = array();
+        foreach ($pids as $pid) {
+            $pid = trim($pid);
+            $job = new StdClass;
+            $job->pid = $pid;
+            $job->start_time = filectime("/proc/{$pid}");
+            $job->comm = trim(file_get_contents("/proc/{$pid}/comm"));
+            $job->cmdline = trim(file_get_contents("/proc/{$pid}/cmdline"));
+            $jobs[] = $job;
+        }
+        echo json_encode($jobs);
+        break;
+
+
 
     case 'shutdown':
         list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
