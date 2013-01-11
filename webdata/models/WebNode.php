@@ -54,6 +54,35 @@ class WebNodeRow extends Pix_Table_Row
         return max($this->access_at, intval($c->get("WebNode:access_at:{$this->ip}:{$this->port}")));
     }
 
+    /**
+     * getNodeProcesses get the process list on node
+     * 
+     * @access public
+     * @return array
+     */
+    public function getNodeProcesses()
+    {
+        $session = ssh2_connect(long2ip($this->ip), 22);
+        if (false === $session) {
+            return false;
+        }
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        if (false === $session) {
+            return false;
+        }
+        $stream = ssh2_exec($session, "check_alive " . ($this->port - 20000));
+        stream_set_blocking($stream, true);
+        $ret = stream_get_contents($stream);
+        $ret = json_decode($ret);
+        if (!is_array($ret)) {
+            return false;
+        }
+        if ($ret->error) {
+            return false;
+        }
+        return $ret;
+    }
+
     public function runJob($command)
     {
         $session = ssh2_connect(long2ip($this->ip), 22);
