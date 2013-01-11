@@ -199,6 +199,16 @@ class WebNode extends Pix_Table
             // 放出 commit 版本不正確的 commit
             if ($project = $node->project) {
                 if ($node->status == WebNode::STATUS_WEBNODE and $project->commit != $node->commit) {
+                    // TODO: log it
+                    $node->markAsUnused();
+                }
+            }
+
+            // 如果是 cronnode or webnode 卻沒有任何 process 就 end
+            if (in_array($node->status, array(WebNode::STATUS_CRONNODE, WebNode::STATUS_WEBNODE))) {
+                $processes = $node->getNodeProcesses();
+                if (0 == count($processes)) {
+                    // TODO: log it
                     $node->markAsUnused();
                 }
             }
