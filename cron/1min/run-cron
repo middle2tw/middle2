@@ -1,9 +1,10 @@
 #!/usr/bin/env php
 <?php
 
-$fp = fopen('/tmp/hisoku-run-cron', 'w+');
+define('LOCK_FILE', '/tmp/hisoku-run-cron');
+$fp = fopen(LOCK_FILE, 'w+');
 if (!flock($fp, LOCK_EX | LOCK_NB)) {
-    throw new Exception('hisoku-run-cron is locking');
+    throw new Exception(LOCK_FILE . ' is locking');
 }
 
 ftruncate($fp, 0);      // truncate file
@@ -15,4 +16,4 @@ CronJob::runPendingJobs();
 
 flock($fp, LOCK_UN);    // release the lock
 fclose($fp);
-unlink('/tmp/hisoku-run-cron');
+unlink(LOCK_FILE);
