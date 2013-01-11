@@ -8,6 +8,10 @@ class CronJobRow extends Pix_Table_Row
         $node = $this->project->getCronNode();
         $ret = $node->runJob($this->job);
 
+        $node->update(array(
+            'status' => WebNode::STATUS_CRONNODE,
+        ));
+
         stream_set_blocking($ret->stdout, true);
         stream_set_blocking($ret->stderr, true);
         stream_set_blocking($ret->stdio, true);

@@ -57,10 +57,6 @@ class ProjectRow extends Pix_Table_Row
         stream_set_blocking($stream, true);
         $ret = stream_get_contents($stream);
 
-        $random_node->update(array(
-            'status' => WebNode::STATUS_CRONNODE,
-        ));
-
         return $random_node;
     }
 
