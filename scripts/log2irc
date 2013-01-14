@@ -1,0 +1,79 @@
+#!/usr/bin/env php
+<?php
+
+class Log2IRC
+{
+    protected $_configs;
+    protected $_log_cursors;
+
+    public function initConfig()
+    {
+        $this->_configs = json_decode(file_get_contents('/srv/config/log2irc.json'));
+    }
+
+    public function initLogFile()
+    {
+        $this->_log_cursors = array();
+        foreach ($this->_configs as $id => $config) {
+            $file_name = strftime($config->file);
+            $fp = fopen($file_name, 'r');
+            // 直接跳到結束
+            //socket_set_blocking($fp, false);
+            $log_cursor = new StdClass;
+            $log_cursor->filename = $file_name;
+            $log_cursor->fp = $fp;
+            $log_cursor->cursor = filesize($file_name);
+            $this->_log_cursors[$id] = $log_cursor;
+        }
+    }
+
+    public function toIRC($message)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'http://10.0.0.26:30001/?message=' . urlencode($message) . '&channel=' . urlencode('#hisoku_log'));
+        curl_exec($curl);
+        curl_close($curl);
+    }
+
+    public function loopLog()
+    {
+        while (true) {
+            file_put_contents('/tmp/irc2log.updated', time());
+            foreach ($this->_log_cursors as $id => $log_cursor) {
+                $fp = $log_cursor->fp;
+                fseek($fp, $log_cursor->cursor);
+                $line = fgets($fp);
+                if (false === $line) {
+                    usleep(100000);
+                    continue;
+                }
+
+                foreach ($this->_configs->{$id}->matches as $match) {
+                    if (preg_match($match, $line)) {
+                        $this->toIRC($line);
+                        break;
+                    }
+                }
+
+
+                $this->_log_cursors[$id]->cursor = ftell($fp);
+            }
+        }
+    }
+
+    public function main()
+    {
+        $fp = fopen('/tmp/irc2log.pid', 'w');
+        fwrite($fp, getmypid());
+        date_default_timezone_set('Asia/Taipei');
+        // 讀設定檔
+        $this->initConfig();
+        // 取得所有要監控的 log 的 file description
+        $this->initLogFile();
+        // 開始 loop 檔案
+        $this->loopLog();
+    }
+}
+
+$l = new Log2IRC;
+$l->main();
