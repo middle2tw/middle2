@@ -4,27 +4,38 @@
 class Log2IRC
 {
     protected $_configs;
-    protected $_log_cursors;
-
-    public function initConfig()
-    {
-        $this->_configs = json_decode(file_get_contents('/srv/config/log2irc.json'));
-    }
+    protected $_log_cursors = null;
 
     public function initLogFile()
     {
-        $this->_log_cursors = array();
-        foreach ($this->_configs as $id => $config) {
-            $file_name = strftime($config->file);
-            $fp = fopen($file_name, 'r');
-            // 直接跳到結束
-            //socket_set_blocking($fp, false);
-            $log_cursor = new StdClass;
-            $log_cursor->filename = $file_name;
-            $log_cursor->fp = $fp;
-            $log_cursor->cursor = filesize($file_name);
-            $this->_log_cursors[$id] = $log_cursor;
+        error_log('init log');
+        $this->_configs = json_decode(file_get_contents('/srv/config/log2irc.json'));
+
+        if (!is_null($this->_log_cursors)) {
+            foreach ($this->_log_cursors as $id => $log_cursor) {
+                fclose($log_cursor->fp);
+            }
         }
+
+        $this->_log_cursors = array();
+    }
+
+    protected $_last_check = null;
+    protected $_config_hash = null;
+    public function checkConfig()
+    {
+        $now = microtime(true);
+        if (is_null($this->_last_check) and abs($now - $this->_last_check) < 1) {
+            return;
+        }
+        $this->_last_check = $now;
+
+        if (!is_null($this->_config_hash) and $this->_config_hash == md5_file('/srv/config/log2irc.json')) {
+            return;
+        }
+
+        $this->initLogFile();
+        $this->_config_hash = md5_file('/srv/config/log2irc.json');
     }
 
     public function toIRC($message)
@@ -39,7 +50,26 @@ class Log2IRC
     {
         while (true) {
             file_put_contents('/tmp/irc2log.updated', time());
-            foreach ($this->_log_cursors as $id => $log_cursor) {
+            $this->checkConfig();
+
+            foreach ($this->_configs as $id => $config) {
+                if (!array_key_exists($id, $this->_log_cursors)) {
+                    $file_name = strftime($config->file);
+                    clearstatcache($file_name);
+                    if (!file_exists($file_name)) {
+                        usleep(100000);
+                        continue;
+                    }
+
+                    $fp = fopen($file_name, 'r');
+                    $log_cursor = new StdClass;
+                    $log_cursor->filename = $file_name;
+                    $log_cursor->fp = $fp;
+                    $log_cursor->cursor = filesize($file_name);
+                    $this->_log_cursors[$id] = $log_cursor;
+                }
+
+                $log_cursor = $this->_log_cursors[$id];
                 $fp = $log_cursor->fp;
                 fseek($fp, $log_cursor->cursor);
                 $line = fgets($fp);
@@ -50,7 +80,11 @@ class Log2IRC
 
                 foreach ($this->_configs->{$id}->matches as $match) {
                     if (preg_match($match, $line)) {
-                        $this->toIRC($line);
+                        $message = $line;
+                        if ($this->_configs->{$id}->prefix) {
+                            $message = $this->_configs->{$id}->prefix . $message;
+                        }
+                        $this->toIRC($message);
                         break;
                     }
                 }
@@ -66,10 +100,6 @@ class Log2IRC
         $fp = fopen('/tmp/irc2log.pid', 'w');
         fwrite($fp, getmypid());
         date_default_timezone_set('Asia/Taipei');
-        // 讀設定檔
-        $this->initConfig();
-        // 取得所有要監控的 log 的 file description
-        $this->initLogFile();
         // 開始 loop 檔案
         $this->loopLog();
     }
