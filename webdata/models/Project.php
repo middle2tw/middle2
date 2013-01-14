@@ -38,7 +38,7 @@ class ProjectRow extends Pix_Table_Row
         }
 
         if (!$random_node = WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED))->offset(rand(0, $free_nodes_count - 1))->first()) {
-            continue;
+            throw new Exception('free node not found');
         }
 
         $random_node->update(array(
