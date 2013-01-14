@@ -56,7 +56,7 @@ class CronJob extends Pix_Table
         $this->_columns['project_id'] = array('type' => 'int');
         // 1 - 10minutes, 2 - hourly, 3 - daily, 4 - 1munute
         $this->_columns['period'] = array('type' => 'tinyint');
-        $this->_columns['start_at'] = array('type' => 'int');
+        $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
         $this->_columns['last_run_at'] = array('type' => 'int');
         $this->_columns['job'] = array('type' => 'text');
 
