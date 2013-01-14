@@ -28,6 +28,12 @@ class Log2IRC
         if (is_null($this->_last_check) and abs($now - $this->_last_check) < 1) {
             return;
         }
+        if (date('Ymd', $this->_last_check) !== date('Ymd')) {
+            $this->initLogFile();
+            $this->_config_hash = md5_file('/srv/config/log2irc.json');
+            $this->_last_check = $now;
+            return;
+        }
         $this->_last_check = $now;
 
         if (!is_null($this->_config_hash) and $this->_config_hash == md5_file('/srv/config/log2irc.json')) {
