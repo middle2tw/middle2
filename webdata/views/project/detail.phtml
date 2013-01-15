@@ -7,8 +7,9 @@
 </form>
 <h3>deployment:</h3>
 <ul>
-    <li>git remote hisoku git@<?= GIT_SERVER ?>:<?= $this->project->name ?></li>
-    <li>git push hisoku master</li>
+    <li><code>git remote add hisoku git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
+    <li> or <code>git clone git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
+    <li><code>git push hisoku master</code></li>
 </ul>
 <hr>
 <h3>Custom domains: </h3>
