@@ -18,8 +18,37 @@ function main()
     $command = getenv('SSH_ORIGINAL_COMMAND');
     list($method) = explode(' ', $command, 2);
     switch ($method) {
+    case 'init-v2':
+        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id) {
+            echo json_encode(array('error' => true, 'message' => 'id is not found'));
+            break;
+        }
+        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
+        }
+        exec("rm -rf /srv/chroot/{$id}");
+        mkdir("/srv/chroot/{$id}");
+        exec("tar zxf /srv/code/images/template.tgz -C /srv/chroot/{$id}");
+        exec("cp /srv/code/hisoku/scripts/scribelogger /srv/chroot/{$id}/usr/local/bin/");
+        exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
+        exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
+        exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
+        exec("mknod /srv/chroot/{$id}/dev/stdin c 5 0");
+        exec("mknod /srv/chroot/{$id}/dev/stdout c 5 1");
+        exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
+        exec("chmod 666 /srv/chroot/{$id}/dev/*");
+        exec("chown -R deploy:nobody /srv/chroot/{$id}");
+        exec("chmod 755 /srv/chroot/{$id}");
+        $port = $uid = 20000 + $id;
+        exec("echo -e 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
+        mkdir("/srv/chroot/{$id}/srv/logs");
+        exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
+        echo json_encode(array('error' => false, 'port' => $port));
+        break;
+
     case 'init':
-        list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
             break;
@@ -56,6 +85,26 @@ function main()
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
+        $port = 20000 + $id;
+        exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
+        mkdir("/srv/chroot/{$id}/srv/web");
+        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
+        break;
+
+    case 'clone-v2':
+        list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        $template = 'php54';
+        if (!$id) {
+            die("invalid $id");
+        }
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return error('project not found: ' . $project_name);
+        }
+        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
+        }
+        exec("rpm --root /srv/chroot/{$id} -ivh --nodeps /srv/code/images/{$template}/*");
+        exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
         mkdir("/srv/chroot/{$id}/srv/web");
@@ -122,8 +171,6 @@ function main()
         }
         echo json_encode($jobs);
         break;
-
-
 
     case 'shutdown':
         list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
