@@ -28,7 +28,7 @@ def file_get_contents(filename):
     with open(filename) as f:
         return f.read()
 
-category = file_get_contents('/srv/log_category').strip()
+category = file_get_contents('/srv/logs/log_category').strip()
 host = sys.argv[1]
 port = 1463
 
