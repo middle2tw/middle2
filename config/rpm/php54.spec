@@ -16,7 +16,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %setup -q -n php-5.4.10
 
 %build
-%configure --enable-fpm
+%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc
 make %{?_smp_mflags}
 
 
