@@ -16,7 +16,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %setup -q -n php-5.4.10
 
 %build
-%configure
+%configure --enable-fpm
 make %{?_smp_mflags}
 
 
@@ -466,6 +466,10 @@ rm -rf %{buildroot}
 /usr/share/man/man1/php-config.1.gz
 /usr/share/man/man1/php.1.gz
 /usr/share/man/man1/phpize.1.gz
+/etc/php-fpm.conf.default
+/usr/sbin/php-fpm
+/usr/share/fpm/status.html
+/usr/share/man/man8/php-fpm.8.gz
 
 %changelog
 
