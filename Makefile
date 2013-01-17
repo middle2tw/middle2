@@ -1,8 +1,13 @@
+DEV_HOSTS= 10.0.0.26
+LB_HOSTS= 10.0.0.74
+NODES_HOSTS= 10.0.0.98
+HOSTS?= ${DEV_HOSTS} ${LB_HOSTS} ${NODES_HOSTS}
+
+
 all:
 	@git pull -v
 
 deploy:
-	@rsync -avz --exclude .git --exclude .gitignore --exclude '.*.swp' --exclude 'webdata/config.php' --delete --delete-excluded -e ssh . code@10.0.0.26:~/hisoku #dev
-	@rsync -avz --exclude .git --exclude .gitignore --exclude '.*.swp' --exclude 'webdata/config.php' --delete --delete-excluded -e ssh . code@10.0.0.74:~/hisoku #loadbalancers
-	@rsync -avz --exclude .git --exclude .gitignore --exclude '.*.swp' --exclude 'webdata/config.php' --delete --delete-excluded -e ssh . code@10.0.0.98:~/hisoku #nodes
-	@rsync -avz --exclude .git --exclude .gitignore --exclude '.*.swp' --exclude 'webdata/config.php' --delete --delete-excluded -e ssh . code@10.0.0.104:~/hisoku #nodes-2
+	@for HOST in ${HOSTS} ; do \
+	rsync -avz --exclude .git --exclude .gitignore --exclude '.*.swp' --exclude 'webdata/config.php' --delete --delete-excluded -e ssh . code@$${HOST}:~/hisoku ; \
+	done
