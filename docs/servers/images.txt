@@ -1,6 +1,6 @@
 build server require
 ====================
-sudo yum install gcc-c++ gcc zlib-devel make gettext glibc rpm-build rpmdevtools libgcc cpp expat-devel
+sudo yum install -y gcc-c++ gcc zlib-devel make gettext glibc rpm-build rpmdevtools libgcc cpp expat-devel python26-devel
 mkdir ~/rpmbuild
 cd ~/rpmbuild
 mkdir RPMS SOURCES SPECS SRPMS BUILD
@@ -16,8 +16,14 @@ mkdir /var/tmp/template/dev
 sudo yum --installroot=/var/tmp/template install -y basesystem
 cd /var/tmp/template
 sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
-yumdownloader --destdir=/var/tmp glibc bash ncurses-base ncurses-libs expat nss-softokn-freebl zlib libxml2-devel libedit gmp bzip2-libs libxml2 krb5-libs libcom_err openssl keyutils-libs libselinux libcurl libidn openldap info nss nss-util nspr libssh2 cyrus-sasl-lib lcms-libs libtiff freetype libjpeg fontconfig libXext libXt libgomp libtool-ltdl libSM libICE libX11 libuuid libxcb libXau coreutils grep tzdata sed gawk libstdc++47 pcre libacl libattr libcap
+yumdownloader --destdir=/var/tmp glibc bash ncurses-base ncurses-libs expat nss-softokn-freebl zlib libxml2-devel libedit gmp bzip2-libs libxml2 krb5-libs libcom_err openssl keyutils-libs libselinux libcurl libidn openldap info nss nss-util nspr libssh2 cyrus-sasl-lib lcms-libs libtiff freetype libjpeg fontconfig libXext libXt libgomp libtool-ltdl libSM libICE libX11 libuuid libxcb libXau coreutils grep tzdata sed gawk libstdc++47 pcre libacl libattr libcap glibc-common python26 python26-libs libgcc47
 sudo rpm --root /var/tmp/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm /var/tmp/*.noarch.rpm
+cd /var/tmp
+sudo rm -rf /var/tmp/template/dev/* /var/tmp/template/etc/shadow /var/tmp/template/etc/gshadow
+sudo cp /etc/resolv.conf /var/tmp/template/etc/
+sudo chown -R ec2-user /var/tmp/template
+cd /var/tmp/template
+tar zcf ../template.tgz .
 
 apache
 ======
@@ -57,7 +63,7 @@ echo "" | /usr/lib/rpm/check-files ~/rpmbuild/BUILDROOT/httpd-2.2.22
 
 thrift & scribe
 ===============
-sudo yum install autoconf automake boost-devel openssl-devel
+sudo yum install -y autoconf automake boost-devel openssl-devel
 cd /var/tmp/
 wget https://dist.apache.org/repos/dist/release/thrift/0.9.0/thrift-0.9.0.tar.gz
 cp thrift-0.9.0.tar.gz ~/rpmbuild/SOURCES/
@@ -86,7 +92,7 @@ rpmbuild -ba ~/rpmbuild/SPECS/thrift-fb303.spec
 
 php54
 =====
-sudo yum install libxml2-devel
+sudo yum install -y libxml2-devel
 cd /var/tmp
 wget 'http://tw2.php.net/get/php-5.4.10.tar.bz2/from/tw1.php.net/mirror'
 cp php-5.4.10.tar.bz2 ~/rpmbuild/SOURCES/
