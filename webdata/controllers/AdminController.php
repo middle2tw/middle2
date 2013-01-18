@@ -102,11 +102,7 @@ class AdminController extends Pix_Controller
         if (!$node = WebNode::find(array(ip2long($ip), 20000 + $port))) {
             return $this->alert('port ' . (20000 + $port) . ' is not found', '/admin');
         }
-        $node->update(array(
-            'project_id' => 0,
-            'commit' => '',
-            'status' => WebNode::STATUS_UNUSED,
-        ));
+        $node->markAsUnused();
 
         return $this->alert('done', '/admin');
     }
