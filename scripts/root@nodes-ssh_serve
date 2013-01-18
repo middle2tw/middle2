@@ -19,6 +19,7 @@ function main()
     list($method) = explode(' ', $command, 2);
     switch ($method) {
     case 'init-v2':
+    case 'init':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
@@ -47,7 +48,6 @@ function main()
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
-    case 'init':
     case 'init-v1':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
@@ -75,7 +75,6 @@ function main()
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
-    case 'clone':
     case 'clone-v1':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
@@ -94,6 +93,7 @@ function main()
         break;
 
     case 'clone-v2':
+    case 'clone':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         $template = 'php54';
         if (!$id) {
