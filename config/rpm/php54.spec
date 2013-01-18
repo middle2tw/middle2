@@ -16,7 +16,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %setup -q -n php-5.4.10
 
 %build
-%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc
+%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc --enable-mysqlnd --with-mysql --with-mysqli
 make %{?_smp_mflags}
 
 
@@ -470,6 +470,28 @@ rm -rf %{buildroot}
 /usr/sbin/php-fpm
 /usr/share/fpm/status.html
 /usr/share/man/man8/php-fpm.8.gz
+/usr/include/php/ext/mysqli/mysqli_mysqlnd.h
+/usr/include/php/ext/mysqli/php_mysqli_structs.h
+/usr/include/php/ext/mysqlnd/config-win.h
+/usr/include/php/ext/mysqlnd/mysqlnd.h
+/usr/include/php/ext/mysqlnd/mysqlnd_alloc.h
+/usr/include/php/ext/mysqlnd/mysqlnd_block_alloc.h
+/usr/include/php/ext/mysqlnd/mysqlnd_charset.h
+/usr/include/php/ext/mysqlnd/mysqlnd_debug.h
+/usr/include/php/ext/mysqlnd/mysqlnd_enum_n_def.h
+/usr/include/php/ext/mysqlnd/mysqlnd_ext_plugin.h
+/usr/include/php/ext/mysqlnd/mysqlnd_libmysql_compat.h
+/usr/include/php/ext/mysqlnd/mysqlnd_net.h
+/usr/include/php/ext/mysqlnd/mysqlnd_portability.h
+/usr/include/php/ext/mysqlnd/mysqlnd_priv.h
+/usr/include/php/ext/mysqlnd/mysqlnd_result.h
+/usr/include/php/ext/mysqlnd/mysqlnd_result_meta.h
+/usr/include/php/ext/mysqlnd/mysqlnd_reverse_api.h
+/usr/include/php/ext/mysqlnd/mysqlnd_statistics.h
+/usr/include/php/ext/mysqlnd/mysqlnd_structs.h
+/usr/include/php/ext/mysqlnd/mysqlnd_wireprotocol.h
+/usr/include/php/ext/mysqlnd/php_mysqlnd.h
+/usr/include/php/ext/mysqlnd/php_mysqlnd_config.h
 
 %changelog
 
