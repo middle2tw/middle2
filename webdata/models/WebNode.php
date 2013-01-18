@@ -7,7 +7,7 @@ class WebNodeRow extends Pix_Table_Row
         $this->update(array(
             'project_id' => 0,
             'commit' => '',
-            'status' => WebNode::STATUS_UNUSED,
+            'status' => WebNode::STATUS_OVER,
         ));
     }
 
@@ -112,6 +112,7 @@ class WebNode extends Pix_Table
     const STATUS_WEBNODE = 10;
     const STATUS_CRONNODE = 11;
     const STATUS_STOP = 100;
+    const STATUS_OVER = 101; // 等待資源再被放出來
 
     public function init()
     {
@@ -134,6 +135,7 @@ class WebNode extends Pix_Table
             10 => 'WebNode',
             11 => 'CronNode',
             100 => 'Stop',
+            101 => 'Over',
         ));
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
