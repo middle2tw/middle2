@@ -33,6 +33,42 @@ class WebNodeRow extends Pix_Table_Row
         return true;
     }
 
+    public function resetNode()
+    {
+        $session = ssh2_connect(long2ip($this->ip), 22);
+        if (false === $session) {
+            throw new Exception('ssh connect failed');
+        }
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        if (false === $ret) {
+            throw new Exception('key failed');
+        }
+        $stream = ssh2_exec($session, "shutdown " . ($this->port - 20000));
+        stream_set_blocking($stream, true);
+        $ret = stream_get_contents($stream);
+        if (!$ret = json_decode($ret)) {
+           //throw new Exception('wrong json');
+        }
+        if ($ret->error) {
+            //throw new Exception('json error');
+        }
+
+        $stream = ssh2_exec($session, "init " . ($this->port - 20000));
+        stream_set_blocking($stream, true);
+        $ret = stream_get_contents($stream);
+        if (!$ret = json_decode($ret)) {
+            throw new Exception('wrong json');
+        }
+        if ($ret->error) {
+            throw new Exception('json error');
+        }
+        $this->update(array(
+            'status' => WebNode::STATUS_UNUSED,
+        ));
+
+        return true;
+    }
+
     public function preInsert()
     {
         $this->created_at = time();
