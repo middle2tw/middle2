@@ -48,6 +48,7 @@ function main()
         break;
 
     case 'init':
+    case 'init-v1':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
@@ -75,6 +76,7 @@ function main()
         break;
 
     case 'clone':
+    case 'clone-v1':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
             die("invalid $id");
@@ -112,6 +114,8 @@ function main()
         break;
 
     case 'restart-web':
+    case 'restart-web-v1':
+    case 'restart-web-v2':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
@@ -129,6 +133,8 @@ function main()
         break;
 
     case 'run':
+    case 'run-v1':
+    case 'run-v2':
         list(, $project_name, $id, $run_cmd) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
@@ -173,6 +179,8 @@ function main()
         break;
 
     case 'shutdown':
+    case 'shutdown-v1':
+    case 'shutdown-v2':
         list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
@@ -181,6 +189,7 @@ function main()
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
         exec("rm -rf /srv/chroot/{$id}");
+        echo json_encode(array('error' => false, 'port' => $port));
         break;
 
     default:
