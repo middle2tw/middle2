@@ -261,6 +261,11 @@ class WebNode extends Pix_Table
                     // TODO: log it
                 }
             }
+
+            // 如果是 over 要放出來
+            if (in_array($node->status, array(WebNode::STATUS_OVER))) {
+                $node->resetNode();
+            }
         }
     }
 }
