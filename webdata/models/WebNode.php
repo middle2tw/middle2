@@ -237,7 +237,6 @@ class WebNode extends Pix_Table
             // 放出 commit 版本不正確的 commit
             if ($project = $node->project) {
                 if ($node->status == WebNode::STATUS_WEBNODE and $project->commit != $node->commit) {
-                    // TODO: log it
                     $node->markAsUnused();
                 }
             }
@@ -246,7 +245,7 @@ class WebNode extends Pix_Table
             if (in_array($node->status, array(WebNode::STATUS_CRONNODE, WebNode::STATUS_WEBNODE))) {
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
-                    // TODO: log it
+                    trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
                     $node->markAsUnused();
                 }
             }
@@ -255,10 +254,10 @@ class WebNode extends Pix_Table
             if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->start_at) > 300) {
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
-                    // TODO: log it
+                    trigger_error("{$node->ip}:{$node->port}(status=processing) had no alive process, release it", E_USER_WARNING);
                     $node->markAsUnused();
                 } else {
-                    // TODO: log it
+                    trigger_error("{$node->ip}:{$node->port}(status=processing) is processing too long, start_at: " . date('c', $node->start_at), E_USER_WARNING);
                 }
             }
 
