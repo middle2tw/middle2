@@ -41,6 +41,7 @@ function main()
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
         exec("chown -R deploy:nobody /srv/chroot/{$id}");
         exec("chmod 755 /srv/chroot/{$id}");
+        exec("mkdir /srv/chroot/{$id}/tmp");
         exec("chmod 1777 /srv/chroot/{$id}/tmp");
         $port = $uid = 20000 + $id;
         exec("echo -e 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
