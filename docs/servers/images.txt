@@ -16,8 +16,8 @@ mkdir /var/tmp/template/dev
 sudo yum --installroot=/var/tmp/template install -y basesystem
 cd /var/tmp/template
 sudo rm -rf boot/ home/ media/ mnt/ opt/ proc/ root/ sys/ tmp/ selinux/
-yumdownloader --destdir=/var/tmp glibc bash ncurses-base ncurses-libs expat nss-softokn-freebl zlib libxml2-devel libedit gmp bzip2-libs libxml2 krb5-libs libcom_err openssl keyutils-libs libselinux libcurl libidn openldap info nss nss-util nspr libssh2 cyrus-sasl-lib lcms-libs libtiff freetype libjpeg fontconfig libXext libXt libgomp libtool-ltdl libSM libICE libX11 libuuid libxcb libXau coreutils grep tzdata sed gawk libstdc++47 pcre libacl libattr libcap glibc-common python26 python26-libs libgcc47
-sudo rpm --root /var/tmp/template/ -ivh --nodeps /var/tmp/*.x86_64.rpm /var/tmp/*.noarch.rpm
+yumdownloader --destdir=/var/tmp glibc bash ncurses-base ncurses-libs expat nss-softokn-freebl zlib libedit gmp bzip2-libs libxml2 krb5-libs libcom_err openssl keyutils-libs libselinux libcurl libidn openldap info nss nss-util nspr libssh2 lcms-libs libtool-ltdl libuuid coreutils grep tzdata sed gawk libstdc++47 pcre libacl libattr libcap glibc-common libgcc47 ca-certificates coreutils-libs ncurses pam libsepol nss-softokn nss-sysinit sqlite db4 cyrus-sasl-lib nss-tools audit-libs cracklib cracklib-dicts gzip readline less groff
+sudo rpm --root /var/tmp/template/ -ivh /var/tmp/*.x86_64.rpm /var/tmp/*.noarch.rpm
 cd /var/tmp
 sudo rm -rf /var/tmp/template/dev/* /var/tmp/template/etc/shadow /var/tmp/template/etc/gshadow
 sudo cp /etc/resolv.conf /var/tmp/template/etc/
