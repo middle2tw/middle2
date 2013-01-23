@@ -11,6 +11,9 @@ hisoku.getBackendHost = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
         return callback({success: true, host: 'main-p.hisoku.ronny.tw', port: 9999});
     }
+    if ('healthcheck' == host) {
+        return callback({success: true, type: 'healthcheck'});
+    }
 
     var selector_request = http.request({
         host: 'main-p.hisoku.ronny.tw',
@@ -84,6 +87,13 @@ main_request.on('request', function(main_request, main_response){
     hisoku.getBackendHost(host, port, function(options){
         if (!options.success) {
             main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
+            main_response.end();
+            return;
+        }
+
+        if (options.type == 'healthcheck') {
+            main_response.writeHead(200);
+            main_response.write('OK');
             main_response.end();
             return;
         }
