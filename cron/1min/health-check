@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+include(__DIR__ . '/../../webdata/init.inc.php');
+
+$load_balancers = array('10.0.0.74');
+# check loadbalancer
+foreach ($load_balancers as $host) {
+    $curl = curl_init('http://' . $host . '/');
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $ret = curl_exec($curl);
+    if ('OK' != $ret) {
+        Hisoku::alert("LoadBalancer error", "LoadBalancer IP: {$host}");
+        continue;
+    }
+    $info = curl_getinfo($curl);
+    if ($info['total_time'] > 0.1) {
+        Hisoku::alert("LoadBalancer warning", "LoadBalancer IP: {$host}\nhealth check time: {$info['total_time']}\n");
+    }
+}
