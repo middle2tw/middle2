@@ -35,13 +35,13 @@ class Hisoku
         if (!class_exists('AmazonSNS')) {
             define('AWS_DISABLE_CONFIG_AUTO_DISCOVERY', true);
             include(__DIR__ . '/../stdlibs/sdk-1.6.0/sdk.class.php');
-            if (!getenv('SNS_KEY') or !getenv('SNS_SECRET')) {
-                throw new Exception('env SNS_KEY & SNS_SECRET not found');
+            if (!getenv('HEALTHCHECK_KEY') or !getenv('HEALTHCHECK_SECRET')) {
+                throw new Exception('env HEALTHCHECK_KEY & HEALTHCHECK_SECRET not found');
             }
             CFCredentials::set(array(
                 'development' => array(
-                    'key' => getenv('SNS_KEY'),
-                    'secret' => getenv('SNS_SECRET'),
+                    'key' => getenv('HEALTHCHECK_KEY'),
+                    'secret' => getenv('HEALTHCHECK_SECRET'),
                 ),
             ));
         }
