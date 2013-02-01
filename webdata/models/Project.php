@@ -15,6 +15,9 @@ class ProjectRow extends Pix_Table_Row
 
     public function getTemplate()
     {
+        if ($template = $this->getEAV('template')) {
+            return $template;
+        }
         return 'php54';
     }
 
