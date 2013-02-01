@@ -31,7 +31,6 @@ function main()
         exec("rm -rf /srv/chroot/{$id}");
         mkdir("/srv/chroot/{$id}");
         exec("tar zxf /srv/code/images/template.tgz -C /srv/chroot/{$id}");
-        exec("cp /srv/code/hisoku/scripts/scribelogger /srv/chroot/{$id}/usr/local/bin/");
         exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
         exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
         exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
@@ -131,7 +130,7 @@ function main()
             $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
         }
         $uid = 20000 + $id;
-        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh app-{$project->getLoggerCategory()} ");
+        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh");
         break;
 
     case 'run':

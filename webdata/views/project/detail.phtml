@@ -65,7 +65,7 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 Log
 <pre>
 <?php
-$cmd = "tail -n 100 /srv/logs/scribed/app-" . $this->project->getLoggerCategory() . "/app-" . $this->project->getLoggerCategory() . '_current';
+$cmd = "tail -n 100 /srv/logs/scribed/app-" . $this->project->name . "/app-" . $this->project->name . '_current';
 echo `$cmd`;
 ?>
 </pre>

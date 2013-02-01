@@ -8,11 +8,6 @@ class ProjectRow extends Pix_Table_Row
         return $this->name . USER_DOMAIN;
     }
 
-    public function getLoggerCategory()
-    {
-        return $this->name . '_' . hash_hmac('sha256', $this->name, getenv('LOG_SECRET'));
-    }
-
     public function getEAVs()
     {
         return EAV::search(array('table' => 'Project', 'id' => $this->id));
