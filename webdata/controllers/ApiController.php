@@ -36,6 +36,7 @@ class ApiController extends Pix_Controller
         $c->set('Project:access_at:' . $project->id, time());
 
         $ret = new StdClass;
+        $ret->project = $project->name;
         try {
             $nodes = $project->getWebNodes();
 
