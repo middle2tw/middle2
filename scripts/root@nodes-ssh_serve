@@ -182,7 +182,7 @@ function main()
     case 'shutdown':
     case 'shutdown-v1':
     case 'shutdown-v2':
-        list(, $id, $template) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
