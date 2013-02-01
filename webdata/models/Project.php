@@ -13,6 +13,11 @@ class ProjectRow extends Pix_Table_Row
         return EAV::search(array('table' => 'Project', 'id' => $this->id));
     }
 
+    public function getTemplate()
+    {
+        return 'php54';
+    }
+
     public function preSave()
     {
         $this->commit = substr($this->commit, 0, 32);

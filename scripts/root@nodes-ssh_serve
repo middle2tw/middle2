@@ -96,7 +96,6 @@ function main()
     case 'clone-v2':
     case 'clone':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        $template = 'php54';
         if (!$id) {
             die("invalid $id");
         }
@@ -106,6 +105,7 @@ function main()
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
+        $template = $project->getTemplate();
         exec("rpm --root /srv/chroot/{$id} -ivh --nodeps /srv/code/images/{$template}/*");
         exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
         $port = 20000 + $id;
