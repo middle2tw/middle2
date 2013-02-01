@@ -191,7 +191,7 @@ main_request.on('request', function(main_request, main_response){
         });
 
         backend_request.on('error', function(e){
-            scribe.send('lb-error', formatdate() + ' backend_request_error' + ' ' + host + ' ' + backend_host + ' ' + backend_port);
+            scribe.send('lb-error', formatdate() + ' backend_request_error' + ' ' + host + ' ' + backend_host + ' ' + backend_port + ' ' + e);
             main_response.end();
         });
 
