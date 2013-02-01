@@ -189,6 +189,12 @@ function main()
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
+        $uid = 20000 + $id;
+        $output = trim(`ps -u {$uid} -opid | grep -v PID`);
+        if ('' !== $output) {
+            $pids = explode("\n", $output);
+            exec("kill " . implode(' ', $pids));
+        }
         exec("rm -rf /srv/chroot/{$id}");
         echo json_encode(array('error' => false, 'port' => $port));
         break;
