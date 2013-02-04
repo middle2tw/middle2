@@ -2,12 +2,31 @@
 
 class WebNodeRow extends Pix_Table_Row
 {
+    /**
+     * markAsUnused 將這個 node 標為需要 reset, 不能再做任何事
+     * 
+     * @access public
+     * @return void
+     */
     public function markAsUnused()
     {
         $this->update(array(
             'project_id' => 0,
             'commit' => '',
             'status' => WebNode::STATUS_OVER,
+        ));
+    }
+
+    /**
+     * markAsWait 將這個 node 標為 waiting, 之後同 repository 還可以用
+     * 
+     * @access public
+     * @return void
+     */
+    public function markAsWait()
+    {
+        $this->update(array(
+            'status' => WebNode::STATUS_WAIT,
         ));
     }
 
@@ -149,6 +168,7 @@ class WebNode extends Pix_Table
     const STATUS_CRONNODE = 11;
     const STATUS_STOP = 100;
     const STATUS_OVER = 101; // 等待資源再被放出來
+    const STATUS_WAIT = 102; // 這個 node 還保有完整的某個 repository 環境，還可以繼續使用
 
     public function init()
     {
@@ -172,6 +192,7 @@ class WebNode extends Pix_Table
             11 => 'CronNode',
             100 => 'Stop',
             101 => 'Over',
+            102 => 'Wait',
         ));
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
