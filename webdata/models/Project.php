@@ -37,7 +37,6 @@ class ProjectRow extends Pix_Table_Row
         // 先拿 wait node 來用
         if ($node = WebNode::search(array('project_id' => $this->id, 'commit' => $this->commit, 'status' => WebNode::STATUS_WAIT))->first()) {
             $node->update(array(
-                'start_at' => time(),
                 'status' => WebNode::STATUS_CRONPROCESSING,
             ));
             return $node;

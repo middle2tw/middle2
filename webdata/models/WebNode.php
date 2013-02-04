@@ -109,6 +109,13 @@ class WebNodeRow extends Pix_Table_Row
         return max($this->access_at, intval($c->get("WebNode:access_at:{$this->ip}:{$this->port}")));
     }
 
+    public function updateAccessAt()
+    {
+        $c = new Pix_Cache;
+        $cache_key = "WebNode:access_at:{$this->ip}:{$this->port}";
+        $c->set($cache_key, time());
+    }
+
     /**
      * getNodeProcesses get the process list on node
      * 
@@ -272,7 +279,7 @@ class WebNode extends Pix_Table
             }
 
             // 如果 processing node 太久也要踢掉
-            if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->start_at) > 300) {
+            if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->getAccessAt()) > 300) {
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port}(status=processing) had no alive process, release it", E_USER_WARNING);
