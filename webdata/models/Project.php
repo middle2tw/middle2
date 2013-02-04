@@ -34,6 +34,15 @@ class ProjectRow extends Pix_Table_Row
      */
     public function getCronNode()
     {
+        // 先拿 wait node 來用
+        if ($node = WebNode::search(array('project_id' => $this->id, 'commit' => $this->commit, 'status' => WebNode::STATUS_WAIT))->first()) {
+            $node->update(array(
+                'start_at' => time(),
+                'status' => WebNode::STATUS_CRONPROCESSING,
+            ));
+            return $node;
+        }
+
         $free_nodes_count = count(WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)));
         if (!$free_nodes_count) {
             // TODO; log it

@@ -19,7 +19,7 @@ class CronJobRow extends Pix_Table_Row
         $output = (stream_get_contents($ret->stdout));
         $output = (stream_get_contents($ret->stderr));
         $output = (stream_get_contents($ret->stdio));
-        $node->markAsUnused();
+        $node->markAsWait();
     }
 
     public function getNextRunAt()
