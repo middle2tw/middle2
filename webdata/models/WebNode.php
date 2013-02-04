@@ -280,7 +280,10 @@ class WebNode extends Pix_Table
 
             // WebNode 超過一小時沒人看就 end
             if (in_array($node->status, array(WebNode::STATUS_WEBNODE)) and (time() - $node->getAccessAt()) > 3600) {
-                $node->markAsUnused();
+                if ($project = $node->project and $project->getEAV('always-alive')) {
+                } else {
+                    $node->markAsUnused();
+                }
             }
 
             // 如果 processing node 太久也要踢掉
