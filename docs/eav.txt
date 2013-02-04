@@ -1,0 +1,8 @@
+EAV list
+========
+
+Project
+-------
+* note: 專案的說明
+* template: 專案要用什麼語言, 預設 php54, 還支援 nodejs
+* always-alive: 是否是固定存活的專案
