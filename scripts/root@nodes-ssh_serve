@@ -130,7 +130,7 @@ function main()
 
         $params = array('project=' . escapeshellcmd($project->name));
         foreach ($project->variables as $variable) {
-            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellcmd($variable->value);
+            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->value);
         }
         $uid = 20000 + $id;
         exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh");
