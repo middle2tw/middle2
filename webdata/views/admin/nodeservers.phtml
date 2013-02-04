@@ -30,6 +30,7 @@ $node_status = WebNode::getTable()->_columns['status']['note'];
                         <tr>
                             <td>port</td>
                             <td>project</td>
+                            <td>template</td>
                             <td>status</td>
                             <td>start at</td>
                             <td>access at</td>
@@ -45,9 +46,22 @@ $node_status = WebNode::getTable()->_columns['status']['note'];
                             <a href="/admin/project/<?= $node->project_id ?>" title="<?= $this->escape($node->project->getEAV('note')) ?>"><?= $node->project->name ?></a>
                             <?php } ?>
                         </td>
+                        <td>
+                            <?php if ($node->project) { ?>
+                            <?= $this->escape($node->project->getTemplate()) ?>
+                            <?php } ?>
+                        </td>
                         <td><?= isset($node_status[$node->status]) ? $node_status[$node->status] : 'Unknown' ?></td>
-                        <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?></td>
-                        <td><?= $this->partial('helper/counttime.phtml', array('time' => $node->getAccessAt())) ?></td>
+                        <td>
+                            <?php if ($node->project) { ?>
+                            <?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?>
+                            <?php } ?>
+                        </td>
+                        <td>
+                            <?php if ($node->project) { ?>
+                            <?= $this->partial('helper/counttime.phtml', array('time' => $node->getAccessAt())) ?>
+                            <?php } ?>
+                        </td>
                         <td>
                             <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverdeleteport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Delete</button>
                             <?php if (WebNode::STATUS_STOP == $node->status) { ?>
