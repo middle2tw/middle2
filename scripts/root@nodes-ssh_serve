@@ -194,7 +194,7 @@ function main()
         }
         $uid = 20000 + $id;
         $output = trim(`ps -u {$uid} -opid | grep -v PID`);
-        if ('' !== $output) {
+        if ('' !== trim($output)) {
             $pids = explode("\n", $output);
             exec("kill " . implode(' ', $pids));
         }
