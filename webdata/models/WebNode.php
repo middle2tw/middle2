@@ -287,7 +287,7 @@ class WebNode extends Pix_Table
             }
 
             // 如果 processing node 太久也要踢掉
-            if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->getAccessAt()) > 300) {
+            if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->getAccessAt()) > 300 and (time() - $node->start_at) > 300) {
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port}(status=processing) had no alive process, release it", E_USER_WARNING);
