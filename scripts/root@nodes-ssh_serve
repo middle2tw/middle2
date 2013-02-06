@@ -18,7 +18,6 @@ function main()
     $command = getenv('SSH_ORIGINAL_COMMAND');
     list($method) = explode(' ', $command, 2);
     switch ($method) {
-    case 'init-v2':
     case 'init':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
@@ -49,51 +48,6 @@ function main()
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
-    case 'init-v1':
-        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        if (!$id) {
-            echo json_encode(array('error' => true, 'message' => 'id is not found'));
-            break;
-        }
-
-        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
-        }
-        exec("rm -rf /srv/chroot/{$id}/");
-        exec("cp --preserve=mode,ownership,timestamps --recursive /srv/chroot/template /srv/chroot/{$id}");
-        exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
-        exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
-        exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
-        exec("mknod /srv/chroot/{$id}/dev/stdin c 5 0");
-        exec("mknod /srv/chroot/{$id}/dev/stdout c 5 1");
-        exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
-        exec("chmod 666 /srv/chroot/{$id}/dev/*");
-        $uid = 20000 + $id;
-        exec("sed -i 's/^www-user:x:10003/www-user:x:{$uid}/' /srv/chroot/{$id}/etc/passwd");
-
-        $port = 20000 + $id;
-        exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
-        echo json_encode(array('error' => false, 'port' => $port));
-        break;
-
-    case 'clone-v1':
-        list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        if (!$id) {
-            die("invalid $id");
-        }
-        if (!$project = Project::find_by_name(strval($project_name))) {
-            return error('project not found: ' . $project_name);
-        }
-        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
-        }
-        $port = 20000 + $id;
-        exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
-        mkdir("/srv/chroot/{$id}/srv/web");
-        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
-        break;
-
-    case 'clone-v2':
     case 'clone':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
@@ -118,8 +72,6 @@ function main()
         break;
 
     case 'restart-web':
-    case 'restart-web-v1':
-    case 'restart-web-v2':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
@@ -137,8 +89,6 @@ function main()
         break;
 
     case 'run':
-    case 'run-v1':
-    case 'run-v2':
         list(, $project_name, $id, $run_cmd) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
@@ -183,8 +133,6 @@ function main()
         break;
 
     case 'shutdown':
-    case 'shutdown-v1':
-    case 'shutdown-v2':
         list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
