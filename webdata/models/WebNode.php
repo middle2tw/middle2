@@ -176,6 +176,7 @@ class WebNode extends Pix_Table
     const STATUS_STOP = 100;
     const STATUS_OVER = 101; // 等待資源再被放出來
     const STATUS_WAIT = 102; // 這個 node 還保有完整的某個 repository 環境，還可以繼續使用
+    const STATUS_SERVICE = 103; // 被 service 拿去用了，這些是不會死的
 
     public function init()
     {
@@ -200,6 +201,7 @@ class WebNode extends Pix_Table
             100 => 'Stop',
             101 => 'Over',
             102 => 'Wait',
+            103 => 'Service',
         ));
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
