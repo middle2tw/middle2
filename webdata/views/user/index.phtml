@@ -35,5 +35,13 @@
     </form>
     </li>
 </ul>
-
+<hr>
+<h2>Change Password</h2>
+<form method="post" action="/user/changepassword">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    Old Password: <input type="password" name="oldpassword"><br>
+    New Password: <input type="password" name="newpassword"><br>
+    Again: <input type="password" name="newpassword2"><br>
+    <input type="submit">
+</form>
 <?= $this->partial('/common/footer.phtml', $this) ?>

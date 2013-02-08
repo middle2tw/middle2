@@ -69,4 +69,28 @@ class UserController extends Pix_Controller
 
         return $this->redirect('/');
     }
+
+    public function changepasswordAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            return $this->alert('Error', '/');
+        }
+
+        if (!$this->user->verifyPassword($_POST['oldpassword'])) {
+            return $this->alert('Wrong password', '/');
+        }
+
+        if ($_POST['newpassword'] != $_POST['newpassword2']) {
+            return $this->alert('Password mismatch', '/');
+        }
+
+        if (strlen($_POST['newpassword']) < 4) {
+            return $this->alert('Password is too short', '/');
+        }
+
+        $this->user->setPassword($_POST['newpassword']);
+
+        return $this->alert('success!', '/');
+
+    }
 }
