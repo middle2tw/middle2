@@ -41,6 +41,22 @@ $node_status = WebNode::getTable()->_columns['status']['note'];
                     <?php foreach ($nodes as $node) { ?>
                     <tr>
                         <td><?= $node->port ?></td>
+                        <?php if (WebNode::STATUS_SERVICE == $node->status) { ?>
+                        <td>
+                            <?php if ($project = $node->getServiceProject()) { ?>
+                            <a href="/admin/project/<?= $project->id ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
+                            <?php } ?>
+                        </td>
+                        <td>
+                            <?= 'memcache' ?>
+                        </td>
+                        <td>Service</td>
+                        <td>
+                            <?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?>
+                        </td>
+                        <td>
+                        </td>
+                        <?php } else { ?>
                         <td>
                             <?php if ($node->project) { ?>
                             <a href="/admin/project/<?= $node->project_id ?>" title="<?= $this->escape($node->project->getEAV('note')) ?>"><?= $node->project->name ?></a>
@@ -62,6 +78,7 @@ $node_status = WebNode::getTable()->_columns['status']['note'];
                             <?= $this->partial('helper/counttime.phtml', array('time' => $node->getAccessAt())) ?>
                             <?php } ?>
                         </td>
+                        <?php } ?>
                         <td>
                             <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverdeleteport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Delete</button>
                             <?php if (WebNode::STATUS_STOP == $node->status) { ?>

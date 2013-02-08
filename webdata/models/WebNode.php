@@ -17,6 +17,11 @@ class WebNodeRow extends Pix_Table_Row
         ));
     }
 
+    public function getServiceProject()
+    {
+        return Addon_Memcached::search(array('host' => long2ip($this->ip), 'port' => $this->port))->first()->project;
+    }
+
     /**
      * markAsWait 將這個 node 標為 waiting, 之後同 repository 還可以用
      * 
