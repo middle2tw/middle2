@@ -5,6 +5,15 @@
     Note: <input type="text" name="note" value="<?= $this->escape($this->project->getEAV('note')) ?>">
     <button type="submit">SAVE</button>
 </form>
+<form method="post" action="/project/edittemplate/<?= $this->project->name ?>">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    Template: <select name="template">
+        <?php foreach (Project::getTemplates() as $template) { ?>
+        <option value="<?= $template ?>"<?= $template == $this->project->getTemplate() ? ' selected="selected"' : '' ?>><?= $template ?></option>
+        <?php } ?>
+    </select>
+    <button type="submit">SAVE</button>
+</form>
 <h3>deployment:</h3>
 <ul>
     <li><code>git remote add hisoku git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>

@@ -196,4 +196,13 @@ class Project extends Pix_Table
         }
         return $random;
     }
+
+    public static function getTemplates()
+    {
+        return array(
+            'php54',
+            'python26',
+            'nodejs',
+        );
+    }
 }

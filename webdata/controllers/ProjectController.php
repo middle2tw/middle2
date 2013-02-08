@@ -137,6 +137,28 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function edittemplateAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*edittemplate*/, $name, $key) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        $templates = Project::getTemplates();
+        if (!in_array($_POST['template'], $templates)) {
+            return $this->error('template not found', '/');
+        }
+
+        $project->setEAV('template', strval($_POST['template']));
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
     public function addmysqladdonAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {
