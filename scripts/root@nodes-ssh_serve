@@ -48,6 +48,31 @@ function main()
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
+    case 'service':
+        list(, $id, $template, $option) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        if (!$id = intval($id)) {
+            die("invalid $id");
+        }
+        if (!file_exists('/srv/code/images/' . $template)) {
+            die("template {$template} not found");
+        }
+        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
+        }
+        exec("rpm --root /srv/chroot/{$id} -ivh --nodeps /srv/code/images/{$template}/*");
+        if (file_exists("/srv/code/hisoku/config/rpmsource/{$template}-config")) {
+            exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
+        }
+        $uid = $port = 20000 + $id;
+        $option = urldecode($option);
+
+        if (file_exists("/srv/chroot/{$id}/init.sh")) {
+            exec("chroot /srv/chroot/{$id}/ /init.sh {$port} {$option}");
+        }
+
+        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ /start.sh {$port} {$option}");
+        break;
+
     case 'clone':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
