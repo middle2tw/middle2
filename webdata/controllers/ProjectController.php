@@ -154,6 +154,24 @@ class ProjectController extends Pix_Controller
 
         return $this->redirect('/project/detail/' . $project->name);
     }
+
+    public function addmemcacheaddonAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*addmemcacheaddon*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        Addon_Memcached::addDB($project);
+
+        return $this->redirect('/project/detail/' . $project->name);
+    }
     public function editvariableAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {
