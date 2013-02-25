@@ -304,6 +304,11 @@ class WebNode extends Pix_Table
                 }
             }
 
+            // Wait node 保留兩小時
+            if (in_array($node->status, array(WebNode::STATUS_WAIT)) and (time() - $node->getAccessAt()) > 7200) {
+                $node->markAsUnused();
+            }
+
             // 如果是 over 要放出來
             if (in_array($node->status, array(WebNode::STATUS_OVER))) {
                 $node->resetNode();
