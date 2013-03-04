@@ -6,12 +6,11 @@ Summary:	php54-pecl-memcached
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	memcached-2.1.0.tar
+Source0:	memcached-2.1.0.tgz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+BuildRequires:  libmemcached-devel
 
 %description
-
-Requires:	libmemcached-devel
 
 %prep
 %setup -q -n memcached-2.1.0

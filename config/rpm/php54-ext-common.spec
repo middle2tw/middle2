@@ -1,20 +1,20 @@
 Name:		php54-ext-common
-Version:	5.4.10
+Version:	5.4.12
 Release:	1%{?dist}
 Summary:	php54-ext-common
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	php-5.4.10.tar.bz2
+Source0:	php-5.4.12.tar.bz2
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-Requires:       autoconf
+BuildRequires:       autoconf
 %description
 
 
 %prep
-%setup -q -n php-5.4.10
+%setup -q -n php-5.4.12
 
 
 %build

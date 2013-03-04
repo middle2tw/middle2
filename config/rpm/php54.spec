@@ -1,29 +1,32 @@
 Name:		php54
-Version:	5.4.10
+Version:	5.4.12
 Release:	1%{?dist}
 Summary:	PHP54
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	php-5.4.10.tar.bz2
+Source0:	php-5.4.12.tar.bz2
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-
+BuildRequires:  libxml2-devel
+BuildRequires:  openssl-devel
+BuildRequires:  libcurl-devel
+BuildRequires:  libpng-devel
+BuildRequires:  libjpeg-devel
 %description
 
 
 %prep
-%setup -q -n php-5.4.10
+%setup -q -n php-5.4.12
 
 %build
-%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc --enable-mysqlnd --with-mysql --with-mysqli --with-zlib --with-gettext --enable-pcntl --with-curl --with-openssl
+%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc --enable-mysqlnd --with-mysql --with-mysqli --with-zlib --with-gettext --enable-pcntl --with-curl --with-openssl --with-gd
 make %{?_smp_mflags}
 
 
 %install
 rm -rf %{buildroot}
 make install INSTALL_ROOT=%{buildroot}
-
 
 %clean
 rm -rf %{buildroot}
@@ -492,6 +495,22 @@ rm -rf %{buildroot}
 /usr/include/php/ext/mysqlnd/mysqlnd_wireprotocol.h
 /usr/include/php/ext/mysqlnd/php_mysqlnd.h
 /usr/include/php/ext/mysqlnd/php_mysqlnd_config.h
+/usr/include/php/ext/gd/gdcache.h
+/usr/include/php/ext/gd/libgd/gd.h
+/usr/include/php/ext/gd/libgd/gd_compat.h
+/usr/include/php/ext/gd/libgd/gd_intern.h
+/usr/include/php/ext/gd/libgd/gd_io.h
+/usr/include/php/ext/gd/libgd/gdcache.h
+/usr/include/php/ext/gd/libgd/gdfontg.h
+/usr/include/php/ext/gd/libgd/gdfontl.h
+/usr/include/php/ext/gd/libgd/gdfontmb.h
+/usr/include/php/ext/gd/libgd/gdfonts.h
+/usr/include/php/ext/gd/libgd/gdfontt.h
+/usr/include/php/ext/gd/libgd/gdhelpers.h
+/usr/include/php/ext/gd/libgd/jisx0208.h
+/usr/include/php/ext/gd/libgd/wbmp.h
+/usr/include/php/ext/gd/libgd/webpimg.h
+/usr/include/php/ext/gd/php_gd.h
 
 %changelog
 
