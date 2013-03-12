@@ -10,7 +10,7 @@ else
 fi
 
 START_AT=`date +%s`
-END_AT=`expr 30 + $START_AT`
+END_AT=`expr 300 + $START_AT`
 
 CHECK_FAIL="1"
 while [ $CHECK_FAIL -eq "1" -a $END_AT -gt `date +%s` ]
