@@ -2,9 +2,8 @@
 <?php
 include(__DIR__ . '/../../webdata/init.inc.php');
 
-$load_balancers = array('10.0.0.74');
 # check loadbalancer
-foreach ($load_balancers as $host) {
+foreach (Hisoku::getLoadBalancers() as $host) {
     $curl = curl_init('http://' . $host . '/');
     curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
