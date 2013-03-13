@@ -65,6 +65,12 @@ hisoku.getBackendHost = function(host, port, callback){
             if (json.error) {
                 return callback({success: false});
             }
+            if (json.wait) {
+                setTimeout(function(){
+                    hisoku.getBackendHost(host, port, callback);
+                }, 3000);
+                return;
+            }
             return callback({success: true, host: json.nodes[0][0], port: json.nodes[0][1], project: json.project});
         });
         selector_response.on('close', function(){
