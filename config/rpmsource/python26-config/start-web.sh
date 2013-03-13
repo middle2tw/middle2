@@ -4,7 +4,7 @@
 cd /srv/web
 
 if  [ -f "/srv/web/manage.py" ]; then
-    env PORT=`cat /etc/port.conf` python ./manage.py runserver 0.0.0.0:`cat /etc/port.conf` --noreload &
+    env PORT=`cat /etc/port.conf` python ./manage.py runserver 0.0.0.0:`cat /etc/port.conf` --noreload > /srv/logs/django.log 2>&1 &
 else
     env PORT=`cat /etc/port.conf` gunicorn app:app -b 0.0.0.0:`cat /etc/port.conf` > /dev/null &
 fi
