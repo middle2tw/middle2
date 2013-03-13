@@ -81,6 +81,9 @@ hisoku.getBackendHost = function(host, port, callback){
 };
 
 var main_request = http.createServer();
+var request_count = 0;
+var request_serial = 0;
+var request_pools = {};
 
 main_request.on('request', function(main_request, main_response){
     var host = main_request.headers['host'];
@@ -90,6 +93,16 @@ main_request.on('request', function(main_request, main_response){
         main_response.end();
         return;
     }
+
+    var current_request = request_serial;
+    request_count ++;
+    request_serial ++;
+    request_pools[current_request] = {
+        host: host,
+        start_at: (new Date()).getTime(),
+        from: main_request.headers['x-forwarded-for'],
+        url: main_request.url,
+    };
 
     if (host.match(/:/)) {
         port = parseInt(host.split(':')[1]);
@@ -140,13 +153,21 @@ main_request.on('request', function(main_request, main_response){
             scribe.send('lb-notfound', log);
             main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
             main_response.end();
+            request_count --;
+            delete(request_pools[current_request]);
             return;
         }
 
         if (options.type == 'healthcheck') {
             main_response.writeHead(200);
-            main_response.write('OK');
+            main_response.write(JSON.stringify({
+                status: 'OK',
+                request_count: request_count,
+                request_pools: request_pools,
+            }));
             main_response.end();
+            request_count --;
+            delete(request_pools[current_request]);
             return;
         }
 
@@ -190,6 +211,8 @@ main_request.on('request', function(main_request, main_response){
                     scribe.send('app-' + options.project, log);
                 }
                 main_response.end();
+                request_count --;
+                delete(request_pools[current_request]);
             });
 
             backend_response.on('close', function(){
@@ -200,6 +223,8 @@ main_request.on('request', function(main_request, main_response){
         backend_request.on('error', function(e){
             scribe.send('lb-error', formatdate() + ' backend_request_error' + ' ' + host + ' ' + backend_host + ' ' + backend_port + ' ' + e);
             main_response.end();
+            request_count --;
+            delete(request_pools[current_request]);
         });
 
         main_request_data = function(chunk){
