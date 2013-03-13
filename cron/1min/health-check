@@ -9,8 +9,8 @@ foreach ($load_balancers as $host) {
     curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     $ret = curl_exec($curl);
-    if ('OK' != $ret) {
-        Hisoku::alert("LoadBalancer error", "LoadBalancer IP: {$host}");
+    if (!preg_match("#OK#", $ret)) {
+        Hisoku::alert("LoadBalancer error", "LoadBalancer IP: {$host}: Return: {$ret}");
         continue;
     }
     $info = curl_getinfo($curl);
