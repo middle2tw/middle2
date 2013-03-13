@@ -31,6 +31,13 @@ class ApiController extends Pix_Controller
             ));
         }
 
+        if ($project->isProcessingWebNode()) {
+            return $this->json(array(
+                'error' => false,
+                'wait' => true,
+            ));
+        }
+
         $c = new Pix_Cache;
         $c->inc('Project:access_count:' . $project->id);
         $c->set('Project:access_at:' . $project->id, time());
