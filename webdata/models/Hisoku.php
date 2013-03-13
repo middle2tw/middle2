@@ -2,6 +2,13 @@
 
 class Hisoku
 {
+    public function getLoadBalancers()
+    {
+        return array(
+            '10.0.0.74',
+        );
+    }
+
     public static function getLoginUser()
     {
         if ($u = User::find(intval(Pix_Session::get('user')))) {
