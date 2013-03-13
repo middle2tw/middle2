@@ -71,6 +71,12 @@ class ProjectRow extends Pix_Table_Row
         return $random_node;
     }
 
+    public function isProcessingWebNode()
+    {
+        $c = new Pix_Cache;
+        return $c->get("Project:processing:{$this->id}");
+    }
+
     /**
      * getWebNodes 取得現在 Project 有哪些 Web node, 如果沒有會自動產生
      *
