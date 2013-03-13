@@ -41,6 +41,7 @@ hisoku.getBackendHost = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
         return callback({success: true, host: 'main-p.hisoku.ronny.tw', port: 9999});
     }
+    // TODO: 要限內部網路才能做這件事
     if ('healthcheck' == host) {
         return callback({success: true, type: 'healthcheck'});
     }
