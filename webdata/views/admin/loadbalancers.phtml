@@ -1,0 +1,51 @@
+<?php
+$this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
+$get_info_from_ip = function($ip){
+    $curl = curl_init('http://' . $ip);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $ret = curl_exec($curl);
+    $info = curl_getinfo($curl);
+
+    if (200 != $info['http_code']) {
+        $obj = new StdClass;
+        $obj->status = 'failed';
+        return $obj;
+    }
+
+    return json_decode($ret);
+};
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2 bs-docs-sidebar">
+            <!--Sidebar content-->
+            <ul class="nav nav-list affix bs-docs-sidenav">
+                <?php foreach (Hisoku::getLoadBalancers() as $ip) { ?>
+                <li>
+                <a href="#node-<?= $ip ?>">
+                    <i class="icon-chevron-right"></i>
+                    <?= $ip ?>
+                </a>
+                </li>
+                <?php } ?>
+            </ul>
+        </div>
+        <div class="span10">
+            <!--Body content-->
+            <?php foreach (Hisoku::getLoadBalancers() as $ip) { ?>
+            <?php $info = $get_info_from_ip($ip); ?>
+            <div id="node-<?= $ip ?>">
+                <h3><?= $ip ?></h3>
+                <pre><?= json_encode($info, JSON_PRETTY_PRINT) ?></pre>
+            </div>
+            <hr>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<script><!--
+//--></script>
+<?= $this->partial('/common/footer.phtml', $this) ?>

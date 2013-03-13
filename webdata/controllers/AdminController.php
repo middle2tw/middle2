@@ -28,6 +28,10 @@ class AdminController extends Pix_Controller
     {
     }
 
+    public function loadbalancersAction()
+    {
+    }
+
     public function nodeserveraddportAction()
     {
         list(, /*admin*/, /*nodeserveraddport*/, $ip, $port) = explode('/', $this->getURI());
