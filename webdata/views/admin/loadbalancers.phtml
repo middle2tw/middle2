@@ -39,7 +39,30 @@ $get_info_from_ip = function($ip){
             <?php $info = $get_info_from_ip($ip); ?>
             <div id="node-<?= $ip ?>">
                 <h3><?= $ip ?></h3>
-                <pre><?= json_encode($info, JSON_PRETTY_PRINT) ?></pre>
+                Start time: <?= $this->partial('/helper/counttime.phtml', array('time' => $info->start_time / 1000)) ?><br>
+                <h4>Current request</h4>
+                <table class="table">
+                    <tr>
+                        <td>no</td>
+                        <td>host</td>
+                        <td>url</td>
+                        <td>time</td>
+                    </tr>
+                    <?php foreach ($info->request_pools as $id => $data) { ?>
+                    <tr>
+                        <td><?= $id ?></td>
+                        <td><?= $this->escape($data->host) ?></td>
+                        <td><?= $this->escape($data->url) ?></td>
+                        <td><?= $this->partial('helper/counttime.phtml', array('time' => $data->start_at / 1000)) ?></td>
+                    </tr>
+                    <?php } ?>
+                </table>
+                <h4>Recent requests</h4>
+                <ol>
+                    <?php foreach ($info->recent_logs as $log) { ?>
+                    <li><?= $this->escape($log) ?></li>
+                    <?php } ?>
+                </ol>
             </div>
             <hr>
             <?php } ?>
