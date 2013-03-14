@@ -84,6 +84,8 @@ var main_request = http.createServer();
 var request_count = 0;
 var request_serial = 0;
 var request_pools = {};
+var recent_logs = [];
+var start_time = (new Date()).getTime();
 
 main_request.on('request', function(main_request, main_response){
     var host = main_request.headers['host'];
@@ -150,6 +152,9 @@ main_request.on('request', function(main_request, main_response){
                 + ' "' + referer + '"'
                 + ' "' + useragent + '"'
             ); 
+            recent_logs.push(log);
+            recent_logs = recent_logs.slice(a.length - 10);
+
             scribe.send('lb-notfound', log);
             main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
             main_response.end();
@@ -164,6 +169,8 @@ main_request.on('request', function(main_request, main_response){
                 status: 'OK',
                 request_count: request_count,
                 request_pools: request_pools,
+                start_time: start_time,
+                recent_logs: recent_logs,
             }));
             main_response.end();
             request_count --;
@@ -210,6 +217,8 @@ main_request.on('request', function(main_request, main_response){
                         + ' "' + useragent + '"'); 
                     scribe.send('app-' + options.project, log);
                 }
+                recent_logs.push(log);
+                recent_logs = recent_logs.slice(a.length - 10);
                 main_response.end();
                 request_count --;
                 delete(request_pools[current_request]);
