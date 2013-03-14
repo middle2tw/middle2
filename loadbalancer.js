@@ -153,7 +153,7 @@ main_request.on('request', function(main_request, main_response){
                 + ' "' + useragent + '"'
             ); 
             recent_logs.push(log);
-            recent_logs = recent_logs.slice(a.length - 10);
+            recent_logs = recent_logs.slice(recent_logs.length - 10);
 
             scribe.send('lb-notfound', log);
             main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
@@ -218,7 +218,7 @@ main_request.on('request', function(main_request, main_response){
                     scribe.send('app-' + options.project, log);
                 }
                 recent_logs.push(log);
-                recent_logs = recent_logs.slice(a.length - 10);
+                recent_logs = recent_logs.slice(recent_logs.length - 10);
                 main_response.end();
                 request_count --;
                 delete(request_pools[current_request]);
