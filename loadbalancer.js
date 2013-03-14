@@ -216,9 +216,9 @@ main_request.on('request', function(main_request, main_response){
                         + ' "' + referer + '"'
                         + ' "' + useragent + '"'); 
                     scribe.send('app-' + options.project, log);
+                    recent_logs.push(log);
+                    recent_logs = recent_logs.slice(recent_logs.length - 10);
                 }
-                recent_logs.push(log);
-                recent_logs = recent_logs.slice(recent_logs.length - 10);
                 main_response.end();
                 request_count --;
                 delete(request_pools[current_request]);
