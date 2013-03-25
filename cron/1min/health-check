@@ -13,7 +13,7 @@ foreach (Hisoku::getLoadBalancers() as $host) {
         continue;
     }
     $info = curl_getinfo($curl);
-    if ($info['total_time'] > 0.1) {
+    if ($info['total_time'] > 1) {
         Hisoku::alert("LoadBalancer warning", "LoadBalancer IP: {$host}\nhealth check time: " . json_encode($info, JSON_PRETTY_PRINT));
     }
 }
