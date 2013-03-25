@@ -26,6 +26,7 @@ if ($this->body_tags) {
             <?php if ($guest->isAdmin()) { ?>
             <li><a href="/admin">Admin</a></li>
             <?php } ?>
+            <li><a href="/phpMyAdmin" target="_blank">phpMyAdmin</a></li>
             <?php } else { ?>
             <li>
             <form method="post" action="/index/login" class="navbar-form">
