@@ -1,2 +1,3 @@
 RewriteEngine on
-RewriteRule .* index.php
+RewriteRule phpMyAdmin/ - [L]
+RewriteRule .* index.php [L]
