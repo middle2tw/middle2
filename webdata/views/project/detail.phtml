@@ -63,6 +63,11 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
     </form>
     </li>
 </ul>
+<textarea readonly="readonly">
+<?php foreach ($this->project->variables as $variable) { ?>
+putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->value) ?>');
+<?php } ?>
+</textarea>
 <hr>
 <h3>Addon: </h3>
 <ol>
