@@ -1,13 +1,12 @@
 <?php
 
 include(__DIR__ . '/../../../webdata/init.inc.php');
-Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET')));
 
-include(__DIR__ . '/../MemcacheSASL.php');
 $m = new MemcacheSASL();
 $m->addServer(getenv('MEMCACHE_SERVER'), getenv('MEMCACHE_PORT'));
 $m->setSaslAuthData(getenv('MEMCACHE_USERNAME'), getenv('MEMCACHE_PASSWORD'));
-$m->session_start();
+$m->setSaveHandler();
+session_start();
 
 if (!$user = Hisoku::getLoginUser()) {
     header('Location: /');
