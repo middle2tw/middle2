@@ -16,7 +16,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %setup -q
 
 %build
-./configure --with-libiconv-prefix=/usr/local
+./configure --without-libiconv-prefix
 make %{?_smp_mflags}
 
 
