@@ -2,6 +2,8 @@
 
 include(__DIR__ . '/../../../webdata/init.inc.php');
 
+Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET'), 'cookie_key' => 'HISOKU_SESSION'));
+
 $m = new MemcacheSASL();
 $m->addServer(getenv('MEMCACHE_SERVER'), getenv('MEMCACHE_PORT'));
 $m->setSaslAuthData(getenv('MEMCACHE_USERNAME'), getenv('MEMCACHE_PASSWORD'));
@@ -12,8 +14,6 @@ if (!$user = Hisoku::getLoginUser()) {
     header('Location: /');
     exit;
 }
-
-$cfg['blowfish_secret'] = 'ubQS8xf'; /* YOU MUST FILL IN THIS FOR COOKIE AUTH! */
 
 $addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
 $i = 0;

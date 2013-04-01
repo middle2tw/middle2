@@ -2,11 +2,6 @@
 
 include(__DIR__ . '/../webdata/init.inc.php');
 
-$m = new MemcacheSASL();
-$m->addServer(getenv('MEMCACHE_SERVER'), getenv('MEMCACHE_PORT'));
-$m->setSaslAuthData(getenv('MEMCACHE_USERNAME'), getenv('MEMCACHE_PASSWORD'));
-$m->setSaveHandler();
-session_start();
-
+Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET'), 'cookie_key' => 'HISOKU_SESSION'));
 Pix_Controller::addCommonHelpers();
 Pix_Controller::dispatch(__DIR__ . '/../webdata/');

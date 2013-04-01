@@ -403,6 +403,7 @@ class MemcacheSASL
 	$this->_options[$key] = $value;
     }
 
+    protected $_session_cache = array();
     /**
      * Set the memcache object to be a session handler
      *
@@ -425,9 +426,12 @@ class MemcacheSASL
             function(){ // close
             },
             function($sessionId){ // read
-                return $this->get($sessionId);
+                return $this->_session_cache[$sessionId] = $this->get($sessionId);
             },
             function($sessionId, $data){ // write
+                if (array_key_exists($sessionId, $this->_session_cache) and $this->_session_cache[$sessionId] == $data) {
+                    return;
+                }
                 return $this->set($sessionId, $data);
             },
             function($sessionId){ // destroy
