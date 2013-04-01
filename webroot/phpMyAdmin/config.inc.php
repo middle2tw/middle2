@@ -1,18 +1,19 @@
 <?php
 
-include(__DIR__ . '/../../../webdata/init.inc.php');
+if (!class_exists('Pix_Session')) {
+    include(__DIR__ . '/../../../webdata/init.inc.php');
 
-Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET'), 'cookie_key' => 'HISOKU_SESSION'));
+    Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET'), 'cookie_key' => 'HISOKU_SESSION'));
 
-$m = new MemcacheSASL();
-$m->addServer(getenv('MEMCACHE_SERVER'), getenv('MEMCACHE_PORT'));
-$m->setSaslAuthData(getenv('MEMCACHE_USERNAME'), getenv('MEMCACHE_PASSWORD'));
-$m->setSaveHandler();
-session_start();
+    $m = new MemcacheSASL();
+    $m->addServer(getenv('MEMCACHE_SERVER'), getenv('MEMCACHE_PORT'));
+    $m->setSaslAuthData(getenv('MEMCACHE_USERNAME'), getenv('MEMCACHE_PASSWORD'));
+    $m->setSaveHandler();
 
-if (!$user = Hisoku::getLoginUser()) {
-    header('Location: /');
-    exit;
+    if (!$user = Hisoku::getLoginUser()) {
+        header('Location: /');
+        exit;
+    }
 }
 
 $addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
