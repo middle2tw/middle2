@@ -1,5 +1,6 @@
 var http = require('http');
 var Scribe = require('scribe').Scribe;
+var main_page_host = 'main-p.hisoku.ronny.tw';
 scribe = new Scribe("scribe.hisoku.ronny.tw", 1463, {"autoReconnect": true});
 scribe.open();
 
@@ -39,7 +40,7 @@ hisoku.cache = {};
 
 hisoku.getBackendHost = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
-        return callback({success: true, host: 'main-p.hisoku.ronny.tw', port: 9999});
+        return callback({success: true, host: main_page_host, port: 9999});
     }
     // TODO: 要限內部網路才能做這件事
     if ('healthcheck' == host) {
@@ -47,7 +48,7 @@ hisoku.getBackendHost = function(host, port, callback){
     }
 
     var selector_request = http.request({
-        host: 'main-p.hisoku.ronny.tw',
+        host: main_page_host,
         port: 9999,
         path: '/api/getnodes?domain=' + encodeURIComponent(host) + '&port=' + parseInt(port)
     }, function(selector_response) {
