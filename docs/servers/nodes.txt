@@ -97,8 +97,8 @@ New Node Server
 ------------------------------
 sudo groupadd -g 10002 deploy
 sudo useradd -u 10002 -r -g deploy -d /srv/deploy deploy 
-sudo mkdir -p ~deploy/
-sudo chown -R deploy:deploy /srv/deploy
+sudo mkdir -p ~deploy/ /srv/chroot
+sudo chown -R deploy:deploy /srv/deploy /srv/chroot
 
 在 root 帳號開洞
 ----------------
@@ -106,7 +106,8 @@ sudo vim ~root/.ssh/authorized_keys
 * 放入 command="/srv/code/hisoku/scripts/root@nodes-ssh_serve",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty {key}
 sudo ssh-keygen
 sudo cat ~root/.ssh/id_rsa.pub
-* 將產生的 key 放進 hisoku-repo/scripts/update-keys 的 $deploy_keys 裡面
+* 將產生的 key 放進 hisoku-repo/scripts/update-keys 的 $deploy_keys 裡面, 然後 make deploy
+* 在 hisoku 的 prompt.php 執行 UserKey::updateKey()
 sudo ssh git@git-p.hisoku.ronny.tw
 * 上面是讓 node server 記住 git-p.hisoku.ronny.tw 的 sign
 
@@ -115,26 +116,6 @@ sudo ssh git@git-p.hisoku.ronny.tw
 sudo yum install -y git php php-mysql php-pecl-memcached
 * git 抓原始檔用
 * php 執行 script 用
-
-安裝 s3cmd
-----------
-wget 'http://downloads.sourceforge.net/project/s3tools/s3cmd/1.1.0-beta3/s3cmd-1.1.0-beta3.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fs3tools%2Ffiles%2F&ts=1357620359&use_mirror=nchc'
-unzip s3cmd-1.1.0-beta3.zip
-./s3cmd-1.1.0-beta3/s3cmd --configure
-* 輸入 access key / secret / proxy
-
-抓下 images
------------
-./s3cmd-1.1.0-beta3/s3cmd get s3://hisoku/images/php53.tgz
-sudo mkdir /srv/chroot
-sudo chown -R deploy:deploy /srv/chroot
-sudo cp php53.tgz /srv/chroot
-cd /srv/chroot
-sudo tar zxvf php53.tgz
-
-解開 template
--------------
-sudo chown -R deploy:nobody /srv/chroot/template
 
 開新的 node
 ===========
