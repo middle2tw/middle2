@@ -108,11 +108,23 @@ hisoku.getBackendHost2 = function(host, port, callback){
 };
 
 hisoku._getNodesByProject = function(project, callback){
-    mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` = 10 AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
-        if (rows.length) {
-            return callback({success: true, host: rows[0].ip, port: rows[0].port, project: project});
+    mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
+        if (!rows.length) {
+            return hisoku._initNewNodes(project, callback);
         }
-        hisoku._initNewNodes(project, callback);
+        var working_nodes = [];
+        for (var i = 0; i < rows.length; i ++) {
+            if (rows[i].status == 10) {
+                working_nodes.push(rows[i]);
+            }
+        }
+        if (working_nodes.length) {
+            random_node = working_nodes[Math.floor(Math.random() * working_nodes.length)];
+            return callback({success: true, host: random_node.ip, port: random_node.port, project: project});
+        }
+        setTimeout(function(){
+            hisoku._getNodesByProject(projectt, callback);
+        }, 500);
     });
 };
 
