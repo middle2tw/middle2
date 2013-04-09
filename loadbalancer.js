@@ -123,7 +123,7 @@ hisoku._getNodesByProject = function(project, callback){
             return callback({success: true, host: random_node.ip, port: random_node.port, project: project});
         }
         setTimeout(function(){
-            hisoku._getNodesByProject(projectt, callback);
+            hisoku._getNodesByProject(project, callback);
         }, 500);
     });
 };
