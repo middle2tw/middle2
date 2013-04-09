@@ -1,8 +1,9 @@
 var http = require('http');
 var Scribe = require('scribe').Scribe;
 var main_page_host = 'main-p.hisoku.ronny.tw';
-var Memcached = require('memcached');
-var memcached = new Memcached('memcache-p-1.hisoku.ronny.tw:11211');
+var Memcache = require('memcache');
+var memcache = new Memcache.Client(11211, 'memcache-p-1.hisoku.ronny.tw');
+memcache.connect();
 
 var mysql = require('mysql');
 
@@ -305,10 +306,10 @@ main_request.on('request', function(main_request, main_response){
 
         if (options.project) {
             var now = Math.floor((new Date()).getTime() / 1000);
-            memcached.increment('Project:access_count:' + options.project.id, 1);
-            memcached.set('Project:access_at:' + options.project.id,  now);
-            memcached.increment('WebNode:access_count:' + options.host + ':' + options.port);
-            memcached.set('WebNode:access_at:' + options.host + ':' + options.port, now);
+            memcache.increment('Project:access_count:' + options.project.id, 1);
+            memcache.set('Project:access_at:' + options.project.id,  now);
+            memcache.increment('WebNode:access_count:' + options.host + ':' + options.port);
+            memcache.set('WebNode:access_at:' + options.host + ':' + options.port, now);
         }
 
         var backend_request = http.request({
