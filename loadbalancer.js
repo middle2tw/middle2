@@ -1,6 +1,8 @@
 var http = require('http');
 var Scribe = require('scribe').Scribe;
 var main_page_host = 'main-p.hisoku.ronny.tw';
+var Memcached = require('memcached');
+var memcached = new Memcached('memcache-p-1.hisoku.ronny.tw:11211');
 
 var mysql = require('mysql');
 
@@ -74,7 +76,7 @@ var apachedate = function(){
 var hisoku = {};
 hisoku.cache = {};
 
-hisoku._getBackendHost = function(host, port, callback){
+hisoku.getBackendHost2 = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
         return callback({success: true, host: main_page_host, port: 9999});
     }
@@ -107,7 +109,7 @@ hisoku._getBackendHost = function(host, port, callback){
 hisoku._getNodesByProject = function(project, callback){
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` = 10 AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
         if (rows.length) {
-            return callback({success: true, host: rows[0].ip, port: rows[0].port, project: project.name});
+            return callback({success: true, host: rows[0].ip, port: rows[0].port, project: project});
         }
         hisoku._initNewNodes(project, callback);
     });
@@ -139,7 +141,7 @@ hisoku._initProjectOnNode = function(project, node, callback){
                                 if (rows.affectedRows != 1) {
                                     return callback({success: false, message: 'Init new node failed'});
                                 }
-                                callback({success: true, host: node.ip, port: node.port, project: project.name});
+                                callback({success: true, host: node.ip, port: node.port, project: project});
                             });
                         });
                     });
@@ -253,7 +255,7 @@ main_request.on('request', function(main_request, main_response){
     main_request.on('close', function(){
     });
 
-    hisoku.getBackendHost(host, port, function(options){
+    hisoku.getBackendHost2(host, port, function(options){
         if (!options.success) {
             var referer = main_request.headers['referer'];
             if (typeof(referer) != 'string') {
@@ -300,7 +302,14 @@ main_request.on('request', function(main_request, main_response){
         var backend_host = options.host;
         var backend_port = options.port;
         var return_length = 0;
-        //console.log(host + ' ' + backend_host + ' ' + backend_port);
+
+        if (options.project) {
+            var now = Math.floor((new Date()).getTime() / 1000);
+            memcached.increment('Project:access_count:' + options.project.id, 1);
+            memcached.set('Project:access_at:' + options.project.id,  now);
+            memcached.increment('WebNode:access_count:' + options.host + ':' + options.port);
+            memcached.set('WebNode:access_at:' + options.host + ':' + options.port, now);
+        }
 
         var backend_request = http.request({
             hostname: backend_host,
@@ -318,7 +327,7 @@ main_request.on('request', function(main_request, main_response){
             });
 
             backend_response.on('end', function(){
-                if ('string' == typeof(options.project)) {
+                if ('object' == typeof(options.project)) {
                     var referer = main_request.headers['referer'];
                     if (typeof(referer) != 'string') {
                         referer = '-';
@@ -334,7 +343,7 @@ main_request.on('request', function(main_request, main_response){
                         + ' ' + backend_response.statusCode + ' ' + return_length 
                         + ' "' + referer + '"'
                         + ' "' + useragent + '"'); 
-                    scribe.send('app-' + options.project, log);
+                    scribe.send('app-' + options.project.name, log);
                     recent_logs.push(log);
                     recent_logs = recent_logs.slice(recent_logs.length - 10);
                 }
