@@ -88,7 +88,7 @@ hisoku.getBackendHost2 = function(host, port, callback){
     }
 
     if (host.match(/\.hisokuapp\.ronny\.tw/)) {
-        var project_name = host.match(/([^.])\.hisokuapp\.ronny\.tw/)[1];
+        var project_name = host.match(/([^.]*)\.hisokuapp\.ronny\.tw/)[1];
         mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
             if (rows.length == 1) {
                 hisoku._getNodesByProject(rows[0], callback);
