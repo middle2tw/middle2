@@ -39,7 +39,7 @@ $get_info_from_ip = function($ip){
             <?php $info = $get_info_from_ip($ip); ?>
             <div id="node-<?= $ip ?>">
                 <h3><?= $ip ?></h3>
-                Start time: <?= $this->partial('/helper/counttime.phtml', array('time' => $info->start_time / 1000)) ?><br>
+                Start time: <?= $this->partial('/helper/counttime.phtml', array('time' => floor($info->start_time / 1000))) ?><br>
                 <h4>Current request</h4>
                 <table class="table">
                     <tr>
@@ -53,7 +53,7 @@ $get_info_from_ip = function($ip){
                         <td><?= $id ?></td>
                         <td><?= $this->escape($data->host) ?></td>
                         <td><?= $this->escape($data->url) ?></td>
-                        <td><?= $this->partial('helper/counttime.phtml', array('time' => $data->start_at / 1000)) ?></td>
+                        <td><?= $this->partial('helper/counttime.phtml', array('time' => floor($data->start_at / 1000))) ?></td>
                     </tr>
                     <?php } ?>
                 </table>

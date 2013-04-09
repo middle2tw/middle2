@@ -4,6 +4,8 @@ $delta = time() - $this->time;
 <span data-timestamp="<?= $this->time ?>" class="counttime" title="<?= date('Y/m/d H:i:s', $this->time) ?>">
     <?php if ($this->time == 0) { ?>
     never
+    <?php } elseif ($delta < 10) { ?>
+    <?= $delta ?>s
     <?php } elseif ($delta < 60) { ?>
     <?= 10 * ceil($delta / 10) ?>s
     <?php } elseif ($delta < 60 * 60) { ?>
