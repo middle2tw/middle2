@@ -1,6 +1,11 @@
 var http = require('http');
 var Scribe = require('scribe').Scribe;
 var main_page_host = 'main-p.hisoku.ronny.tw';
+
+var mysql = require('mysql');
+
+var SSH2 = require('ssh2');
+
 scribe = new Scribe("scribe.hisoku.ronny.tw", 1463, {"autoReconnect": true});
 scribe.open();
 
@@ -8,11 +13,42 @@ if (process.argv.length < 4) {
     throw "Usage: node loadbalancer.js [server-ip] [server-port]";
 }
 
+var loadConfig = function(){
+    var content = require('fs').readFileSync('/srv/config/config.php');
+    var regex = /putenv\(\'([^=]*)=([^\']*)\'\);/g;
+
+    var match;
+    var ret = {};
+    while (match = regex.exec(content)) {
+        ret[match[1]] = match[2];
+    }
+    return ret;
+};
+
+var config = loadConfig();
+var mysql_connection = mysql.createConnection({
+      host     : config.MYSQL_HOST,
+      user     : config.MYSQL_USER,
+      password : config.MYSQL_PASS,
+      database : config.MYSQL_DATABASE,
+});
+
 var formatdate = function(){
     var d = new Date;
     // 2012-12-32 12:32:33 -480
     return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' ' + d.getTimezoneOffset();
 };
+
+function long2ip (ip) {
+  // http://kevin.vanzonneveld.net
+  // +   original by: Waldo Malqui Silva
+  // *     example 1: long2ip( 3221234342 );
+  // *     returns 1: '192.0.34.166'
+  if (!isFinite(ip))
+    return false;
+
+  return [ip >>> 24, ip >>> 16 & 0xFF, ip >>> 8 & 0xFF, ip & 0xFF].join('.');
+}
 
 var pad = function(n, length){
     var ret = '' + n;
@@ -37,6 +73,88 @@ var apachedate = function(){
 
 var hisoku = {};
 hisoku.cache = {};
+
+hisoku._getBackendHost = function(host, port, callback){
+    if ('hisoku.ronny.tw' == host) {
+        return callback({success: true, host: main_page_host, port: 9999});
+    }
+
+    // TODO: 要限內部網路才能做這件事
+    if ('healthcheck' == host) {
+        return callback({success: true, type: 'healthcheck'});
+    }
+
+    if (host.match(/\.hisokuapp\.ronny\.tw/)) {
+        var project_name = host.match(/([^.])\.hisokuapp\.ronny\.tw/)[1];
+        mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
+            if (rows.length == 1) {
+                hisoku._getNodesByProject(rows[0], callback);
+                return;
+            }
+            return callback({success: false, message: 'Project not found'});
+        });
+    } else {
+        mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
+            if (rows.length == 1) {
+                hisoku._getNodesByProject(rows[0], callback);
+                return;
+            }
+            return callback({success: false, message: 'Domain not found'});
+        });
+    }
+};
+
+hisoku._getNodesByProject = function(project, callback){
+    mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` = 10 AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
+        if (rows.length) {
+            return callback({success: true, host: rows[0].ip, port: rows[0].port, project: project.name});
+        }
+        hisoku._initNewNodes(project, callback);
+    });
+};
+
+hisoku._initNewNodes = function(project, callback){
+    mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
+        if (rows.length == 0) {
+            return callback({success: false, message: 'No empty node'});
+        }
+        hisoku._initProjectOnNode(project, rows[Math.floor(Math.random() * rows.length)], callback);
+    });
+};
+
+hisoku._initProjectOnNode = function(project, node, callback){
+    mysql_connection.query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
+        if (rows.affectedRows != 1) {
+            return callback({success: false, message: 'Init new node failed'});
+        }
+
+        var ssh2 = new SSH2();
+        var node_id = node.port - 20000;
+        ssh2.on('ready', function(){
+            ssh2.exec('clone ' + project.name + ' ' + node_id, function(err, stream){
+                stream.on('end', function(){
+                    ssh2.exec('restart-web ' + project.name + ' ' + node_id, function(err, stream){
+                        stream.on('end', function(){
+                            mysql_connection.query("UPDATE `webnode` SET `status` = 10 WHERE `ip` = ? AND `port` = ?", [node.ip, node.port], function(err, rows, fields){
+                                if (rows.affectedRows != 1) {
+                                    return callback({success: false, message: 'Init new node failed'});
+                                }
+                                callback({success: true, host: node.ip, port: node.port, project: project.name});
+                            });
+                        });
+                    });
+                });
+            });
+        });
+        ssh2.connect({
+            host: long2ip(node.ip),
+            port: 22,
+            username: 'root',
+            privateKey: require('fs').readFileSync('/srv/config/web-key'),
+        });
+
+    });
+};
 
 hisoku.getBackendHost = function(host, port, callback){
     if ('hisoku.ronny.tw' == host) {
