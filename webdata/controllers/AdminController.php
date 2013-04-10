@@ -139,4 +139,8 @@ class AdminController extends Pix_Controller
 
         return $this->alert('done', '/admin');
     }
+
+    public function searchesAction()
+    {
+    }
 }

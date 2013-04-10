@@ -9,6 +9,13 @@ class Hisoku
         );
     }
 
+    public function getSearchServers()
+    {
+        return array(
+            'search-1.hisoku.ronny.tw',
+        );
+    }
+
     public static function getLoginUser()
     {
         if ($u = User::find(intval(Pix_Session::get('user')))) {

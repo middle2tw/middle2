@@ -1,0 +1,58 @@
+<?php
+$query = function($url){
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $content = curl_exec($curl);
+    curl_close($curl);
+    return json_decode($content);
+};
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2 bs-docs-sidebar">
+            <!--Sidebar content-->
+            <ul class="nav nav-list affix bs-docs-sidenav">
+                <?php foreach (Hisoku::getSearchServers() as $domain) { ?>
+                <li>
+                <a href="#node-<?= $this->escape($domain) ?>">
+                    <i class="icon-chevron-right"></i>
+                    <?= $this->escape($domain) ?>
+                </a>
+                </li>
+                <?php } ?>
+            </ul>
+        </div>
+        <div class="span10">
+            <!--Body content-->
+            <?php foreach (Hisoku::getSearchServers() as $domain) { ?>
+            <div id="node-<?= $this->escape($domain) ?>">
+                <h3><?= $this->escape($domain) ?></h3>
+                <?php $cluster_stats = $query('http://' . $domain . ':9200/_cluster/state'); ?>
+                <h4>Indices</h4>
+                <ul>
+                    <?php foreach ($cluster_stats->metadata->indices as $name => $data) { ?>
+                    <li>
+                    <?= $this->escape($name) ?>.
+                    <ul>
+                        <li>State: <?= $this->escape($data->state) ?></li>
+                        <li>Mappings:
+                        <ul>
+                            <?php foreach ($data->mappings as $mapping_name => $mapping_data) { ?>
+                            <li><?= $this->escape($mapping_name) ?></li>
+                            <?php } ?>
+                        </ul>
+                        </li>
+                    </ul>
+                    </li>
+                    <?php } ?>
+                </ul>
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<script><!--
+//--></script>
+<?= $this->partial('/common/footer.phtml', $this) ?>
