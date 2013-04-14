@@ -74,7 +74,7 @@ sudo ssh git@git-p.hisoku.ronny.tw
 
 安裝 git
 --------
-sudo yum install -y git php php-mysql php-pecl-memcached
+sudo yum install -y git php54 php54-mysql php54-pecl-memcached
 * git 抓原始檔用
 * php 執行 script 用
 
