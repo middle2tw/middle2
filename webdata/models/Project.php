@@ -82,39 +82,45 @@ class ProjectRow extends Pix_Table_Row
      *
      * @return array WebNode
      */
-    public function getWebNodes()
+    public function getWebNodes($ip = null)
     {
-        // find current
-        $nodes = WebNode::search(array(
-            'project_id' => $this->id,
-            'status' => WebNode::STATUS_WEBNODE,
-            'commit' => $this->commit,
-        ));
-
-        if (count($nodes)) {
-            return $nodes;
-        }
-
         $c = new Pix_Cache;
-        // 如果處理中就等 0.1 秒後再說
-        if ($c->get("Project:processing:{$this->id}")) {
-            // sleep 0.1s
-            usleep(100000);
-            return $this->getWebNodes();
+        if (is_null($ip)) {
+            // find current
+            $nodes = WebNode::search(array(
+                'project_id' => $this->id,
+                'status' => WebNode::STATUS_WEBNODE,
+                'commit' => $this->commit,
+            ));
+
+            if (count($nodes)) {
+                return $nodes;
+            }
+
+            // 如果處理中就等 0.1 秒後再說
+            if ($c->get("Project:processing:{$this->id}")) {
+                // sleep 0.1s
+                usleep(100000);
+                return $this->getWebNodes();
+            }
         }
 
         $c->set("Project:processing:{$this->id}", time());
 
         $choosed_nodes = array();
         while (true) {
-            $free_nodes_count = count(WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)));
+            $node_pools = WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED));
+            if (!is_null($ip)) {
+                $node_pools = $node_pools->search(array('ip' => ip2long($ip)));
+            }
+            $free_nodes_count = count($node_pools);
             if (!$free_nodes_count) {
                 // TODO; log it
                 $c->delete("Project:processing:{$this->id}");
                 throw new Exception('No free nodes');
             }
 
-            if (!$random_node = WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED))->offset(rand(0, $free_nodes_count - 1))->first()) {
+            if (!$random_node = $node_pools->offset(rand(0, $free_nodes_count - 1))->first()) {
                 continue;
             }
 
