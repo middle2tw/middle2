@@ -4,22 +4,26 @@ class Addon_MemcachedRow extends Pix_Table_Row
 {
     public function saveProjectVariable()
     {
-        $this->project->variables->insert(array(
-            'key' => 'MEMCACHE_SERVER',
-            'value' => $this->host,
-        ));
-        $this->project->variables->insert(array(
-            'key' => 'MEMCACHE_PORT',
-            'value' => $this->port,
-        ));
-        $this->project->variables->insert(array(
-            'key' => 'MEMCACHE_USERNAME',
-            'value' => $this->user_name,
-        ));
-        $this->project->variables->insert(array(
-            'key' => 'MEMCACHE_PASSWORD',
-            'value' => $this->password,
-        ));
+        $key_value = array(
+            'MEMCACHE_SERVER' => $this->host,
+            'MEMCACHE_PORT' => $this->port,
+            'MEMCACHE_USERNAME' => $this->user_name,
+            'MEMCACHE_PASSWORD' => $this->password,
+        );
+        foreach ($key_value as $key => $value) {
+            try {
+                $this->project->variables->insert(array(
+                    'key' => $key,
+                    'value' => $value,
+                ));
+            } catch (Pix_Table_DuplicateException $e) {
+                $this->project->variables->search(array(
+                    'key' => $key,
+                ))->update(array(
+                    'value' => $value,
+                ));
+            }
+        }
     }
 }
 
