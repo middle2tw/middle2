@@ -5,10 +5,7 @@ if (!class_exists('Pix_Session')) {
 
     Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET'), 'cookie_key' => 'HISOKU_SESSION'));
 
-    $m = new MemcacheSASL();
-    $m->addServer(getenv('MEMCACHE_SERVER'), getenv('MEMCACHE_PORT'));
-    $m->setSaslAuthData(getenv('MEMCACHE_USERNAME'), getenv('MEMCACHE_PASSWORD'));
-    $m->setSaveHandler();
+    session_save_path('/tmp');
 
     if (!$user = Hisoku::getLoginUser()) {
         header('Location: /');
