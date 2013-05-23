@@ -46,7 +46,7 @@ $res->free_result();
             <a href="/admin/project/<?= $project->id ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
             <?php } ?>
         </td>
-        <td><?= number_format(intval($db_sizes[$db])) ?></td>
+        <td class="usage" data-value="<?= intval($db_sizes[$db]) ?>"><?= number_format(intval($db_sizes[$db])) ?></td>
         <td><?= intval($db_tables[$db]) ?></td>
         <td><?= number_format(intval($db_rows[$db])) ?></td>
     </tr>
@@ -54,4 +54,31 @@ $res->free_result();
 </table>
 <hr>
 <?php } ?>
+<script>
+var usage_format = 'full';
+$('.usage').click(function(){
+    usage_format = ('full' == usage_format) ? 'simple' : 'full';
+
+    $('.usage').each(function(){
+        var value = $(this).attr('data-value');
+        if (usage_format == 'full') {
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(value)) {
+                value = value.replace(rgx, '$1' + ',' + '$2');
+            }
+            $(this).text(value);
+        } else {
+            if (value < 1024) {
+                $(this).text(value);
+            } else if (value < 1024 * 1024) {
+                $(this).text(Math.floor(value / 1024.0) + 'KB');
+            } else if (value < 1024 * 1024 * 1024) {
+                $(this).text(Math.floor(value / 1024.0 / 1024) + 'MB');
+            } else {
+                $(this).text(Math.floor(value / 1024.0 / 1024 / 1024) + 'GB');
+            }
+        }
+    });
+});
+</script>
 <?= $this->partial('/common/footer.phtml', $this) ?>
