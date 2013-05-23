@@ -3,7 +3,7 @@
 /**
  * Config file generator
  *
- * @package PhpMyAdmin-setup
+ * @package PhpMyAdmin-Setup
  */
 
 /**
@@ -83,6 +83,7 @@ class ConfigGenerator
      * @param string $var_name
      * @param mixed  $var_value
      * @param string $crlf
+     *
      * @return string
      */
     private static function _getVarExport($var_name, $var_value, $crlf)
@@ -108,6 +109,7 @@ class ConfigGenerator
      * Check whether $array is a continuous 0-based array
      *
      * @param array $array
+     *
      * @return boolean
      */
     private static function _isZeroBasedArray(array $array)
@@ -125,6 +127,7 @@ class ConfigGenerator
      *
      * @param array $array
      * @param string $crlf
+     *
      * @return string
      */
     private static function _exportZeroBasedArray(array $array, $crlf)
@@ -139,8 +142,8 @@ class ConfigGenerator
             $ret .= implode(', ', $retv);
         } else {
             // more than 4 values - value per line
-            $imax = count($retv)-1;
-            for ($i = 0; $i <= $imax; $i++) {
+            $imax = count($retv);
+            for ($i = 0; $i < $imax; $i++) {
                 $ret .= ($i > 0 ? ',' : '') . $crlf . '    ' . $retv[$i];
             }
         }

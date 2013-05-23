@@ -12,7 +12,7 @@
  * User first authenticates using OpenID and based on content of $AUTH_MAP
  * the login information is passed to phpMyAdmin in session data.
  *
- * @package PhpMyAdmin
+ * @package    PhpMyAdmin
  * @subpackage Example
  */
 
@@ -32,18 +32,20 @@ $AUTH_MAP = array(
 
 /**
  * Simple function to show HTML page with given content.
+ *
+ * @return void
  */
 function show_page($contents)
 {
     header('Content-Type: text/html; charset=utf-8');
     echo '<?xml version="1.0" encoding="utf-8"?>' . "\n";
     ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<!DOCTYPE HTML>
+<html lang="en" dir="ltr">
 <head>
     <link rel="icon" href="../favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+    <meta charset="utf-8" />
     <title>phpMyAdmin OpenID signon example</title>
 </head>
 <body>

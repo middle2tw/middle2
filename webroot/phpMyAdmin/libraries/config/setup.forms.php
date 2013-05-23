@@ -19,7 +19,7 @@
  * End group blocks with:
  * ':group:end'
  *
- * @package PhpMyAdmin-setup
+ * @package PhpMyAdmin-Setup
  */
 
 $forms = array();
@@ -67,19 +67,18 @@ $forms['Servers']['Server_pmadb'] = array('Servers' => array(1 => array(
     'controlhost',
     'controluser',
     'controlpass',
-    'verbose_check',
-    'bookmarktable' => 'pma_bookmark',
-    'relation' => 'pma_relation',
-    'userconfig' => 'pma_userconfig',
-    'table_info' => 'pma_table_info',
-    'column_info' => 'pma_column_info',
-    'history' => 'pma_history',
-    'recent' => 'pma_recent',
-    'table_uiprefs' => 'pma_table_uiprefs',
-    'tracking' => 'pma_tracking',
-    'table_coords' => 'pma_table_coords',
-    'pdf_pages' => 'pma_pdf_pages',
-    'designer_coords' => 'pma_designer_coords',
+    'bookmarktable' => 'pma__bookmark',
+    'relation' => 'pma__relation',
+    'userconfig' => 'pma__userconfig',
+    'table_info' => 'pma__table_info',
+    'column_info' => 'pma__column_info',
+    'history' => 'pma__history',
+    'recent' => 'pma__recent',
+    'table_uiprefs' => 'pma__table_uiprefs',
+    'tracking' => 'pma__tracking',
+    'table_coords' => 'pma__table_coords',
+    'pdf_pages' => 'pma__pdf_pages',
+    'designer_coords' => 'pma__designer_coords',
     'MaxTableUiprefs' => 100)));
 $forms['Servers']['Server_tracking'] = array('Servers' => array(1 => array(
     'tracking_version_auto_create',
@@ -115,6 +114,7 @@ $forms['Features']['Page_titles'] = array(
     'TitleDatabase',
     'TitleServer');
 $forms['Features']['Warnings'] = array(
+    'ServerLibraryDifference_DisableWarning',
     'PmaNoRelation_DisableWarning',
     'SuhosinDisableWarning',
     'McryptDisableWarning');
@@ -124,14 +124,12 @@ $forms['Features']['Developer'] = array(
     'Error_Handler/gather',
     'DBG/sql');
 $forms['Features']['Other_core_settings'] = array(
-    'AjaxEnable',
     'VersionCheck',
     'NaturalOrder',
     'InitialSlidersState',
-    'ErrorIconic',
-    'ReplaceHelpImg',
     'MaxDbList',
     'MaxTableList',
+    'NumRecentTables',
     'ShowHint',
     'OBGzip',
     'PersistentConnections',
@@ -139,21 +137,20 @@ $forms['Features']['Other_core_settings'] = array(
     'MemoryLimit',
     'SkipLockedTables',
     'DisableMultiTableMaintenance',
-    'UseDbSearch',
-    'AllowThirdPartyFraming');
+    'UseDbSearch');
 $forms['Sql_queries']['Sql_queries'] = array(
     'ShowSQL',
     'Confirm',
     'QueryHistoryDB',
     'QueryHistoryMax',
     'IgnoreMultiSubmitErrors',
-    'VerboseMultiSubmit',
     'MaxCharactersInDisplayedSQL',
     'EditInWindow',
     //'QueryWindowWidth', // overridden in theme
     //'QueryWindowHeight',
     'QueryWindowDefTab',
-    'RetainQueryBox');
+    'RetainQueryBox',
+    'CodemirrorEnable');
 $forms['Sql_queries']['Sql_box'] = array('SQLQuery' => array(
     'Edit',
     'Explain',
@@ -164,44 +161,44 @@ $forms['Sql_queries']['Sql_validator'] = array('SQLValidator' => array(
     'use',
     'username',
     'password'));
-$forms['Left_frame']['Left_frame'] = array(
-    'LeftFrameLight',
-    'LeftDisplayLogo',
-    'LeftLogoLink',
-    'LeftLogoLinkWindow',
-    'LeftPointerEnable',
-    'LeftRecentTable');
-$forms['Left_frame']['Left_servers'] = array(
-    'LeftDisplayServers',
+$forms['Navi_panel']['Navi_panel'] = array(
+    'NavigationDisplayLogo',
+    'NavigationLogoLink',
+    'NavigationLogoLinkWindow',
+    'NavigationTreePointerEnable',
+    'MaxNavigationItems',
+    'NavigationTreeEnableGrouping',
+    'NavigationTreeDisplayItemFilterMinimum');
+$forms['Navi_panel']['Navi_servers'] = array(
+    'NavigationDisplayServers',
     'DisplayServersList');
-$forms['Left_frame']['Left_databases'] = array(
-    'DisplayDatabasesList',
-    'LeftFrameDBTree',
-    'LeftFrameDBSeparator',
-    'ShowTooltipAliasDB');
-$forms['Left_frame']['Left_tables'] = array(
-    'LeftDisplayTableFilterMinimum',
-    'LeftDefaultTabTable',
-    'LeftFrameTableSeparator',
-    'LeftFrameTableLevel',
-    'ShowTooltip',
-    'ShowTooltipAliasTB');
-$forms['Main_frame']['Startup'] = array(
-    'MainPageIconic',
-    'ShowCreateDb' => ':group',
-        'SuggestDBName',
-        ':group:end',
+$forms['Navi_panel']['Navi_databases'] = array(
+    'NavigationTreeDbSeparator');
+$forms['Navi_panel']['Navi_tables'] = array(
+    'NavigationTreeDefaultTabTable',
+    'NavigationTreeTableSeparator',
+    'NavigationTreeTableLevel',
+    'ShowTooltip');
+$forms['Main_panel']['Startup'] = array(
+    'ShowCreateDb',
     'ShowStats',
     'ShowServerInfo',
     'ShowPhpInfo',
     'ShowChgPassword');
-$forms['Main_frame']['Browse'] = array(
+$forms['Main_panel']['DbStructure'] = array(
+    'ShowDbStructureCreation',
+    'ShowDbStructureLastUpdate',
+    'ShowDbStructureLastCheck');
+$forms['Main_panel']['TableStructure'] = array(
+    'HideStructureActions');
+$forms['Main_panel']['Browse'] = array(
     'NavigationBarIconic',
     'ShowAll',
     'MaxRows',
     'Order',
     'BrowsePointerEnable',
     'BrowseMarkerEnable',
+    'GridEditing',
     'SaveCellsAtOnce',
     'ShowDisplayDirection',
     'RepeatCells',
@@ -209,7 +206,7 @@ $forms['Main_frame']['Browse'] = array(
     'RowActionLinks',
     'DefaultDisplay',
     'RememberSorting');
-$forms['Main_frame']['Edit'] = array(
+$forms['Main_panel']['Edit'] = array(
     'ProtectBinary',
     'ShowFunctionFields',
     'ShowFieldTypesInDataEditView',
@@ -224,8 +221,7 @@ $forms['Main_frame']['Edit'] = array(
     'InsertRows',
     'ForeignKeyDropdownOrder',
     'ForeignKeyMaxLimit');
-$forms['Main_frame']['Tabs'] = array(
-    'LightTabs',
+$forms['Main_panel']['Tabs'] = array(
     'PropertiesIconic',
     'DefaultTabServer',
     'DefaultTabDatabase',

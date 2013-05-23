@@ -3,13 +3,15 @@
 /**
  * Formset processing library
  *
- * @package PhpMyAdmin-setup
+ * @package PhpMyAdmin-Setup
  */
 
 /**
  * Processes forms registered in $form_display, handles error correction
  *
  * @param FormDisplay $form_display
+ *
+ * @return void
  */
 function process_formset(FormDisplay $form_display)
 {

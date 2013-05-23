@@ -3,10 +3,7 @@
 /**
  * Various checks and message functions used on index page.
  *
- * Security checks are the idea of Aung Khant <aungkhant[at]yehg.net>, http://yehg.net/lab
- * Version check taken from the old setup script by Michal Čihař <michal@cihar.com>
- *
- * @package PhpMyAdmin-setup
+ * @package PhpMyAdmin-Setup
  */
 
 if (!defined('PHPMYADMIN')) {
@@ -15,6 +12,8 @@ if (!defined('PHPMYADMIN')) {
 
 /**
  * Initializes message list
+ *
+ * @return void
  */
 function messages_begin()
 {
@@ -34,10 +33,12 @@ function messages_begin()
 /**
  * Adds a new message to message list
  *
- * @param string $type one of: notice, error
- * @param string $id unique message identifier
- * @param string $title language string id (in $str array)
+ * @param string $type    one of: notice, error
+ * @param string $id      unique message identifier
+ * @param string $title   language string id (in $str array)
  * @param string $message message text
+ *
+ * @return void
  */
 function messages_set($type, $id, $title, $message)
 {
@@ -51,6 +52,8 @@ function messages_set($type, $id, $title, $message)
 
 /**
  * Cleans up message list
+ *
+ * @return void
  */
 function messages_end()
 {
@@ -69,13 +72,17 @@ function messages_end()
 
 /**
  * Prints message list, must be called after messages_end()
+ *
+ * @return void
  */
 function messages_show_html()
 {
     $old_ids = array();
     foreach ($_SESSION['messages'] as $type => $messages) {
         foreach ($messages as $id => $msg) {
-            echo '<div class="' . $type . '" id="' . $id . '">' . '<h4>' . $msg['title'] . '</h4>' . $msg['message'] . '</div>';
+            echo '<div class="' . $type . '" id="' . $id . '">'
+                . '<h4>' . $msg['title'] . '</h4>'
+                . $msg['message'] . '</div>';
             if (!$msg['fresh'] && $type != 'error') {
                 $old_ids[] = $id;
             }
@@ -91,6 +98,8 @@ function messages_show_html()
 
 /**
  * Checks for newest phpMyAdmin version and sets result as a new notice
+ *
+ * @return void
  */
 function PMA_version_check()
 {
@@ -102,9 +111,11 @@ function PMA_version_check()
     $connection_timeout = 3;
 
     $url = 'http://phpmyadmin.net/home_page/version.php';
-    $context = stream_context_create(array(
-        'http' => array(
-            'timeout' => $connection_timeout)));
+    $context = stream_context_create(
+        array(
+            'http' => array('timeout' => $connection_timeout)
+        )
+    );
     $data = @file_get_contents($url, null, $context);
     if ($data === false) {
         if (function_exists('curl_init')) {
@@ -119,7 +130,8 @@ function PMA_version_check()
                 'error',
                 $message_id,
                 __('Version check'),
-                __('Neither URL wrapper nor CURL is available. Version check is not possible.'));
+                __('Neither URL wrapper nor CURL is available. Version check is not possible.')
+            );
             return;
         }
     }
@@ -129,7 +141,8 @@ function PMA_version_check()
             'error',
             $message_id,
             __('Version check'),
-            __('Reading of version failed. Maybe you\'re offline or the upgrade server does not respond.'));
+            __('Reading of version failed. Maybe you\'re offline or the upgrade server does not respond.')
+        );
         return;
     }
 
@@ -149,7 +162,8 @@ function PMA_version_check()
             'error',
             $message_id,
             __('Version check'),
-            __('Got invalid version string from server'));
+            __('Got invalid version string from server')
+        );
         return;
     }
 
@@ -159,7 +173,8 @@ function PMA_version_check()
             'error',
             $message_id,
             __('Version check'),
-            __('Unparsable version string'));
+            __('Unparsable version string')
+        );
         return;
     }
 
@@ -170,20 +185,23 @@ function PMA_version_check()
             'notice',
             $message_id,
             __('Version check'),
-            sprintf(__('A newer version of phpMyAdmin is available and you should consider upgrading. The newest version is %s, released on %s.'), $version, $date));
+            sprintf(__('A newer version of phpMyAdmin is available and you should consider upgrading. The newest version is %s, released on %s.'), $version, $date)
+        );
     } else {
         if ($version_local % 100 == 0) {
             messages_set(
                 'notice',
                 $message_id,
                 __('Version check'),
-                PMA_sanitize(sprintf(__('You are using Git version, run [kbd]git pull[/kbd] :-)[br]The latest stable version is %s, released on %s.'), $version, $date)));
+                PMA_sanitize(sprintf(__('You are using Git version, run [kbd]git pull[/kbd] :-)[br]The latest stable version is %s, released on %s.'), $version, $date))
+            );
         } else {
             messages_set(
                 'notice',
                 $message_id,
                 __('Version check'),
-                __('No newer stable version is available'));
+                __('No newer stable version is available')
+            );
         }
     }
 }
@@ -191,8 +209,9 @@ function PMA_version_check()
 /**
  * Calculates numerical equivalent of phpMyAdmin version string
  *
- * @param string  $version
- * @return mixed  false on failure, integer on success
+ * @param string $version version
+ *
+ * @return mixed false on failure, integer on success
  */
 function version_to_int($version)
 {
@@ -202,29 +221,30 @@ function version_to_int($version)
     }
     if (!empty($matches[6])) {
         switch ($matches[6]) {
-            case 'pl':
-                $added = 60;
-                break;
-            case 'rc':
-                $added = 30;
-                break;
-            case 'beta':
-                $added = 20;
-                break;
-            case 'alpha':
-                $added = 10;
-                break;
-            case 'dev':
-                $added = 0;
-                break;
-            default:
-                messages_set(
-                    'notice',
-                    'version_match',
-                    __('Version check'),
-                    'Unknown version part: ' . htmlspecialchars($matches[6]));
-                $added = 0;
-                break;
+        case 'pl':
+            $added = 60;
+            break;
+        case 'rc':
+            $added = 30;
+            break;
+        case 'beta':
+            $added = 20;
+            break;
+        case 'alpha':
+            $added = 10;
+            break;
+        case 'dev':
+            $added = 0;
+            break;
+        default:
+            messages_set(
+                'notice',
+                'version_match',
+                __('Version check'),
+                'Unknown version part: ' . htmlspecialchars($matches[6])
+            );
+            $added = 0;
+            break;
         }
     } else {
         $added = 50; // for final
@@ -241,6 +261,8 @@ function version_to_int($version)
  * @param bool &$is_readable
  * @param bool &$is_writable
  * @param bool &$file_exists
+ *
+ * @return void
  */
 function check_config_rw(&$is_readable, &$is_writable, &$file_exists)
 {
@@ -263,6 +285,8 @@ function check_config_rw(&$is_readable, &$is_writable, &$file_exists)
  *
  * Outputs results to message list, must be called between messages_begin()
  * and messages_end()
+ *
+ * @return void
  */
 function perform_config_checks()
 {
@@ -321,7 +345,8 @@ function perform_config_checks()
                 'notice',
                 "Servers/$i/ssl",
                 $title,
-                __('You should use SSL connections if your database server supports it.'));
+                __('You should use SSL connections if your database server supports it.')
+            );
         }
 
         //
@@ -329,12 +354,14 @@ function perform_config_checks()
         // warn about using 'mysql'
         //
         if ($cf->getValue("Servers/$i/extension") == 'mysql') {
-            $title = PMA_lang(PMA_lang_name('Servers/1/extension')) . " ($server_name)";
+            $title = PMA_lang(PMA_lang_name('Servers/1/extension'))
+                . " ($server_name)";
             messages_set(
                 'notice',
                 "Servers/$i/extension",
                 $title,
-                __('You should use mysqli for performance reasons.'));
+                __('You should use mysqli for performance reasons.')
+            );
         }
 
         //
@@ -342,15 +369,18 @@ function perform_config_checks()
         // warn about full user credentials if 'auth_type' is 'config'
         //
         if ($cf->getValue("Servers/$i/auth_type") == 'config'
-                && $cf->getValue("Servers/$i/user") != ''
-                && $cf->getValue("Servers/$i/password") != '') {
-            $title = PMA_lang(PMA_lang_name('Servers/1/auth_type')) . " ($server_name)";
+            && $cf->getValue("Servers/$i/user") != ''
+            && $cf->getValue("Servers/$i/password") != ''
+        ) {
+            $title = PMA_lang(PMA_lang_name('Servers/1/auth_type'))
+                . " ($server_name)";
             messages_set(
                 'notice',
                 "Servers/$i/auth_type",
                 $title,
-                PMA_lang($strServerAuthConfigMsg, $i) . ' ' .
-                    PMA_lang($strSecurityInfoMsg, $i));
+                PMA_lang($strServerAuthConfigMsg, $i) . ' '
+                . PMA_lang($strSecurityInfoMsg, $i)
+            );
         }
 
         //
@@ -359,14 +389,17 @@ function perform_config_checks()
         // serious security flaw
         //
         if ($cf->getValue("Servers/$i/AllowRoot")
-                && $cf->getValue("Servers/$i/AllowNoPassword")) {
-            $title = PMA_lang(PMA_lang_name('Servers/1/AllowNoPassword')) . " ($server_name)";
+            && $cf->getValue("Servers/$i/AllowNoPassword")
+        ) {
+            $title = PMA_lang(PMA_lang_name('Servers/1/AllowNoPassword'))
+                . " ($server_name)";
             messages_set(
                 'notice',
                 "Servers/$i/AllowNoPassword",
                 $title,
-                __('You allow for connecting to the server without a password.') . ' ' .
-                    PMA_lang($strSecurityInfoMsg, $i));
+                __('You allow for connecting to the server without a password.') . ' '
+                . PMA_lang($strSecurityInfoMsg, $i)
+            );
         }
     }
 
@@ -381,7 +414,8 @@ function perform_config_checks()
                 'notice',
                 'blowfish_secret_created',
                 PMA_lang(PMA_lang_name('blowfish_secret')),
-                $strBlowfishSecretMsg);
+                $strBlowfishSecretMsg
+            );
         } else {
             $blowfish_warnings = array();
             // check length
@@ -401,7 +435,8 @@ function perform_config_checks()
                     'error',
                     'blowfish_warnings' . count($blowfish_warnings),
                     PMA_lang(PMA_lang_name('blowfish_secret')),
-                    implode('<br />', $blowfish_warnings));
+                    implode('<br />', $blowfish_warnings)
+                );
             }
         }
     }
@@ -415,7 +450,8 @@ function perform_config_checks()
             'notice',
             'ForceSSL',
             PMA_lang(PMA_lang_name('ForceSSL')),
-            PMA_lang($strForceSSLNotice));
+            PMA_lang($strForceSSLNotice)
+        );
     }
 
     //
@@ -427,15 +463,17 @@ function perform_config_checks()
             'notice',
             'AllowArbitraryServer',
             PMA_lang(PMA_lang_name('AllowArbitraryServer')),
-            PMA_lang($strAllowArbitraryServerWarning));
+            PMA_lang($strAllowArbitraryServerWarning)
+        );
     }
 
     //
     // $cfg['LoginCookieValidity']
-    // value greater than session.gc_maxlifetime will cause random session invalidation after that time
-    //
+    // value greater than session.gc_maxlifetime will cause
+    // random session invalidation after that time
     if ($cf->getValue('LoginCookieValidity') > 1440
-            || $cf->getValue('LoginCookieValidity') > ini_get('session.gc_maxlifetime')) {
+        || $cf->getValue('LoginCookieValidity') > ini_get('session.gc_maxlifetime')
+    ) {
         $message_type = $cf->getValue('LoginCookieValidity') > ini_get('session.gc_maxlifetime')
             ? 'error'
             : 'notice';
@@ -443,7 +481,8 @@ function perform_config_checks()
             $message_type,
             'LoginCookieValidity',
             PMA_lang(PMA_lang_name('LoginCookieValidity')),
-            PMA_lang($strLoginCookieValidityWarning));
+            PMA_lang($strLoginCookieValidityWarning)
+        );
     }
 
     //
@@ -455,7 +494,8 @@ function perform_config_checks()
             'notice',
             'LoginCookieValidity',
             PMA_lang(PMA_lang_name('LoginCookieValidity')),
-            PMA_lang($strLoginCookieValidityWarning2));
+            PMA_lang($strLoginCookieValidityWarning2)
+        );
     }
 
     //
@@ -463,12 +503,15 @@ function perform_config_checks()
     // $cfg['LoginCookieStore']
     // LoginCookieValidity must be less or equal to LoginCookieStore
     //
-    if ($cf->getValue('LoginCookieStore') != 0 && $cf->getValue('LoginCookieValidity') > $cf->getValue('LoginCookieStore')) {
+    if ($cf->getValue('LoginCookieStore') != 0
+        && $cf->getValue('LoginCookieValidity') > $cf->getValue('LoginCookieStore')
+    ) {
         messages_set(
             'error',
             'LoginCookieValidity',
             PMA_lang(PMA_lang_name('LoginCookieValidity')),
-            PMA_lang($strLoginCookieValidityWarning3));
+            PMA_lang($strLoginCookieValidityWarning3)
+        );
     }
 
     //
@@ -480,7 +523,8 @@ function perform_config_checks()
             'notice',
             'SaveDir',
             PMA_lang(PMA_lang_name('SaveDir')),
-            PMA_lang($strDirectoryNotice));
+            PMA_lang($strDirectoryNotice)
+        );
     }
 
     //
@@ -492,7 +536,8 @@ function perform_config_checks()
             'notice',
             'TempDir',
             PMA_lang(PMA_lang_name('TempDir')),
-            PMA_lang($strDirectoryNotice));
+            PMA_lang($strDirectoryNotice)
+        );
     }
 
     //
@@ -500,12 +545,14 @@ function perform_config_checks()
     // requires zlib functions
     //
     if ($cf->getValue('GZipDump')
-            && (@!function_exists('gzopen') || @!function_exists('gzencode'))) {
+        && (@!function_exists('gzopen') || @!function_exists('gzencode'))
+    ) {
         messages_set(
             'error',
             'GZipDump',
             PMA_lang(PMA_lang_name('GZipDump')),
-            PMA_lang($strGZipDumpWarning, 'gzencode'));
+            PMA_lang($strGZipDumpWarning, 'gzencode')
+        );
     }
 
     //
@@ -513,7 +560,8 @@ function perform_config_checks()
     // requires bzip2 functions
     //
     if ($cf->getValue('BZipDump')
-            && (!@function_exists('bzopen') || !@function_exists('bzcompress'))) {
+        && (!@function_exists('bzopen') || !@function_exists('bzcompress'))
+    ) {
         $functions = @function_exists('bzopen')
                 ? '' :
                 'bzopen';
@@ -524,7 +572,8 @@ function perform_config_checks()
             'error',
             'BZipDump',
             PMA_lang(PMA_lang_name('BZipDump')),
-            PMA_lang($strBZipDumpWarning, $functions));
+            PMA_lang($strBZipDumpWarning, $functions)
+        );
     }
 
     //
@@ -536,7 +585,8 @@ function perform_config_checks()
             'error',
             'ZipDump_import',
             PMA_lang(PMA_lang_name('ZipDump')),
-            PMA_lang($strZipDumpImportWarning, 'zip_open'));
+            PMA_lang($strZipDumpImportWarning, 'zip_open')
+        );
     }
 
     //
@@ -548,7 +598,8 @@ function perform_config_checks()
             'error',
             'ZipDump_export',
             PMA_lang(PMA_lang_name('ZipDump')),
-            PMA_lang($strZipDumpExportWarning, 'gzcompress'));
+            PMA_lang($strZipDumpExportWarning, 'gzcompress')
+        );
     }
 }
 ?>

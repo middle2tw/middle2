@@ -8,18 +8,19 @@
 /**
  *
  */
-require_once './libraries/common.inc.php';
+require_once 'libraries/common.inc.php';
 
-$GLOBALS['js_include'][] = 'export.js';
-$GLOBALS['js_include'][] = 'codemirror/lib/codemirror.js';
-$GLOBALS['js_include'][] = 'codemirror/mode/mysql/mysql.js';
+$response = PMA_Response::getInstance();
+$header   = $response->getHeader();
+$scripts  = $header->getScripts();
+$scripts->addFile('export.js');
 
 /**
  * Gets tables informations and displays top links
  */
-require_once './libraries/tbl_common.php';
+require_once 'libraries/tbl_common.inc.php';
 $url_query .= '&amp;goto=tbl_export.php&amp;back=tbl_export.php';
-require_once './libraries/tbl_info.inc.php';
+require_once 'libraries/tbl_info.inc.php';
 
 // Dump of a table
 
@@ -36,13 +37,11 @@ if (! empty($sql_query)) {
     // Need to generate WHERE clause?
     if (isset($where_clause)) {
 
-        $temp_sql_array = explode("where", strtolower($sql_query));
+        $temp_sql_array = preg_split("/\bwhere\b/i", $sql_query);
 
-        // The fields which is going to select will be remain
-        // as it is regardless of the where clause(s).
-        // EX :- The part "SELECT `id`, `name` FROM `customers`"
-        // will be remain same when representing the resulted rows
-        // from the following query,
+        // The part "SELECT `id`, `name` FROM `customers`"
+        // is not modified by the next code segment, when exporting 
+        // the result set from a query such as
         // "SELECT `id`, `name` FROM `customers` WHERE id NOT IN
         //  ( SELECT id FROM companies WHERE name LIKE '%u%')"
         $sql_query = $temp_sql_array[0];
@@ -65,20 +64,9 @@ if (! empty($sql_query)) {
         // Just crop LIMIT clause
         $sql_query = $analyzed_sql[0]['section_before_limit'] . $analyzed_sql[0]['section_after_limit'];
     }
-    $message = PMA_Message::success();
+    echo PMA_Util::getMessage(PMA_Message::success());
 }
 
-/**
- * Displays top menu links
- */
-require './libraries/tbl_links.inc.php';
-
 $export_type = 'table';
-require_once './libraries/display_export.lib.php';
-
-
-/**
- * Displays the footer
- */
-require './libraries/footer.inc.php';
+require_once 'libraries/display_export.lib.php';
 ?>

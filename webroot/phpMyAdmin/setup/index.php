@@ -1,10 +1,10 @@
 <?php
+/* vim: set expandtab sw=4 ts=4 sts=4: */
 /**
  * Front controller for setup script
  *
- * @package    phpMyAdmin-setup
- * @copyright  Copyright (c) 2008, Piotr Przybylski <piotrprz@gmail.com>
- * @license    http://www.gnu.org/licenses/gpl.html GNU GPL 2.0
+ * @package PhpMyAdmin-Setup
+ * @license http://www.gnu.org/licenses/gpl.html GNU GPL 2.0
  */
 
 /**
@@ -18,28 +18,29 @@ if ($page === '') {
     $page = 'index';
 }
 if (!file_exists("./setup/frames/$page.inc.php")) {
-    // it will happen only when enterung URL by hand, we don't care for these cases
-    die(__('Wrong GET file attribute value'));
+    // it will happen only when entering URL by hand, we don't care for these cases
+    PMA_fatalError(__('Wrong GET file attribute value'));
 }
 
 // Handle done action info
 $action_done = filter_input(INPUT_GET, 'action_done');
 $action_done = preg_replace('/[^a-z_]/', '', $action_done);
 
-// send no-cache headers
-require './libraries/header_http.inc.php';
+PMA_noCacheHeader();
+
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta charset="utf-8" />
 <title>phpMyAdmin setup</title>
 <link href="../favicon.ico" rel="icon" type="image/x-icon" />
 <link href="../favicon.ico" rel="shortcut icon" type="image/x-icon" />
 <link href="styles.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="../js/jquery/jquery-1.6.2.js"></script>
-<script type="text/javascript" src="../js/jquery/jquery-ui-1.8.16.custom.js"></script>
-<script type="text/javascript" src="../js/jquery/jquery.json-2.2.js"></script>
+<script type="text/javascript" src="../js/jquery/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="../js/jquery/jquery-ui-1.9.2.custom.js"></script>
+<script type="text/javascript" src="../js/jquery/jquery.json-2.4.js"></script>
+<script type="text/javascript" src="ajax.js"></script>
 <script type="text/javascript" src="../js/config.js"></script>
 <script type="text/javascript" src="scripts.js"></script>
 </head>
