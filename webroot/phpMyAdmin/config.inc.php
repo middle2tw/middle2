@@ -13,7 +13,31 @@ if (!class_exists('Pix_Session')) {
     }
 }
 
-$addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
+if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
+    // XXX: 這邊需要更嚴格安全的權限控管..或者之後要搬到內網
+    if (!$user->isAdmin()) {
+        header('Location: /');
+        exit;
+    }
+    $addon = new StdClass;
+    $addon->host = getenv('MYSQL_HOST');
+    $addon->user_name = getenv('MYSQL_USER');
+    $addon->password = getenv('MYSQL_PASS');
+    $addon->database = getenv('MYSQL_DATABASE');
+    $addon->verbose = 'Main';
+
+    $addons = array($addon);
+
+    $addon = new StdClass;
+    $addon->host = USERDB_DOMAIN;
+    $addon->user_name = getenv('MYSQL_USERDB_USER');
+    $addon->password = getenv('MYSQL_USERDB_PASS');
+    $addon->verbose = 'UserDB';
+    $addons[] = $addon;
+
+} else {
+    $addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
+}
 $i = 0;
 foreach ($addons as $addon) {
     $i++;
@@ -22,7 +46,11 @@ foreach ($addons as $addon) {
     /* Server parameters */
     $cfg['Servers'][$i]['host'] = $addon->host;
     $cfg['Servers'][$i]['user'] = $addon->user_name;
-    $cfg['Servers'][$i]['verbose'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
+    if ($addon->project) {
+        $cfg['Servers'][$i]['verbose'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
+    } elseif ($addon->verbose) {
+        $cfg['Servers'][$i]['verbose'] = $addon->verbose;
+    }
     $cfg['Servers'][$i]['password'] = $addon->password;
     $cfg['Servers'][$i]['only_db'] = $addon->database;
     $cfg['Servers'][$i]['connect_type'] = 'tcp';
