@@ -10,11 +10,11 @@ class ApiController extends Pix_Controller
     {
         // TODO: 要判斷只有內網可以
         $name = strval($_GET['name']);
-        $data = $_POST['data'];
+        $status = $_POST['status'];
 
         MachineStatus::insert(array(
             'name' => $name,
-            'data' => $data,
+            'status' => $status,
             'updated_at' => time(),
         ));
 
