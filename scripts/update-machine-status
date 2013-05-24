@@ -1,0 +1,36 @@
+#!/usr/bin/php
+<?php
+
+// 回傳這台機器的 uptime, cpu load, disk, maximum process 等資訊
+$ret = new StdClass;
+$ret->hostname = gethostname();
+$ret->uname = trim(`uname -a`);
+
+// 硬碟資訊
+$disks = array();
+
+$df_result = explode("\n", trim(`df -P -a`));
+for ($i = 1; $i < count($df_result); $i ++) {
+    $rows = preg_split('/\s+/', trim($df_result[$i]));
+    $columns = array('id', 'disk_total', 'disk_usage', 'disk_available', 'disk_capacity', 'mount_point');
+
+    $disks[$rows[0]] = array_combine($columns, $rows);
+}
+
+$df_result = explode("\n", trim(`df -P -i`));
+for ($i = 1; $i < count($df_result); $i ++) {
+    $rows = preg_split('/\s+/', trim($df_result[$i]));
+    $columns = array('id', 'inode_total', 'inode_usage', 'inode_available', 'inode_capacity', 'mount_point');
+
+    $disks[$rows[0]] = array_merge($disks[$rows[0]], array_combine($columns, $rows));
+}
+$ret->disk = array_values($disks);
+
+// cpu 資訊
+$ret->process = trim(`top -b -n 1 -c`);
+$ret->dmesg = trim(`dmesg`);
+
+$curl = curl_init('http://hisoku.ronny.tw/api/updatemachinestatus?name=' . urlencode($ret->hostname));
+curl_setopt($curl, CURLOPT_POSTFIELDS, 'status=' . urlencode(json_encode($ret, JSON_UNESCAPED_UNICODE)));
+curl_exec($curl);
+
