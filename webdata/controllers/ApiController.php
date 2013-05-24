@@ -6,6 +6,21 @@ class ApiController extends Pix_Controller
     {
     }
 
+    public function updatemachinestatusAction()
+    {
+        // TODO: 要判斷只有內網可以
+        $name = strval($_GET['name']);
+        $data = $_POST['data'];
+
+        MachineStatus::insert(array(
+            'name' => $name,
+            'data' => $data,
+            'updated_at' => time(),
+        ));
+
+        return $this->json(1);
+    }
+
     public function getnodesAction()
     {
         $request_host = strval($_GET['domain']);
