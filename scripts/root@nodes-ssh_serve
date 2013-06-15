@@ -74,7 +74,7 @@ function main()
         break;
 
     case 'clone':
-        list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        list(, $project_name, $id, $flag) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
             die("invalid $id");
         }
@@ -91,7 +91,7 @@ function main()
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
         mkdir("/srv/chroot/{$id}/srv/web");
         exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
-        if (file_exists("/srv/chroot/{$id}/post-clone.sh")) {
+        if ('no-post-clone' != $flag and file_exists("/srv/chroot/{$id}/post-clone.sh")) {
             exec("chroot /srv/chroot/{$id}/ /post-clone.sh {$port}");
         }
         break;
