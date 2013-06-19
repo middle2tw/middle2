@@ -18,7 +18,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 
 %build
-%configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker
+%configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker --sysconfdir=/etc/httpd
 make %{?_smp_mflags}
 cd modules/fastcgi
 make top_dir=../../
@@ -41,32 +41,32 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc
-/etc/extra/httpd-autoindex.conf
-/etc/extra/httpd-dav.conf
-/etc/extra/httpd-default.conf
-/etc/extra/httpd-info.conf
-/etc/extra/httpd-languages.conf
-/etc/extra/httpd-manual.conf
-/etc/extra/httpd-mpm.conf
-/etc/extra/httpd-multilang-errordoc.conf
-/etc/extra/httpd-ssl.conf
-/etc/extra/httpd-userdir.conf
-/etc/extra/httpd-vhosts.conf
-/etc/httpd.conf
-/etc/magic
-/etc/mime.types
-/etc/original/extra/httpd-autoindex.conf
-/etc/original/extra/httpd-dav.conf
-/etc/original/extra/httpd-default.conf
-/etc/original/extra/httpd-info.conf
-/etc/original/extra/httpd-languages.conf
-/etc/original/extra/httpd-manual.conf
-/etc/original/extra/httpd-mpm.conf
-/etc/original/extra/httpd-multilang-errordoc.conf
-/etc/original/extra/httpd-ssl.conf
-/etc/original/extra/httpd-userdir.conf
-/etc/original/extra/httpd-vhosts.conf
-/etc/original/httpd.conf
+/etc/httpd/extra/httpd-autoindex.conf
+/etc/httpd/extra/httpd-dav.conf
+/etc/httpd/extra/httpd-default.conf
+/etc/httpd/extra/httpd-info.conf
+/etc/httpd/extra/httpd-languages.conf
+/etc/httpd/extra/httpd-manual.conf
+/etc/httpd/extra/httpd-mpm.conf
+/etc/httpd/extra/httpd-multilang-errordoc.conf
+/etc/httpd/extra/httpd-ssl.conf
+/etc/httpd/extra/httpd-userdir.conf
+/etc/httpd/extra/httpd-vhosts.conf
+/etc/httpd/httpd.conf
+/etc/httpd/magic
+/etc/httpd/mime.types
+/etc/httpd/original/extra/httpd-autoindex.conf
+/etc/httpd/original/extra/httpd-dav.conf
+/etc/httpd/original/extra/httpd-default.conf
+/etc/httpd/original/extra/httpd-info.conf
+/etc/httpd/original/extra/httpd-languages.conf
+/etc/httpd/original/extra/httpd-manual.conf
+/etc/httpd/original/extra/httpd-mpm.conf
+/etc/httpd/original/extra/httpd-multilang-errordoc.conf
+/etc/httpd/original/extra/httpd-ssl.conf
+/etc/httpd/original/extra/httpd-userdir.conf
+/etc/httpd/original/extra/httpd-vhosts.conf
+/etc/httpd/original/httpd.conf
 /modules/mod_fastcgi.so
 /modules/mod_rpaf.so
 /usr/bin/apr-1-config
