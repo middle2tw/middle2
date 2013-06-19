@@ -2,6 +2,6 @@
 
 port=$1
 
-sed -i 's/^Listen 80$/Listen '$port'/' /etc/httpd.conf
-sed -i 's#/var/logs#/srv/logs#g' /etc/httpd.conf
-echo -e "\nInclude /etc/extra/node.conf" >> /etc/httpd.conf
+sed -i 's/^Listen 80$/Listen '$port'/' /etc/httpd/httpd.conf
+sed -i 's#/var/logs#/srv/logs#g' /etc/httpd/httpd.conf
+echo "\nInclude /etc/httpd/extra/node.conf" >> /etc/httpd/httpd.conf
