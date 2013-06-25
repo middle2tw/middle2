@@ -4,10 +4,18 @@ class Addon_MySQLDBRow extends Pix_Table_Row
 {
     public function saveProjectVariable()
     {
-        $this->project->variables->insert(array(
-            'key' => 'DATABASE_URL',
-            'value' => "mysql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
-        ));
+        try {
+            $this->project->variables->insert(array(
+                'key' => 'DATABASE_URL',
+                'value' => "mysql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+            ));
+        } catch (Pix_Table_DuplicateException $e) {
+            $this->project->variables->search(array(
+                'key' => 'DATABASE_URL',
+            ))->update(array(
+                'value' => "mysql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+            ));
+        }
     }
 }
 

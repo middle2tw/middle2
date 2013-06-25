@@ -4,10 +4,18 @@ class Addon_PgSQLDBRow extends Pix_Table_Row
 {
     public function saveProjectVariable()
     {
-        $this->project->variables->insert(array(
-            'key' => 'DATABASE_URL',
-            'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
-        ));
+        try {
+            $this->project->variables->insert(array(
+                'key' => 'DATABASE_URL',
+                'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+            ));
+        } catch (Pix_Table_DuplicateException $e) {
+            $this->project->variables->search(array(
+                'key' => 'DATABASE_URL',
+            ))->update(array(
+                'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+            ));
+        }
     }
 }
 
@@ -39,16 +47,22 @@ class Addon_PgSQLDB extends Pix_Table
             return;
         }
 
-        $host = USERDB_DOMAIN;
+        $host = getenv('PGSQL_USERDB_HOST');
         $user_name = Hisoku::uniqid(16);
         $password = Hisoku::uniqid(16);
         $database = 'user_' . $project->name;
 
-        $link = new mysqli(USERDB_DOMAIN, getenv('PGSQL_USERDB_USER'), getenv('PGSQL_USERDB_PASS'));
-        $db = new Pix_Table_Db_Adapter_Pgsqli($link);
-        $db->query("CREATE USER '{$user_name}'@'%' IDENTIFIED BY '{$password}'");
-        $db->query("CREATE DATABASE IF NOT EXISTS`{$database}` CHARACTER SET utf8");
-        $db->query("GRANT ALL PRIVILEGES ON  `{$database}` . * TO  '{$user_name}'@'%'");
+        $db = new Pix_Table_Db_Adapter_PgSQL(array(
+            'host' => getenv('PGSQL_USERDB_HOST'),
+            'port' => getenv('PGSQL_USERDB_PORT'),
+            'user' => getenv('PGSQL_USERDB_USER'),
+            'password' => getenv('PGSQL_USERDB_PASS'),
+        ));
+        $db->query("CREATE USER \"{$user_name}\" WITH LOGIN PASSWORD '{$password}' NOINHERIT");
+        $db->query("CREATE DATABASE \"{$database}\"");
+        $db->query("GRANT ALL PRIVILEGES ON DATABASE \"{$database}\" TO \"{$user_name}\"");
+        $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$database}\" FROM PUBLIC");
+        $db->query("ALTER DATABASE \"{$database}\" OWNER TO \"{$user_name}\"");
 
         $addon = self::insert(array(
             'project_id' => $project->id,
@@ -58,6 +72,5 @@ class Addon_PgSQLDB extends Pix_Table
             'database' => $database,
         ));
         $addon->saveProjectVariable();
-
     }
 }
