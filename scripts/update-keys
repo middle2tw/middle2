@@ -6,10 +6,12 @@ if ('git' !== getenv('USER')) {
     die('git user only' . PHP_EOL);
 }
 
-$public_key = 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAv5o3c0ukue9lZKTqJhSKM1uH3CGLUUNVT1XKQB3WN+IxOOWQw8l5Sr9ipZ2wRVHE3NLY/jSgg6w8VjW1Ig9gwtquGpdbjEDLBRZYQZwtzVtgN5q8+isxIUpfUlJikd86hmMN4QF0VVRkQq8VLkVLN8xkatmeyXcAXZSrrDjP02CXe+W25MjHR+qsLJAc0COT9c+2Q30tU1mA3CKKuMoacQstijdiwJvgyiNWcAlejBQnTU7JnnzcKQxVTRCjtvlItYjuWRbzqho+nc5/fOQukn5w7uES0sceEUcnkzX2u7h2uM3u77S93FeQKQO/u+IvszX3EpVxBd7aw+Stg87nAw== root@ip-10-146-23-10';
+$public_keys = array(
+    'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDH32ZXsqqw/t4w0YHJhsfdSaNQNmUBQj/aEzBKbqW4mNRY3CsEshtg95HZk2Lyo9KDP1g0ZRftilsXwHgFla80NJbIzP3UpSaNKembGPJmirXjyQNzar6ho3GpQP84ZGrYQW6sPUtHYY3XPEs6H7SOTTWSNZ757IEiIUaRglfZzwxe8lOxc5YxAQ6HL4XJNRd0mbdogdr3zIIY++WNylRQ0M+omHmsA+soD5AJBiCEy3BsS5IOc/k4nxCuDeLu15LcxC3SG5EFi1OTZ+eA2y0h/WmSoKF2ybwxgGTX5VLbwlqiStaqJqLMavE0bi+TzkUBzr8tEbgeo6v+DqWrg1cF www@m2',
+);
 
 $deploy_keys = array(
-    'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7H4UXwQkeW1J8zcxyMSanBVZmsvkFz4D+vyXSb4LheSB5Nt/wMFy5w50zeOF4BRtLnX+ISq9vWDpHHJD3tYPOYt6RWfMT+9OvTpRuoCuoQXgvSpFKhdOuT+zS+Dl20I7HTwO1ZHGY0OQf7K3Z7ETjCmO8J+BBys0n1eLpmCq5aRfwkYz+2yX/0k+URSeqJWAnkl2hYu2eypHP+jwBj4+E3xwAUdKm8fihMlNW5JwDmjkxR80dKx/7LDFSUvDPdcGhJPGqsWVtnlc1UgbuJ/w6AoHHIu22ySCsPy1D8xJ4LrABTvN3usxUNzV/rFQpq0FL12chCpsoDNnvaxlZkJvP root@ip-10-0-0-10',
+    'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcU7MdolnYp4Y4dKiuWeHdxP68ScEGSOmaE+wBo5HL3cjQCqMStTFQ36gQYUr9qYnteYWeo4cGVzAcmbH4ty1VnnTQrEZT3gIS+J7YZz7VD+T5KtffSboGshKj3EMXJ3yMFUi7IlssuFvQXiZBUKcX4us2X6JlS6xrr2DGh1Q5aPt1P19my9PYYvyyQ738yKZSkbj+PtKrgfLQJMsMDlrnoI0NimpEqHEpcs8k4Tw5XBZCEAzpkcfY6XQeUjQ1vsW8wf35PWzkFDhXr2gGLcfmdWzxFLrnkQJe3TVNIK4jnGQe6UF2g06SH1QMejywrJAWkcwsQZ2G9DyuWV8UYEDF root@m2-nodes',
     
 );
 
@@ -20,7 +22,9 @@ foreach ($deploy_keys as $deploy_key) {
     $content .= 'command="/srv/code/hisoku/scripts/deploy-key-archive-only",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $deploy_key . "\n";
 }
 $content .= "# update-keys\n";
-$content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $public_key . "\n";
+foreach ($public_keys as $public_key) {
+    $content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $public_key . "\n";
+}
 $content .= "# user keys\n";
 foreach (UserKey::search(1) as $user_key) {
     $content .= 'command="/srv/code/hisoku/scripts/ssh-serve ' . $user_key->user->name . '",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $user_key->key_body . "\n";
