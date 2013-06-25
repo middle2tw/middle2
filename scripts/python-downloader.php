@@ -26,8 +26,6 @@ if (file_exists($build_file)) {
 }
 
 $command = 'pip install --no-install'
-    . ' --force-reinstall'
-    . ' --upgrade'
     . ' --requirement ' . escapeshellarg($req_file)
     . ' --build ' . escapeshellarg($build_path)
     . ' --download-cache ' . escapeshellarg($download_cache_path);
