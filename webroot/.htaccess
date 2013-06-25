@@ -1,5 +1,6 @@
 RewriteEngine on
 RewriteBase /
 RewriteRule phpMyAdmin/ - [L]
+RewriteRule phpPgAdmin/ - [L]
 RewriteRule phpMyAdmin2/ - [L]
 RewriteRule .* index.php [L]
