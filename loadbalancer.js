@@ -1,16 +1,9 @@
 var http = require('http');
 var Scribe = require('scribe').Scribe;
-var main_page_host = 'main-p.hisoku.ronny.tw';
 var Memcache = require('memcache');
-var memcache = new Memcache.Client(11211, 'memcache-p-1.hisoku.ronny.tw');
-memcache.connect();
-
 var mysql = require('mysql');
-
 var SSH2 = require('ssh2');
 
-scribe = new Scribe("scribe.hisoku.ronny.tw", 1463, {"autoReconnect": true});
-scribe.open();
 
 if (process.argv.length < 4) {
     throw "Usage: node loadbalancer.js [server-ip] [server-port]";
@@ -29,12 +22,41 @@ var loadConfig = function(){
 };
 
 var config = loadConfig();
+
+if (!config.MEMCACHE_PRIVATE_PORT) {
+    throw "need MEMCACHE_PRIVATE_PORT";
+}
+var memcache = new Memcache.Client(config.MEMCACHE_PRIVATE_PORT, config.MEMCACHE_PRIVATE_HOST);
+memcache.connect();
+
+if (!config.MYSQL_HOST) {
+    throw "need MYSQL_HOST";
+}
 var mysql_connection = mysql.createConnection({
       host     : config.MYSQL_HOST,
       user     : config.MYSQL_USER,
       password : config.MYSQL_PASS,
       database : config.MYSQL_DATABASE,
 });
+
+if (!config.MAINPAGE_HOST) {
+    throw "need MAINPAGE_HOST";
+}
+var main_page_host = config.MAINPAGE_HOST;
+var main_page_port = config.MAINPAGE_PORT;
+
+if (!config.MAINPAGE_DOMAIN) {
+    throw "need MAINPAGE_DOMAIN";
+}
+if (!config.APP_SUFFIX) {
+    throw "need APP_SUFFIX";
+}
+
+if (!config.SCRIBE_HOST) {
+    throw "need SCRIBE_HOST";
+}
+scribe = new Scribe(config.SCRIBE_HOST, config.SCRIBE_PORT, {"autoReconnect": true});
+scribe.open();
 
 var formatdate = function(){
     var d = new Date;
@@ -74,12 +96,12 @@ var apachedate = function(){
     return '[' + pad(d.getDate(), 2) + '/' + month_locale[d.getMonth()] + '/' + d.getFullYear() + ':' + pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2) + ':' + pad(d.getSeconds(), 2) + ' ' + zone + ']';
 };
 
-var hisoku = {};
-hisoku.cache = {};
+var lb_core = {};
+lb_core.cache = {};
 
-hisoku.getBackendHost2 = function(host, port, callback){
-    if ('hisoku.ronny.tw' == host) {
-        return callback({success: true, host: main_page_host, port: 9999});
+lb_core.getBackendHost2 = function(host, port, callback){
+    if (config.MAINPAGE_DOMAIN == host) {
+        return callback({success: true, host: main_page_host, port: main_page_port});
     }
 
     // TODO: 要限內部網路才能做這件事
@@ -87,11 +109,11 @@ hisoku.getBackendHost2 = function(host, port, callback){
         return callback({success: true, type: 'healthcheck'});
     }
 
-    if (host.match(/\.hisokuapp\.ronny\.tw/)) {
-        var project_name = host.match(/([^.]*)\.hisokuapp\.ronny\.tw/)[1];
+    if (host.indexOf(config.APP_SUFFIX) > 0) {
+        var project_name = host.split(config.APP_SUFFIX)[0];
         mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
             if (rows.length == 1) {
-                hisoku._getNodesByProject(rows[0], callback);
+                lb_core._getNodesByProject(rows[0], callback);
                 return;
             }
             return callback({success: false, message: 'Project not found'});
@@ -99,7 +121,7 @@ hisoku.getBackendHost2 = function(host, port, callback){
     } else {
         mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
             if (rows.length == 1) {
-                hisoku._getNodesByProject(rows[0], callback);
+                lb_core._getNodesByProject(rows[0], callback);
                 return;
             }
             return callback({success: false, message: 'Domain not found'});
@@ -107,10 +129,10 @@ hisoku.getBackendHost2 = function(host, port, callback){
     }
 };
 
-hisoku._getNodesByProject = function(project, callback){
+lb_core._getNodesByProject = function(project, callback){
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
         if (!rows.length) {
-            return hisoku._initNewNodes(project, callback);
+            return lb_core._initNewNodes(project, callback);
         }
         var working_nodes = [];
         for (var i = 0; i < rows.length; i ++) {
@@ -123,21 +145,21 @@ hisoku._getNodesByProject = function(project, callback){
             return callback({success: true, host: random_node.ip, port: random_node.port, project: project});
         }
         setTimeout(function(){
-            hisoku._getNodesByProject(project, callback);
+            lb_core._getNodesByProject(project, callback);
         }, 500);
     });
 };
 
-hisoku._initNewNodes = function(project, callback){
+lb_core._initNewNodes = function(project, callback){
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
         if (rows.length == 0) {
             return callback({success: false, message: 'No empty node'});
         }
-        hisoku._initProjectOnNode(project, rows[Math.floor(Math.random() * rows.length)], callback);
+        lb_core._initProjectOnNode(project, rows[Math.floor(Math.random() * rows.length)], callback);
     });
 };
 
-hisoku._initProjectOnNode = function(project, node, callback){
+lb_core._initProjectOnNode = function(project, node, callback){
     mysql_connection.query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
         if (rows.affectedRows != 1) {
             return callback({success: false, message: 'Init new node failed'});
@@ -171,9 +193,9 @@ hisoku._initProjectOnNode = function(project, node, callback){
     });
 };
 
-hisoku.getBackendHost = function(host, port, callback){
-    if ('hisoku.ronny.tw' == host) {
-        return callback({success: true, host: main_page_host, port: 9999});
+lb_core.getBackendHost = function(host, port, callback){
+    if (config.MAINPAGE_DOMAIN == host) {
+        return callback({success: true, host: main_page_host, port: main_page_port});
     }
     // TODO: 要限內部網路才能做這件事
     if ('healthcheck' == host) {
@@ -182,7 +204,7 @@ hisoku.getBackendHost = function(host, port, callback){
 
     var selector_request = http.request({
         host: main_page_host,
-        port: 9999,
+        port: main_page_port,
         path: '/api/getnodes?domain=' + encodeURIComponent(host) + '&port=' + parseInt(port)
     }, function(selector_response) {
         var data = '';
@@ -202,7 +224,7 @@ hisoku.getBackendHost = function(host, port, callback){
             }
             if (json.wait) {
                 setTimeout(function(){
-                    hisoku.getBackendHost(host, port, callback);
+                    lb_core.getBackendHost(host, port, callback);
                 }, 500);
                 return;
             }
@@ -225,7 +247,7 @@ main_request.on('request', function(main_request, main_response){
     var host = main_request.headers['host'];
     var port = 80;
     if (!host) {
-        main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
+        main_response.writeHead(302, {Location: 'http://' + config.MAINPAGE_DOMAIN + '/error/notfound'});
         main_response.end();
         return;
     }
@@ -268,7 +290,7 @@ main_request.on('request', function(main_request, main_response){
     main_request.on('close', function(){
     });
 
-    hisoku.getBackendHost2(host, port, function(options){
+    lb_core.getBackendHost2(host, port, function(options){
         if (!options.success) {
             var referer = main_request.headers['referer'];
             if (typeof(referer) != 'string') {
@@ -290,7 +312,7 @@ main_request.on('request', function(main_request, main_response){
             recent_logs = recent_logs.slice(recent_logs.length - 10);
 
             scribe.send('lb-notfound', log);
-            main_response.writeHead(302, {Location: 'http://hisoku.ronny.tw/error/notfound'});
+            main_response.writeHead(302, {Location: 'http://' + config.MAINPAGE_DOMAIN + '/error/notfound'});
             main_response.end();
             request_count --;
             delete(request_pools[current_request]);
