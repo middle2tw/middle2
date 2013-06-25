@@ -159,6 +159,24 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function addpgsqladdonAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: error
+            return $this->redirect('/');
+        }
+
+        list(, /*project*/, /*addpgsqladdon*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            // TODO: 404
+            return $this->redirect('/');
+        }
+
+        Addon_PgSQLDB::addDB($project);
+
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
     public function addmysqladdonAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {
