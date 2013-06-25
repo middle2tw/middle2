@@ -5,7 +5,21 @@ class Hisoku
     public function getLoadBalancers()
     {
         return array(
-            '10.0.0.74',
+            '210.65.10.110',
+        );
+    }
+
+    public function getMySQLServers()
+    {
+        return array(
+            '210.65.11.197',
+        );
+    }
+
+    public function getPgSQLServers()
+    {
+        return array(
+            '210.65.11.197',
         );
     }
 
