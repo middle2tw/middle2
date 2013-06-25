@@ -14,19 +14,21 @@ if (file_exists(__DIR__ . '/config.php')) {
 } elseif (file_exists('/srv/config/config.php')) {
     include('/srv/config/config.php');
 }
-define('GIT_SERVER', 'git.hisoku.ronny.tw');
-define('GIT_PRIVATE_SERVER', 'git-p.hisoku.ronny.tw');
-define('USER_DOMAIN', '.hisokuapp.ronny.tw');
+define('GIT_SERVER', getenv('GIT_PUBLIC_SERVER') ?: 'git.hisoku.ronny.tw');
+define('GIT_PRIVATE_SERVER', getenv('GIT_PRIVATE_SERVER') ?: 'git-p.hisoku.ronny.tw');
+define('USER_DOMAIN', getenv('APP_SUFFIX') ?: '.hisokuapp.ronny.tw');
 define('USERDB_DOMAIN', 'userdb.hisoku.ronny.tw');
 define('WEB_KEYFILE', '/srv/config/web-key');
 define('WEB_PUBLIC_KEYFILE', '/srv/config/web-key.pub');
+define('MEMCACHE_PRIVATE_HOST', getenv('MEMCACHE_PRIVATE_HOST'));
+define('MEMCACHE_PRIVATE_PORT', getenv('MEMCACHE_PRIVATE_PORT'));
 
 // TODO: 之後要搭配 geoip
 date_default_timezone_set('Asia/Taipei');
 
 Pix_Cache::addServer('Pix_Cache_Adapter_Memcached', array(
     'servers' => array(
-        array('host' => 'memcache-p-1.hisoku.ronny.tw', 'port' => 11211, 'weight' => 1), // 256M
+        array('host' => MEMCACHE_PRIVATE_HOST, 'port' => MEMCACHE_PRIVATE_PORT, 'weight' => 1), // 256M
     ),
 ));
 
