@@ -18,7 +18,7 @@ BuildRequires:       autoconf
 
 
 %build
-for EXT in ctype dom fileinfo filter hash iconv json posix session simplexml tokenizer xml xmlreader xmlwriter mbstring pdo_mysql zip; do
+for EXT in ctype dom fileinfo filter hash iconv json posix session simplexml tokenizer xml xmlreader xmlwriter mbstring zip; do
 cd ext/${EXT}
 phpize
 %configure
@@ -29,7 +29,7 @@ done
 
 %install
 rm -rf %{buildroot}
-for EXT in ctype dom fileinfo filter hash iconv json posix session simplexml tokenizer xml xmlreader xmlwriter mbstring pdo_mysql zip; do
+for EXT in ctype dom fileinfo filter hash iconv json posix session simplexml tokenizer xml xmlreader xmlwriter mbstring zip; do
 cd ext/${EXT}
 make install INSTALL_ROOT=%{buildroot}
 cd ../../
@@ -103,7 +103,6 @@ rm -rf %{buildroot}
 /usr/include/php/ext/mbstring/php_mbregex.h
 /usr/include/php/ext/mbstring/php_onig_compat.h
 /usr/lib64/extensions/no-debug-non-zts-20100525/mbstring.so
-/usr/lib64/extensions/no-debug-non-zts-20100525/pdo_mysql.so
 /usr/lib64/extensions/no-debug-non-zts-20100525/zip.so
 
 %changelog
