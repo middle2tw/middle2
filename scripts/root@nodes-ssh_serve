@@ -37,7 +37,7 @@ function main()
         exec("mknod /srv/chroot/{$id}/dev/stdout c 5 1");
         exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
-        exec("chown -R deploy:nobody /srv/chroot/{$id}");
+        exec("chown -R deploy:nogroup /srv/chroot/{$id}");
         exec("chmod 755 /srv/chroot/{$id}");
         exec("mkdir /srv/chroot/{$id}/tmp");
         exec("chmod 1777 /srv/chroot/{$id}/tmp");
@@ -85,7 +85,7 @@ function main()
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
         $template = $project->getTemplate();
-        exec("rpm --root /srv/chroot/{$id} -ivh --nodeps /srv/code/images/{$template}/*");
+        exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/{$template}/*.deb");
         exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
