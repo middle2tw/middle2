@@ -33,7 +33,7 @@ class Hisoku
     public function getSearchServers()
     {
         return array(
-            'search-1.hisoku.ronny.tw',
+            '210.65.11.197',
         );
     }
 
