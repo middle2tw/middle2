@@ -19,6 +19,19 @@ class FirewallGenerator
         );
     }
 
+    public function testSuffix()
+    {
+        return array(
+            'sleep 30',
+            'iptables -F',
+            'iptables -X',
+            'iptables -Z',
+            'iptables -P INPUT ACCEPT',
+            'iptables -P OUTPUT ACCEPT',
+            'iptables -P FORWARD ACCEPT',
+        );
+    }
+
     protected $_server_categories = array();
     protected $_category_servers = array();
 
@@ -76,6 +89,10 @@ class FirewallGenerator
             $this->_addServer($ip, 'scribe');
         }
 
+        foreach (Hisoku::getSearchServers() as $ip) {
+            $this->_addServer($ip, 'elastic_search');
+        }
+
         // mainpage server
         foreach ($mainpage_servers as $ip) {
             $this->_addServer($ip, 'mainpage');
@@ -98,6 +115,9 @@ class FirewallGenerator
             'node' => array(
                 array('20001:29999', array('loadbalancer')),
                 array('22', array('mainpage', 'loadbalancer')),
+            ),
+            'elastic_search' => array(
+                array('9200', array('node', 'mainpage')),
             ),
             'mainpage' => array(
                 array('9999', array('loadbalancer')),
@@ -186,6 +206,9 @@ class FirewallGenerator
                 }
             }
             file_put_contents(__DIR__ . '/outputs/' . $ip . '.sh', implode("\n", $rules) . "\n");
+            file_put_contents(__DIR__ . '/outputs/' . $ip . '_test.sh', implode("\n", array_merge($rules, $this->testSuffix())) . "\n");
+            chmod(__DIR__ . '/outputs/' . $ip . '.sh', 0755);
+            chmod(__DIR__ . '/outputs/' . $ip . '_test.sh', 0755);
         }
     }
 }
