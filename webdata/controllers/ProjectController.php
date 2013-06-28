@@ -38,6 +38,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         if (!$domain = $project->custom_domains->search(array('domain' => $_GET['domain']))->first()) {
             return $this->alert('domain not found', '/');
         }
@@ -55,6 +59,10 @@ class ProjectController extends Pix_Controller
 
         list(, /*project*/, /*adddomain*/, $name) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
             return $this->alert('Project not found', '/');
         }
 
@@ -82,6 +90,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         if (!$variable = $project->variables->search(array('key' => $key))->first()) {
             return $this->alert('variable not found', '/');
         }
@@ -99,6 +111,10 @@ class ProjectController extends Pix_Controller
 
         list(, /*project*/, /*addvariable*/, $name) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
             return $this->alert('Project not found', '/');
         }
 
@@ -123,6 +139,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         $project->setEAV('note', strval($_POST['note']));
         return $this->redirect('/project/detail/' . $project->name);
     }
@@ -136,6 +156,10 @@ class ProjectController extends Pix_Controller
 
         list(, /*project*/, /*edittemplate*/, $name, $key) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
             return $this->alert('Project not found', '/');
         }
 
@@ -160,6 +184,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         Addon_PgSQLDB::addDB($project);
 
         return $this->redirect('/project/detail/' . $project->name);
@@ -174,6 +202,10 @@ class ProjectController extends Pix_Controller
 
         list(, /*project*/, /*addmysqladdon*/, $name) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
             return $this->alert('Project not found', '/');
         }
 
@@ -194,6 +226,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         Addon_Memcached::addDB($project);
 
         return $this->redirect('/project/detail/' . $project->name);
@@ -207,6 +243,10 @@ class ProjectController extends Pix_Controller
 
         list(, /*project*/, /*editvariable*/, $name, $key) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
             return $this->alert('Project not found', '/');
         }
 
@@ -232,6 +272,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         $project->cronjobs->insert(array(
             'job' => strval($_POST['job']),
             'period' => intval($_POST['period']),
@@ -249,6 +293,10 @@ class ProjectController extends Pix_Controller
 
         list(, /*project*/, /*deletecronjob*/, $name, $id) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
             return $this->alert('Project not found', '/');
         }
 
@@ -272,6 +320,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
         if (!$cronjob = $project->cronjobs->search(array('id' => $id))->first()) {
             return $this->alert('Cronjob not found', '/');
         }
@@ -282,4 +334,5 @@ class ProjectController extends Pix_Controller
         ));
         return $this->redirect('/project/detail/' . $project->name);
     }
+
 }
