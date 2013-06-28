@@ -1,16 +1,13 @@
 var http = require('http');
+var https = require('https');
 var Scribe = require('scribe').Scribe;
 var Memcache = require('memcache');
 var mysql = require('mysql');
 var SSH2 = require('ssh2');
-
-
-if (process.argv.length < 4) {
-    throw "Usage: node loadbalancer.js [server-ip] [server-port]";
-}
+var fs = require('fs');
 
 var loadConfig = function(){
-    var content = require('fs').readFileSync('/srv/config/config.php');
+    var content = fs.readFileSync('/srv/config/config.php');
     var regex = /putenv\(\'([^=]*)=([^\']*)\'\);/g;
 
     var match;
@@ -187,7 +184,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
             host: long2ip(node.ip),
             port: 22,
             username: 'root',
-            privateKey: require('fs').readFileSync('/srv/config/web-key'),
+            privateKey: fs.readFileSync('/srv/config/web-key'),
         });
 
     });
@@ -236,14 +233,19 @@ lb_core.getBackendHost = function(host, port, callback){
     }).end();
 };
 
-var main_request = http.createServer();
+var http_main_request = http.createServer();
+var https_options = {
+    key: fs.readFileSync('/srv/config/middle2.key'),
+    cert: fs.readFileSync('/srv/config/middle2.crt')
+};
+var https_main_request = https.createServer(https_options);
 var request_count = 0;
 var request_serial = 0;
 var request_pools = {};
 var recent_logs = [];
 var start_time = (new Date()).getTime();
 
-main_request.on('request', function(main_request, main_response){
+var http_request_callback = function(main_request, main_response){
     var host = main_request.headers['host'];
     var port = 80;
     if (!host) {
@@ -413,4 +415,7 @@ main_request.on('request', function(main_request, main_response){
 
         return;
     });
-}).listen(process.argv[3], process.argv[2]);
+};
+
+https_main_request.on('request', http_request_callback).listen(443, 0);
+http_main_request.on('request', http_request_callback).listen(80, 0);
