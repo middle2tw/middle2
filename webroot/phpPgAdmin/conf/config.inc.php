@@ -15,6 +15,10 @@ if (!class_exists('Pix_Session')) {
 }
 
 $addons = Addon_PgSQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
+if (!count($addons)) {
+    header('Location: /user/nodb');
+    exit;
+}
 $i = 0;
 foreach ($addons as $addon) {
     if ($addon->project) {

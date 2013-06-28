@@ -37,6 +37,10 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
 
 } else {
     $addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
+    if (!count($addons)) {
+        header('Location: /user/nodb');
+        exit;
+    }
 }
 $i = 0;
 foreach ($addons as $addon) {
