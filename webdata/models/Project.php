@@ -2,6 +2,16 @@
 
 class ProjectRow extends Pix_Table_Row
 {
+    public function isOwner($user)
+    {
+        return count($this->members->search(array('is_admin' => 1, 'user_id' => $user->id)));
+    }
+
+    public function isMember($user)
+    {
+        return count($this->members->search(array('user_id' => $user->id)));
+    }
+
     public function getFirstDomain()
     {
         // TODO: add custom domain
