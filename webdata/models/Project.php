@@ -2,7 +2,7 @@
 
 class ProjectRow extends Pix_Table_Row
 {
-    public function isOwner($user)
+    public function isAdmin($user)
     {
         return count($this->members->search(array('is_admin' => 1, 'user_id' => $user->id)));
     }
