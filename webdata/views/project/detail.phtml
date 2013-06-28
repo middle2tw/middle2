@@ -100,6 +100,31 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->value)
     </form>
     <?php } ?>
 </ol>
+<hr>
+<h3>Node Status</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <td>status</td>
+            <td>start at</td>
+            <td>access at</td>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach (WebNode::search(array('project_id' => $this->project->id)) as $node) { ?>
+    <tr>
+        <td><?= $this->escape($node->getStatusWord()) ?></td>
+        <td>
+            <?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?>
+        </td>
+        <td>
+            <?= $this->partial('helper/counttime.phtml', array('time' => $node->getAccessAt())) ?>
+        </td>
+    </tr>
+    <?php } ?>
+    </tbody>
+</table>
+<hr>
 Log
 <pre>
 <?php
