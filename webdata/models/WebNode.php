@@ -17,6 +17,12 @@ class WebNodeRow extends Pix_Table_Row
         ));
     }
 
+    public function getStatusWord()
+    {
+        $node_status = WebNode::getTable()->_columns['status']['note'];
+        return isset($node_status[$this->status]) ? $node_status[$this->status] : 'Unknown';
+    }
+
     public function getServiceProject()
     {
         return Addon_Memcached::search(array('host' => long2ip($this->ip), 'port' => $this->port))->first()->project;
