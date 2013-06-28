@@ -1,7 +1,6 @@
 <?php
 $grouped_nodes = WebNode::getGroupedNodes();
 $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
-$node_status = WebNode::getTable()->_columns['status']['note'];
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <?= $this->partial('/admin/header.phtml', $this) ?>
@@ -67,7 +66,7 @@ $node_status = WebNode::getTable()->_columns['status']['note'];
                             <?= $this->escape($node->project->getTemplate()) ?>
                             <?php } ?>
                         </td>
-                        <td><?= isset($node_status[$node->status]) ? $node_status[$node->status] : 'Unknown' ?></td>
+                        <td><?= $this->escape($this->node->getStatusWord()) ?></td>
                         <td>
                             <?php if ($node->project) { ?>
                             <?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?>
