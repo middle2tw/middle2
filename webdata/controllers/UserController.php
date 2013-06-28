@@ -93,4 +93,9 @@ class UserController extends Pix_Controller
         return $this->alert('success!', '/');
 
     }
+
+    public function nodbAction()
+    {
+        return $this->alert('沒有任何 database 可用', '/');
+    }
 }
