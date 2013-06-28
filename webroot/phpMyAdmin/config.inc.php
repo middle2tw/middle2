@@ -28,12 +28,14 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
 
     $addons = array($addon);
 
-    $addon = new StdClass;
-    $addon->host = USERDB_DOMAIN;
-    $addon->user_name = getenv('MYSQL_USERDB_USER');
-    $addon->password = getenv('MYSQL_USERDB_PASS');
-    $addon->verbose = 'UserDB';
-    $addons[] = $addon;
+    foreach (Hisoku::getMysqlServers() as $ip) {
+        $addon = new StdClass;
+        $addon->host = $ip;
+        $addon->user_name = getenv('MYSQL_USERDB_USER');
+        $addon->password = getenv('MYSQL_USERDB_PASS');
+        $addon->verbose = 'UserDB';
+        $addons[] = $addon;
+    }
 
 } else {
     $addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));

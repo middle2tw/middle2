@@ -17,7 +17,6 @@ if (file_exists(__DIR__ . '/config.php')) {
 define('GIT_SERVER', getenv('GIT_PUBLIC_SERVER') ?: 'git.hisoku.ronny.tw');
 define('GIT_PRIVATE_SERVER', getenv('GIT_PRIVATE_SERVER') ?: 'git-p.hisoku.ronny.tw');
 define('USER_DOMAIN', getenv('APP_SUFFIX') ?: '.hisokuapp.ronny.tw');
-define('USERDB_DOMAIN', 'userdb.hisoku.ronny.tw');
 define('WEB_KEYFILE', '/srv/config/web-key');
 define('WEB_PUBLIC_KEYFILE', '/srv/config/web-key.pub');
 define('MEMCACHE_PRIVATE_HOST', getenv('MEMCACHE_PRIVATE_HOST'));

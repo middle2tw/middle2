@@ -1,7 +1,5 @@
 <?php
-$database_hosts = array(
-    'userdb.hisoku.ronny.tw',
-);
+$database_hosts = Hisoku::getMysqlServers();
 $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>

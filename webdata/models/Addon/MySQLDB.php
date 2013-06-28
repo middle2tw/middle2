@@ -47,12 +47,13 @@ class Addon_MySQLDB extends Pix_Table
             return;
         }
 
-        $host = USERDB_DOMAIN;
+        $ips = Hisoku::getMysqlServers();
+        $host = $ips[0];
         $user_name = Hisoku::uniqid(16);
         $password = Hisoku::uniqid(16);
         $database = 'user_' . $project->name;
 
-        $link = new mysqli(USERDB_DOMAIN, getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
+        $link = new mysqli($ips[0], getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
         $db = new Pix_Table_Db_Adapter_Mysqli($link);
         $db->query("CREATE USER '{$user_name}'@'%' IDENTIFIED BY '{$password}'");
         $db->query("CREATE DATABASE IF NOT EXISTS`{$database}` CHARACTER SET utf8");
