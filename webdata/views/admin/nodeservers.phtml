@@ -66,7 +66,7 @@ $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scr
                             <?= $this->escape($node->project->getTemplate()) ?>
                             <?php } ?>
                         </td>
-                        <td><?= $this->escape($this->node->getStatusWord()) ?></td>
+                        <td><?= $this->escape($node->getStatusWord()) ?></td>
                         <td>
                             <?php if ($node->project) { ?>
                             <?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?>
