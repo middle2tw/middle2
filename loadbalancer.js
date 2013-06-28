@@ -245,7 +245,8 @@ var request_pools = {};
 var recent_logs = [];
 var start_time = (new Date()).getTime();
 
-var http_request_callback = function(main_request, main_response){
+var http_request_callback = function(protocol){
+    return function(main_request, main_response){
     var host = main_request.headers['host'];
     var port = 80;
     if (!host) {
@@ -281,6 +282,9 @@ var http_request_callback = function(main_request, main_response){
     if (!main_request.headers['x-forwarded-for']) {
         main_request.headers['x-forwarded-for'] = main_request.socket.remoteAddress;
         main_request.headers['x-forwarded-port'] = main_request.socket.address().port;
+        if ('https' == protocol) {
+            main_request.headers['x-forwarded-https'] = 'On';
+        }
     }
 
     main_request.on('data', function(chunk){
@@ -416,6 +420,7 @@ var http_request_callback = function(main_request, main_response){
         return;
     });
 };
+};
 
-https_main_request.on('request', http_request_callback).listen(443, 0);
-http_main_request.on('request', http_request_callback).listen(80, 0);
+https_main_request.on('request', http_request_callback('https')).listen(443, 0);
+http_main_request.on('request', http_request_callback('http')).listen(80, 0);
