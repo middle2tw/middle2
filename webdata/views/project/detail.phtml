@@ -79,11 +79,16 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->value)
 <hr>
 <h3>Members: </h3>
 <ol>
+    <?php $is_admin = $this->project->isAdmin($this->user); ?>
+    <?php $admin_count = $this->project->members->search(array('is_admin' => 1))->count(); ?>
     <?php foreach ($this->project->members as $project_member) { ?>
     <?php if (!$user = $project_member->user) { continue; } ?>
     <li>
     <?= $this->escape($user->name) ?>
     <?php if ($project_member->is_admin) { ?>[Admin]<?php } ?>
+    <?php if ($is_admin and (!$project_member->is_admin or $admin_count != 1)) { ?>
+    <a href="/project/deletemember/<?= $this->project->name ?>?account=<?= urlencode($user->name) ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($user->name) ?> member">Delete</a>
+    <?php } ?>
     </li>
     <?php } ?>
 
