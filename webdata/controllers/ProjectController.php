@@ -335,4 +335,66 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function deletememberAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: log it
+            return $this->alert('error', '/');
+        }
+
+        list(, /*project*/, /*deletemember*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isAdmin($this->user)) {
+            return $this->alert('You are not admin', '/');
+        }
+
+        if (!$user = User::find_by_name(strval($_GET['account']))) {
+            return $this->alert('User not found', '/');
+        }
+
+        if (!$project_member = $project->members->search(array('user_id' => $user->id))->first()) {
+            return $this->alert('project member not found', '/');
+        }
+
+        if ($project_member->is_admin and count($project->members->search(array('is_admin' => 1))) == 1) {
+            return $this->alert('there is only one admin', '/');
+        }
+
+        $project_member->delete();
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
+    public function addmemberAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: log it
+            return $this->alert('error', '/');
+        }
+
+        list(, /*project*/, /*addmember*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isAdmin($this->user)) {
+            return $this->alert('You are not admin', '/');
+        }
+
+        if (!$user = User::find_by_name(strval($_POST['account']))) {
+            return $this->alert('User not found', '/');
+        }
+
+        try {
+            $project->members->insert(array(
+                'user_id' => $user->id,
+            ));
+        } catch (Pix_Table_DuplicateException $e) {
+        }
+
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
 }
