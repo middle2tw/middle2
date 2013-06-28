@@ -78,6 +78,24 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->value)
     </li>
 </ol>
 <hr>
+<h3>Members: </h3>
+<ol>
+    <?php foreach ($this->project->members as $project_member) { ?>
+    <?php if (!$user = $project_member->user) { continue; } ?>
+    <li>
+    <?= $this->escape($user->name) ?>
+    <?php if ($project_member->is_admin) { ?>[Admin]<?php } ?>
+    </li>
+    <?php } ?>
+
+    <?php if ($this->project->isAdmin($this->user)) { ?>
+    <form method="post" action="/project/addmember/<?= $this->project->name ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        add member: <input type="text" name="account">
+        <input type="submit">
+    </form>
+    <?php } ?>
+</ol>
 Log
 <pre>
 <?php
