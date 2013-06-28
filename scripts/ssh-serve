@@ -36,7 +36,7 @@ function main()
         return error('invalid ssh key');
     }
 
-    if (!$project->members->search(array('user_id' => $user->id))->count()) {
+    if (!$project->isMember($user)) {
         return error('project not found: ' . $project_name);
     }
 
