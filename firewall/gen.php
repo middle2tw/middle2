@@ -136,7 +136,7 @@ class FirewallGenerator
                 array('3306', array('loadbalancer', 'mainpage', 'node')),
             ),
             'pgsql' => array(
-                array('5432', array('loadbalancer', 'mainpage', 'node')),
+                array('5432', array('loadbalancer', 'mainpage', 'node', 'PUBLIC')),
             ),
             'scribe' => array(
                 array('1426', array('loadbalancer', 'node')),
