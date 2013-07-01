@@ -63,6 +63,7 @@ class Addon_PgSQLDB extends Pix_Table
         $db->query("GRANT ALL PRIVILEGES ON DATABASE \"{$database}\" TO \"{$user_name}\"");
         $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$database}\" FROM PUBLIC");
         $db->query("ALTER DATABASE \"{$database}\" OWNER TO \"{$user_name}\"");
+        $db->query("ALTER GROUP \"appdb\" ADD USER \"{$user_name}\"");
 
         $addon = self::insert(array(
             'project_id' => $project->id,
