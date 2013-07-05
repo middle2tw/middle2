@@ -39,7 +39,6 @@ if ('python26' == $project->getTemplate()) {
         $fp = tmpfile();
         fputs($fp, $file_content);
         $meta_data = stream_get_meta_data($fp);
-        //system('/srv/code/hisoku/scripts/python-downloader.php ' . escapeshellarg($meta_data['uri']));
 
         $session = ssh2_connect('localhost', 22);
         $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
