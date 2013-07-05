@@ -57,7 +57,7 @@ class Prebuilder
             return $this->error("File not found");
         }
 
-        $project_file = '/tmp/project-' . md5_file($req_file);
+        $project_file = '/tmp/project-python26-' . md5_file($req_file);
 
         // 已經有了，不需要再做了
         if (file_exists($project_file . '.tar.gz')) {

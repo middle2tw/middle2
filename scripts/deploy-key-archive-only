@@ -50,7 +50,7 @@ function getProjectBaseByRepository($args)
     stream_set_blocking($stream, true);
     stream_get_contents($stream);
 
-    readfile('/tmp/project-' . md5($file_content) . '.tar.gz');
+    readfile('/tmp/project-' . $template . '-' . md5($file_content) . '.tar.gz');
 }
 
 function main()
