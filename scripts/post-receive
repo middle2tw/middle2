@@ -29,7 +29,7 @@ $template = $project->getTemplate();
 $package_filename = null;
 if ('python26' == $template) {
     $package_filename = 'requirements.txt';
-} elseif ('ruby18' == $template) {
+} elseif ('ruby20' == $template) {
     $package_filename = 'Gemfile';
 }
 

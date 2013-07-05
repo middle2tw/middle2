@@ -30,7 +30,7 @@ function getProjectBaseByRepository($args)
     $template = $project->getTemplate();
     if ('python26' == $template) {
         $package_filename = 'requirements.txt';
-    } elseif ('ruby18' == $template) {
+    } elseif ('ruby20' == $template) {
         $package_filename = 'Gemfile';
     } else {
         return error('template ' . $template . ' package filename unknown');

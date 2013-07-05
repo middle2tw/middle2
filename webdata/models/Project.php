@@ -225,7 +225,7 @@ class Project extends Pix_Table
             'php54',
             'python26',
             'nodejs',
-            'ruby18',
+            'ruby20',
         );
     }
 }
