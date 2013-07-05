@@ -51,7 +51,7 @@ function main()
         mkdir("/srv/chroot/{$id}/srv/logs");
         exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
         $spent = microtime(true) - $start;
-        file_put_contents($log_file, date('c') . " [init] done)(spent: {$spent})\n", FILE_APPEND);
+        file_put_contents($log_file, date('c') . " [init] done(spent: {$spent})\n", FILE_APPEND);
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
