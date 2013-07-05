@@ -100,9 +100,8 @@ function main()
         exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
         if ('python26' == $template) {
             $tmp_name = tempnam('/tmp', '') . '.tar.gz';
-            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-python-package " . $project_name . " > " . $tmp_name);
-            mkdir("/srv/chroot/{$id}/tmp/pip-build");
-            exec("tar zxvf " . $tmp_name . " -C /srv/chroot/{$id}/tmp/pip-build");
+            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-base " . $project_name . " > " . $tmp_name);
+            exec("tar zxf " . $tmp_name . " -C /srv/chroot/{$id}");
             unlink($tmp_name);
         }
         if ('no-post-clone' != $flag and file_exists("/srv/chroot/{$id}/post-clone.sh")) {
@@ -187,6 +186,11 @@ function main()
         }
         exec("rm -rf /srv/chroot/{$id}");
         echo json_encode(array('error' => false, 'port' => $port));
+        break;
+
+    case 'local-build-project-base':
+        list(, $local_req_path) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        system("/srv/code/hisoku/scripts/python-prebuild.php " . escapeshellarg($local_req_path));
         break;
 
     default:
