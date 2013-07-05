@@ -13,9 +13,9 @@ START_AT=`date +%s`
 END_AT=`expr 300 + $START_AT`
 
 CHECK_FAIL="1"
-while [ $CHECK_FAIL -eq "1" -a $END_AT -gt `date +%s` ]
+while [ $CHECK_FAIL -gt "0" -a $END_AT -gt `date +%s` ]
 do
-        echo '' | nc 0 `cat /etc/port.conf`
+        wget --timeout=5 http://0:`cat /etc/port.conf` -O /dev/null
         CHECK_FAIL=$?
         sleep 1
 done
