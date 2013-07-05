@@ -1,0 +1,63 @@
+#!/usr/bin/php
+<?php
+// 把 /srv/chroot/1xxx 建立好，留著拿來做 project_base 用的
+// chroot 有五個狀態
+// 1. notexists (根本不存在): 不存在 /srv/chroot/1xxx/ 資料夾
+// 2. initing (建立中): 存在 /srv/chroot/1xxx.initing 和 /srv/chroot/1xxx/ 資料夾
+// 3. available (可使用): 只存在 /srv/chroot/1xxx/ 資料夾
+// 4. using (正在使用): 存在 /srv/chroot/1xxx.locking 和 /srv/chroot/1xxx/ 資料夾
+// 5. used (用完了): 存在 /srv/chroot/1xxx.used 和 /srv/chroot/1xxx/ 資料夾
+//
+// 這個 script 只需要對 1 和 5 做事就行了
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+class Initer
+{
+    public function initChroot($id)
+    {
+        // 只有 notexists 和 used 兩個狀況需要做事
+        if (file_exists("/srv/chroot/{$id}") and !file_exists("/srv/chroot/{$id}.used")) {
+            return;
+        }
+        error_log("initing node $id...");
+
+        // 先建立 initing file ，表示在 init 中
+        touch("/srv/chroot/{$id}.initing");
+
+        // 先清空舊檔案
+        system("rm -rf /srv/chroot/{$id} /srv/chroot/{$id}.used");
+
+        // init 新的 chroot
+        $session = ssh2_connect('localhost', 22);
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        $stream = ssh2_exec($session, "init {$id}");
+        stream_set_blocking($stream, true);
+        stream_get_contents($stream);
+
+        // 把修改時間全改成 2000/1/1 以方便之後找出 diff
+        system("find /srv/chroot/{$id} -exec touch --no-dereference --date=20000101 {} \;");
+
+        // 完工，把 initing 拿掉進入 available 狀態
+        unlink("/srv/chroot/{$id}.initing");
+    }
+
+    public function error($message)
+    {
+        throw new Exception($message);
+    }
+
+    public function main()
+    {
+        if (0 !== posix_getuid()) {
+            return $this->error("Muse be root");
+        }
+
+        for ($id = 1000; $id < 1010; $id ++) {
+            $this->initChroot($id);
+        }
+    }
+}
+
+$i = new Initer;
+$i->main();
