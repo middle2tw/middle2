@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+// 當使用者 git push 時，會在 git server 以 git 使用者的身份執行這個 script 
 include(__DIR__ . '/../webdata/init.inc.php');
 
 $fp = fopen('php://stdin', 'r');
@@ -38,7 +39,13 @@ if ('python26' == $project->getTemplate()) {
         $fp = tmpfile();
         fputs($fp, $file_content);
         $meta_data = stream_get_meta_data($fp);
-        system('/srv/code/hisoku/scripts/python-downloader.php ' . escapeshellarg($meta_data['uri']));
+        //system('/srv/code/hisoku/scripts/python-downloader.php ' . escapeshellarg($meta_data['uri']));
+
+        $session = ssh2_connect('localhost', 22);
+        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+        $stream = ssh2_exec($session, "local-build-project-base {$meta_data['uri']}");
+        stream_set_blocking($stream, true);
+        stream_get_contents($stream);
     }
 }
 
