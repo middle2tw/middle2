@@ -24,6 +24,8 @@ function main()
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
             break;
         }
+        $log_file = "/srv/chroot/{$id}.log";
+        file_put_contents($log_file, date('c') . " [init] start\n", FILE_APPEND);
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
@@ -47,6 +49,7 @@ function main()
         exec("echo -e 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
         mkdir("/srv/chroot/{$id}/srv/logs");
         exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
+        file_put_contents($log_file, date('c') . " [init] done\n", FILE_APPEND);
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
@@ -87,7 +90,6 @@ function main()
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
-        file_put_contents($log_file, '');
         $template = $project->getTemplate();
         file_put_contents($log_file, date('c') . " [clone] project: {$project_name}, template: {$template}\n", FILE_APPEND);
         file_put_contents($log_file, date('c') . " [clone] init lang base\n", FILE_APPEND);
@@ -152,18 +154,24 @@ function main()
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
+        $log_file = "/srv/chroot/{$id}.log";
+        file_put_contents($log_file, date('c') . " [run] run {$run_cmd}\n", FILE_APPEND);
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
+
+        file_put_contents($log_file, date('c') . " [run] loading project variables\n", FILE_APPEND);
         $params = array('project=' . escapeshellarg($project->name));
         foreach ($project->variables as $variable) {
             $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->value);
         }
         $run_cmd = 'cd /srv/web; ' . urldecode($run_cmd);
 
+        file_put_contents($log_file, date('c') . " [run] start\n", FILE_APPEND);
         $uid = 20000 + $id;
 	$cmd = "chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         passthru($cmd);
+        file_put_contents($log_file, date('c') . " [run] done\n", FILE_APPEND);
         break;
 
     case 'check_alive':
