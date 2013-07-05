@@ -26,13 +26,23 @@ function getProjectBaseByRepository($args)
     if (!file_exists($absolute_path)) {
         return error('project not found: ' . $project_name);
     }
+
+    $template = $project->getTemplate();
+    if ('python26' == $template) {
+        $package_filename = 'requirements.txt';
+    } elseif ('ruby18' == $template) {
+        $package_filename = 'Gemfile';
+    } else {
+        return error('template ' . $template . ' package filename unknown');
+    }
+
     chdir($absolute_path);
-    $ls_tree_cmd = 'git ls-tree HEAD requirements.txt';
+    $ls_tree_cmd = 'git ls-tree HEAD ' . $package_filename;
     $ls_result = trim(`$ls_tree_cmd`);
     // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
     list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
-    if ($type != 'blob' or $file != 'requirements.txt') {
-        error("requirements.txt not found");
+    if ($type != 'blob' or $file != $package_filename) {
+        error($package_filename . " not found");
     }
 
     $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($object_id);
@@ -42,7 +52,6 @@ function getProjectBaseByRepository($args)
     fputs($fp, $file_content);
     $meta_data = stream_get_meta_data($fp);
 
-    $template = $project->getTemplate();
 
     $session = ssh2_connect('localhost', 22);
     $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
