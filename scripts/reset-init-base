@@ -17,7 +17,18 @@ class Initer
     public function initChroot($id)
     {
         // 只有 notexists 和 used 兩個狀況需要做事
-        if (file_exists("/srv/chroot/{$id}") and !file_exists("/srv/chroot/{$id}.used")) {
+        if (file_exists("/srv/chroot/{$id}.lock")) {
+            $fp = fopen("/srv/chroot/{$id}.lock", 'w+');
+            // 被 lock 住了，先不用管他
+            if (!flock($fp, LOCK_EX | LOCK_NB)) {
+                return;
+            }
+            // 已經沒有被 lock 了，換成 used 狀態
+            touch("/srv/chroot/{$id}.used");
+            flock($fp, LOCK_UN);    // release the lock
+            fclose($fp);
+            unlink("/srv/chroot/{$id}.lock");
+        } elseif (file_exists("/srv/chroot/{$id}") and !file_exists("/srv/chroot/{$id}.used")) {
             return;
         }
         error_log("initing node $id...");
