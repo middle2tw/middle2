@@ -42,9 +42,11 @@ function getProjectBaseByRepository($args)
     fputs($fp, $file_content);
     $meta_data = stream_get_meta_data($fp);
 
+    $template = $project->getTemplate();
+
     $session = ssh2_connect('localhost', 22);
     $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
-    $stream = ssh2_exec($session, "local-build-project-base {$meta_data['uri']}");
+    $stream = ssh2_exec($session, "local-build-project-base {$template} {$meta_data['uri']}");
     stream_set_blocking($stream, true);
     stream_get_contents($stream);
 

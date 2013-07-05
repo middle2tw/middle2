@@ -227,8 +227,8 @@ function main()
         break;
 
     case 'local-build-project-base':
-        list(, $local_req_path) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        system("/srv/code/hisoku/scripts/python-prebuild.php " . escapeshellarg($local_req_path));
+        list(, $template, $local_req_path) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        system("/srv/code/hisoku/scripts/build-project-base/{$template}.php " . escapeshellarg($local_req_path));
         break;
 
     default:
