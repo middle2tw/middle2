@@ -8,6 +8,49 @@ function error($message)
     error_log($message);
 }
 
+function getProjectBaseByRepository($args)
+{
+    $project_name = trim($args, "' ");
+    if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
+        $project_name = $matches[1];
+    }
+    if (FALSE !== strpos($project_name, '.')) {
+        return error('invalid project name: ' . $project_name);
+    }
+
+    if (!$project = Project::find_by_name(strval($project_name))) {
+        return error('project not found: ' . $project_name);
+    }
+
+    $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
+    if (!file_exists($absolute_path)) {
+        return error('project not found: ' . $project_name);
+    }
+    chdir($absolute_path);
+    $ls_tree_cmd = 'git ls-tree HEAD requirements.txt';
+    $ls_result = trim(`$ls_tree_cmd`);
+    // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
+    list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
+    if ($type != 'blob' or $file != 'requirements.txt') {
+        error("requirements.txt not found");
+    }
+
+    $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($object_id);
+    $file_content = trim(`$cat_file_cmd`);
+
+    $fp = tmpfile();
+    fputs($fp, $file_content);
+    $meta_data = stream_get_meta_data($fp);
+
+    $session = ssh2_connect('localhost', 22);
+    $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+    $stream = ssh2_exec($session, "local-build-project-base {$meta_data['uri']}");
+    stream_set_blocking($stream, true);
+    stream_get_contents($stream);
+
+    readfile('/tmp/project-' . md5($file_content) . '.tar.gz');
+}
+
 function getPythonBuildPackageByRepository($args)
 {
     $project_name = trim($args, "' ");
@@ -56,6 +99,9 @@ function main()
 
     if ($command == 'get-python-package') {
         getPythonBuildPackageByRepository($args);
+        return;
+    } elseif ('get-project-base' == $command) {
+        getProjectBaseByRepository($args);
         return;
     } elseif (!in_array($command, array('git-upload-archive'))) {
         return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
