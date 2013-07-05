@@ -1,3 +1,6 @@
+<?php
+$this->title = $this->project->name . (($note = $this->project->getEAV('note')) ? "({$note})" : '') . ' :: ';
+?>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <h2><?= $this->escape($this->project->name) ?></h2>
 <form method="post" action="/project/editnote/<?= $this->project->name ?>">

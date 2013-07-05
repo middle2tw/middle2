@@ -1,6 +1,7 @@
 <?php
 $grouped_nodes = WebNode::getGroupedNodes();
 $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
+$this->title = 'NodeServers Info :: ';
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <?= $this->partial('/admin/header.phtml', $this) ?>
