@@ -87,7 +87,12 @@ function main()
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
         $template = $project->getTemplate();
-        exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/{$template}/*.deb");
+        $lang_base_file = "/srv/code/images/lang-{$template}.tar.gz";
+        if (file_exists($lang_base_file)) {
+            exec("tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
+        } else {
+            exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/{$template}/*.deb");
+        }
         exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
         $port = 20000 + $id;
         exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
