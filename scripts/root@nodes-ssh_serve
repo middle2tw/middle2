@@ -24,6 +24,7 @@ function main()
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
             break;
         }
+        $start = microtime(true);
         $log_file = "/srv/chroot/{$id}.log";
         file_put_contents($log_file, date('c') . " [init] start\n", FILE_APPEND);
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
@@ -49,7 +50,8 @@ function main()
         exec("echo -e 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
         mkdir("/srv/chroot/{$id}/srv/logs");
         exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
-        file_put_contents($log_file, date('c') . " [init] done\n", FILE_APPEND);
+        $spent = microtime(true) - $start;
+        file_put_contents($log_file, date('c') . " [init] done)(spent: {$spent})\n", FILE_APPEND);
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
@@ -80,6 +82,7 @@ function main()
 
     case 'clone':
         list(, $project_name, $id, $flag) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        $start = microtime(true);
         $log_file = "/srv/chroot/{$id}.log";
         if (!$id) {
             die("invalid $id");
@@ -124,11 +127,13 @@ function main()
             exec("chroot /srv/chroot/{$id}/ /post-clone.sh {$port}");
         }
 
-        file_put_contents($log_file, date('c') . " [clone] done\n", FILE_APPEND);
+        $spent = microtime(true) - $start;
+        file_put_contents($log_file, date('c') . " [clone] done(spent: $spent)\n", FILE_APPEND);
         break;
 
     case 'restart-web':
         list(, $project_name, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        $start = microtime(true);
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
@@ -146,19 +151,22 @@ function main()
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
         exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh");
-        file_put_contents($log_file, date('c') . " [restart-web] done\n", FILE_APPEND);
+
+        $spent = microtime(true) - $start;
+        file_put_contents($log_file, date('c') . " [restart-web] done(spent: $spent)\n", FILE_APPEND);
         break;
 
     case 'run':
         list(, $project_name, $id, $run_cmd) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        $start = microtime(true);
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
         $log_file = "/srv/chroot/{$id}.log";
-        file_put_contents($log_file, date('c') . " [run] run {$run_cmd}\n", FILE_APPEND);
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
+        file_put_contents($log_file, date('c') . " [run] run project: {$project_name} command: \"" . urldecode($run_cmd) . "\"\n", FILE_APPEND);
 
         file_put_contents($log_file, date('c') . " [run] loading project variables\n", FILE_APPEND);
         $params = array('project=' . escapeshellarg($project->name));
@@ -171,7 +179,8 @@ function main()
         $uid = 20000 + $id;
 	$cmd = "chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         passthru($cmd);
-        file_put_contents($log_file, date('c') . " [run] done\n", FILE_APPEND);
+        $spent = microtime(true) - $start;
+        file_put_contents($log_file, date('c') . " [run] done(spent: {$spent})\n", FILE_APPEND);
         break;
 
     case 'check_alive':
