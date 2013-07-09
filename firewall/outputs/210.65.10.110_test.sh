@@ -14,7 +14,7 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 # allow all from categories loadbalancer
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 # allow loadbalancer, node from categories scribe
-iptables -A INPUT -p tcp -s 210.65.11.137 --dport 1426 -j ACCEPT
+iptables -A INPUT -p tcp -s 210.61.2.239 --dport 1426 -j ACCEPT
 # allow loadbalancer from categories mainpage
 # allow loadbalancer, mainpage from categories private_memcache
 sleep 30
