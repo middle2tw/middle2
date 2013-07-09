@@ -19,7 +19,7 @@ class Hisoku
     public function getNodeServers()
     {
         return array(
-            '210.65.11.137',
+            '210.61.2.239',
         );
     }
 
