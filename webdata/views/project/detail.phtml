@@ -11,8 +11,8 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
 <form method="post" action="/project/edittemplate/<?= $this->project->name ?>">
     <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
     Template: <select name="template">
-        <?php foreach (Project::getTemplates() as $template) { ?>
-        <option value="<?= $template ?>"<?= $template == $this->project->getTemplate() ? ' selected="selected"' : '' ?>><?= $template ?></option>
+        <?php foreach (Project::getTemplates() as $template => $template_desc) { ?>
+        <option value="<?= $template ?>"<?= $template == $this->project->getTemplate() ? ' selected="selected"' : '' ?>><?= $this->escape($template_desc) ?></option>
         <?php } ?>
     </select>
     <button type="submit">SAVE</button>

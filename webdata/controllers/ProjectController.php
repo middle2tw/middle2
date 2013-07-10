@@ -164,7 +164,7 @@ class ProjectController extends Pix_Controller
         }
 
         $templates = Project::getTemplates();
-        if (!in_array($_POST['template'], $templates)) {
+        if (!array_key_exists($_POST['template'], $templates)) {
             return $this->error('template not found', '/');
         }
 
