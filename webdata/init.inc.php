@@ -25,12 +25,6 @@ define('MEMCACHE_PRIVATE_PORT', getenv('MEMCACHE_PRIVATE_PORT'));
 // TODO: 之後要搭配 geoip
 date_default_timezone_set('Asia/Taipei');
 
-Pix_Cache::addServer('Pix_Cache_Adapter_Memcached', array(
-    'servers' => array(
-        array('host' => MEMCACHE_PRIVATE_HOST, 'port' => MEMCACHE_PRIVATE_PORT, 'weight' => 1), // 256M
-    ),
-));
-
 $db = new StdClass;
 $db->host = getenv('MYSQL_HOST');
 $db->username = getenv('MYSQL_USER');
@@ -39,4 +33,12 @@ $db->dbname = getenv('MYSQL_DATABASE');
 $config = new StdClass;
 $config->master = $config->slave = $db;
 Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_MysqlConf(array($config)));
-Pix_Table::setCache(new Pix_Cache);
+if (MEMCACHE_PRIVATE_HOST) {
+    Pix_Cache::addServer('Pix_Cache_Adapter_Memcached', array(
+        'servers' => array(
+            array('host' => MEMCACHE_PRIVATE_HOST, 'port' => MEMCACHE_PRIVATE_PORT, 'weight' => 1), // 256M
+        ),
+    ));
+    Pix_Table::setCache(new Pix_Cache);
+}
+
