@@ -28,7 +28,7 @@ class ProjectRow extends Pix_Table_Row
         if ($template = $this->getEAV('template')) {
             return $template;
         }
-        return 'php54';
+        return 'mixed';
     }
 
     public function preSave()
