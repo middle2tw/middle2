@@ -4,6 +4,23 @@
 // 當使用者 git push 時，會在 git server 以 git 使用者的身份執行這個 script 
 include(__DIR__ . '/../webdata/init.inc.php');
 
+function getGitFileInfo($file_name)
+{
+    $ls_tree_cmd = 'git ls-tree HEAD ' . $file_name;
+    $ls_result = trim(`$ls_tree_cmd`);
+    // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
+    if (!trim($ls_result)) {
+        return null;
+    }
+    list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
+    $ret = new stdClass;
+    $ret->perm = $perm;
+    $ret->type = $type;
+    $ret->object_id = $object_id;
+    $ret->file = $file;
+    return $ret;
+}
+
 $fp = fopen('php://stdin', 'r');
 $content = '';
 while (false !== ($line = fgets($fp))) {
@@ -27,33 +44,28 @@ if (!$project = Project::find(intval($matches[1]))) {
 // 處理先下載好各 repository 需要的內容
 $template = $project->getTemplate();
 $package_filename = null;
-if ('python26' == $template) {
+if ($info = getGitFileInfo('requirements.txt')) {
+    $template = 'python26';
     $package_filename = 'requirements.txt';
-} elseif ('ruby20' == $template) {
+} elseif ($info = getGitFileInfo('Gemfile')) {
+    $template = 'ruby20';
     $package_filename = 'Gemfile';
 }
 
-if (!is_null($package_filename)) {
-    // Ex: git ls-tree a9b6e64f0b4c61901287ab17e53c4040225af496 requirements.txt
-    $ls_tree_cmd = 'git ls-tree ' . escapeshellarg($newrev) . ' ' . $package_filename;
-    $ls_result = trim(`$ls_tree_cmd`);
-    // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
-    list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
-    if ($type == 'blob' and $file == $package_filename) {
-        // Ex: git cat-file -p 433ee4e878d82d375ea2311dcd4f0046a8eb12b6
-        $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($object_id);
-        $file_content = trim(`$cat_file_cmd`);
+if (!is_null($package_filename) and !is_null($info)) {
+    // Ex: git cat-file -p 433ee4e878d82d375ea2311dcd4f0046a8eb12b6
+    $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($info->object_id);
+    $file_content = trim(`$cat_file_cmd`);
 
-        $fp = tmpfile();
-        fputs($fp, $file_content);
-        $meta_data = stream_get_meta_data($fp);
+    $fp = tmpfile();
+    fputs($fp, $file_content);
+    $meta_data = stream_get_meta_data($fp);
 
-        $session = ssh2_connect('localhost', 22);
-        $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
-        $stream = ssh2_exec($session, "local-build-project-base {$template} {$meta_data['uri']}");
-        stream_set_blocking($stream, true);
-        stream_get_contents($stream);
-    }
+    $session = ssh2_connect('localhost', 22);
+    $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
+    $stream = ssh2_exec($session, "local-build-project-base {$template} {$meta_data['uri']}");
+    stream_set_blocking($stream, true);
+    stream_get_contents($stream);
 }
 
 // TODO: deploy to webnode
