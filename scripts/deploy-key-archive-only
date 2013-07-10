@@ -8,6 +8,23 @@ function error($message)
     error_log($message);
 }
 
+function getGitFileInfo($file_name)
+{
+    $ls_tree_cmd = 'git ls-tree HEAD ' . $file_name;
+    $ls_result = trim(`$ls_tree_cmd`);
+    // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
+    if (!trim($ls_result)) {
+        return null;
+    }
+    list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
+    $ret = new stdClass;
+    $ret->perm = $perm;
+    $ret->type = $type;
+    $ret->object_id = $object_id;
+    $ret->file = $file;
+    return $ret;
+}
+
 function getProjectBaseByRepository($args)
 {
     $project_name = trim($args, "' ");
@@ -27,25 +44,24 @@ function getProjectBaseByRepository($args)
         return error('project not found: ' . $project_name);
     }
 
+    chdir($absolute_path);
+
     $template = $project->getTemplate();
-    if ('python26' == $template) {
+    if ($info = getGitFileInfo('requirements.txt')) {
+        $template = 'python26';
         $package_filename = 'requirements.txt';
-    } elseif ('ruby20' == $template) {
+    } elseif ($info = getGitFileInfo('Gemfile')) {
+        $template = 'ruby20';
         $package_filename = 'Gemfile';
     } else {
         return error('template ' . $template . ' package filename unknown');
     }
 
-    chdir($absolute_path);
-    $ls_tree_cmd = 'git ls-tree HEAD ' . $package_filename;
-    $ls_result = trim(`$ls_tree_cmd`);
-    // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
-    list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
-    if ($type != 'blob' or $file != $package_filename) {
+    if ($info->type != 'blob' or $info->file != $package_filename) {
         error($package_filename . " not found");
     }
 
-    $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($object_id);
+    $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($info->object_id);
     $file_content = trim(`$cat_file_cmd`);
 
     $fp = tmpfile();
