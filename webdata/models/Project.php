@@ -222,10 +222,10 @@ class Project extends Pix_Table
     public static function getTemplates()
     {
         return array(
-            'php54',
-            'python26',
-            'nodejs',
-            'ruby20',
+            'php54' => 'php54',
+            'python26' => 'python26',
+            'nodejs' => 'nodejs',
+            'ruby20' => 'ruby20',
         );
     }
 }
