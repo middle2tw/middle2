@@ -212,17 +212,26 @@ function main()
         if (!$id = intval($id)) {
             error('invalid id: ' . $id);
         }
+        $log_file = "/srv/chroot/{$id}.log";
+        $start = microtime(true);
+        file_put_contents($log_file, date('c') . " [shutdown] start\n", FILE_APPEND);
+
         if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
+            file_put_contents($log_file, date('c') . " [shutdown] /shutdown.sh\n", FILE_APPEND);
             exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
         }
         $uid = 20000 + $id;
         $output = trim(`ps -u {$uid} -opid | grep -v PID`);
         if ('' !== trim($output)) {
             $pids = explode("\n", $output);
+            file_put_contents($log_file, date('c') . " [shutdown] kill " . implode(' ' , $pids) . "\n", FILE_APPEND);
             exec("kill " . implode(' ', $pids));
         }
+        file_put_contents($log_file, date('c') . " [shutdown] delete /srv/chroot/{$id}\n", FILE_APPEND);
         exec("rm -rf /srv/chroot/{$id}");
         echo json_encode(array('error' => false, 'port' => $port));
+        $spent = microtime(true) - $start;
+        file_put_contents($log_file, date('c') . " [shutdown] done(spent: {$spent})\n", FILE_APPEND);
         break;
 
     case 'local-build-project-base':
