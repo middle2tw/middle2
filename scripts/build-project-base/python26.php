@@ -78,7 +78,23 @@ class Prebuilder
 
         error_log('pip installing ...');
         // 安裝 python package
-        passthru("pip install --ignore-installed --requirement " . escapeshellarg($req_file) . " --environment={$root}/usr/bin/python --download-cache /tmp/pip-download-cache/");
+        $cmd = "pip install --ignore-installed --requirement " . escapeshellarg($req_file) . " --environment={$root}/usr/bin/python --download-cache /tmp/pip-download-cache/";
+        $fp = proc_open($cmd, array(0 => array('pipe', 'r'), 1 => array('pipe' , 'w'), 2 => array('pipe', 'w')), $pipes, NULL, array('PYTHONUNBUFFERED' => 'x'));
+
+        while (false !== ($line = fgets($pipes[1], 4096))) {
+            if (feof($pipes[1])) {
+                break;
+            }
+
+            if ($line === '') {
+                continue;
+            }
+
+            if (0 === strpos($line, 'Downloading/unpacking')) {
+                echo trim($line) . "\n";
+            }
+        }
+        proc_close($fp);
 
         // 把檔案弄進去
         chdir($root);
