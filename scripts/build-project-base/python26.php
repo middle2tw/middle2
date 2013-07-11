@@ -91,7 +91,7 @@ class Prebuilder
             }
 
             if (0 === strpos($line, 'Downloading/unpacking')) {
-                echo trim($line) . "\n";
+                echo trim(str_replace($req_file, 'requirements.txt', $line)) . "\n";
             }
         }
         proc_close($fp);
