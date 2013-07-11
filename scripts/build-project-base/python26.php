@@ -47,7 +47,7 @@ class Prebuilder
         return $this->error("No avaiabled root");
     }
 
-    public function main($req_file)
+    public function main($req_file, $force_rebuild = false)
     {
         if (0 !== posix_getuid()) {
             return $this->error("Muse be root");
@@ -60,7 +60,7 @@ class Prebuilder
         $project_file = '/tmp/project-python26-' . md5_file($req_file);
 
         // 已經有了，不需要再做了
-        if (file_exists($project_file . '.tar.gz')) {
+        if (!$force_rebuild and file_exists($project_file . '.tar.gz')) {
             return;
         }
 
@@ -102,4 +102,4 @@ class Prebuilder
 }
 
 $p = new Prebuilder;
-$p->main($_SERVER['argv'][1]);
+$p->main($_SERVER['argv'][1], array_key_exists(2, $_SERVER['argv']) ? true : false);
