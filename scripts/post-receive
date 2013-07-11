@@ -65,7 +65,9 @@ if (!is_null($package_filename) and !is_null($info)) {
     $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
     $stream = ssh2_exec($session, "local-build-project-base {$template} {$meta_data['uri']}");
     stream_set_blocking($stream, true);
-    stream_get_contents($stream);
+    while (false !== ($line = fgets($stream))) {
+        error_log(trim($line));
+    }
 }
 
 // TODO: deploy to webnode
