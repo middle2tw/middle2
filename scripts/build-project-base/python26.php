@@ -90,7 +90,7 @@ class Prebuilder
         // 處理 symbolic link
         system("find . -type l -printf \"%TY%Tm%Td %p\n\" | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
 
-        system("gzip {$project_file}.tar");
+        system("gzip --force {$project_file}.tar");
 
         // 標示為已用完，並解除 lock
         touch("{$root}.used");
