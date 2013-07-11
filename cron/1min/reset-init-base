@@ -10,7 +10,7 @@
 //
 // 這個 script 只需要對 1 和 5 做事就行了
 
-include(__DIR__ . '/../webdata/init.inc.php');
+include(__DIR__ . '/../../webdata/init.inc.php');
 
 class Initer
 {
