@@ -96,6 +96,8 @@ function main()
         $template = $project->getTemplate();
         file_put_contents($log_file, date('c') . " [clone] project: {$project_name}, template: {$template}\n", FILE_APPEND);
         file_put_contents($log_file, date('c') . " [clone] init lang base\n", FILE_APPEND);
+        file_put_contents("/srv/chroot/{$id}.project", $project_name);
+
         $lang_base_file = "/srv/code/images/lang-{$template}.tar.gz";
         if (file_exists($lang_base_file)) {
             exec("tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
