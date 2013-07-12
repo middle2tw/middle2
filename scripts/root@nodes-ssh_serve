@@ -234,6 +234,7 @@ function main()
         echo json_encode(array('error' => false, 'port' => $port));
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [shutdown] done(spent: {$spent})\n", FILE_APPEND);
+        unlink("/srv/chroot/{$id}.project");
         break;
 
     case 'local-build-project-base':
