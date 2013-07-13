@@ -1,0 +1,108 @@
+#!/usr/bin/env php
+<?php
+
+// 爬各 node 的 /srv/logs/web.log 並把他傳到
+
+class Crawler
+{
+    protected $_file_objects = array();
+
+    public function getFileObj($id)
+    {
+        $path = "/srv/chroot/{$id}/srv/logs/web.log";
+        $inode = fileinode($path);
+
+        if (!array_key_exists($id, $this->_file_objects) or $this->_file_objects[$id]->inode != $inode) {
+            error_log('loading ' . $id);
+            if (array_key_exists($id, $this->_file_objects)) {
+                fclose($this->_file_objects[$id]->fp);
+            }
+            $obj = new StdClass;
+            $obj->id = $id;
+            $obj->inode = $inode;
+            $obj->path = $path;
+            $obj->file_size = filesize($path);
+            $obj->fp = fopen($path, 'r');
+            fseek($obj->fp, $obj->file_size);
+            $obj->project = file_get_contents("/srv/chroot/{$id}.project");
+            $this->_file_objects[$id] = $obj;
+        }
+
+        return $this->_file_objects[$id];
+    }
+
+    public function loop()
+    {
+        clearstatcache();
+        foreach (glob("/srv/chroot/*/srv/logs/web.log") as $log_file) {
+            if (!preg_match("#/srv/chroot/(\d+)/srv/logs/web\.log#", $log_file, $matches)) {
+                continue;
+            }
+            $id = $matches[1];
+
+            $file_obj = $this->getFileObj($id);
+            if (filesize($log_file) == $file_obj->file_size) {
+                continue;
+            }
+
+            $fp = $file_obj->fp;
+            fseek($fp, $file_obj->file_size);
+            while (false !== ($line = fgets($fp))) {
+                $this->insertLog($file_obj, trim($line));
+            }
+            $this->_file_objects[$id]->file_size = ftell($fp);
+        }
+
+        $this->commitLog();
+    }
+
+    protected $_logs = array();
+
+    public function insertLog($file_obj, $line)
+    {
+        $obj = new StdClass;
+        $obj->project = $file_obj->project;
+        $obj->id = $file_obj->id;
+        $obj->log = $line;
+        $obj->time = time();
+
+        $this->_logs[] = $obj;
+
+        if (count($this->_logs) > 100) {
+            $this->commitLog();
+        }
+    }
+
+    public function commitLog()
+    {
+        if (!$this->_logs) {
+            return;
+        }
+
+        error_log('commit ' . count($this->_logs) . ' log');
+        $curl = curl_init();
+        // TODO: 需要加上 secret key 檢查
+        curl_setopt($curl, CURLOPT_URL, 'http://middle2.com/api/weblog');
+        curl_setopt($curl, CURLOPT_POST, true);
+        $params = array(
+            'data' => json_encode($this->_logs),
+        );
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($params));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($curl);
+        curl_close($curl);
+
+        $this->_logs = array();
+    }
+
+    public function main()
+    {
+        while (true) {
+            $this->loop();
+            sleep(1);
+        }
+    }
+}
+
+$c = new Crawler;
+$c->main();
