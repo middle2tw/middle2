@@ -6,6 +6,24 @@ class ApiController extends Pix_Controller
     {
     }
 
+    public function weblogAction()
+    {
+        // TODO: 要限內網並且加上 secret key
+        if (!$logs = json_decode($_POST['data'])) {
+            throw new Exception('invalid data');
+        }
+
+        $messages = array();
+        foreach ($logs as $log) {
+            $messages[] = array(
+                'category' => "app-{$log->project}-error",
+                'message' => $log->time . ' ' . $log->id . ' ' . urlencode($log->log),
+            );
+        }
+        Logger::log($messages);
+        return $this->json(1);
+    }
+
     public function updatemachinestatusAction()
     {
         // TODO: 要判斷只有內網可以
