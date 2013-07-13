@@ -3,18 +3,20 @@ yum install boost-devel.x86_64 libevent-devel.x86_64 openssl-devel.x86_64 byacc.
 wget https://dist.apache.org/repos/dist/release/thrift/0.9.0/thrift-0.9.0.tar.gz
 tar zxvf thrift-0.9.0.tar.gz
 cd thrift-0.9.0/
-./configure --with-cpp --without-csharp --without-erlang --without-haskell --without-java --without-perl --without-php --without-php_extension --without-ruby
-
-make
+./configure --with-cpp --without-csharp --without-erlang --without-haskell --without-java --without-perl --without-ruby
+make all
 sudo make all install
+
 cd contrib/fb303
 ./bootstrap.sh
 ./configure CPPFLAGS="-DHAVE_INTTYPES_H -DHAVE_NETINET_IN_H"
+make all
 sudo make all install
 
 git clone https://github.com/facebook/scribe.git
 cd scribe
 ./bootstrap.sh
 ./configure CPPFLAGS="-DHAVE_INTTYPES_H -DHAVE_NETINET_IN_H" --with-boost-filesystem=boost_filesystem --libdir=/usr/local/lib
+make all
 sudo make all install
 env LD_LIBRARY_PATH=/usr/local/lib scribed /srv/code/hisoku/config/scribed.conf
