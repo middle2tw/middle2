@@ -23,7 +23,6 @@ class ProjectController extends Pix_Controller
         }
 
         $this->view->project = $project;
-
     }
 
     public function deletedomainAction()
@@ -397,4 +396,43 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function getlogAction()
+    {
+        list(, /*project*/, /*getlog*/, $name, $type) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if ($type == 'error') {
+            $category = "app-{$name}-error";
+            $log_filter = function($line){
+                list($timestamp, $node_id, $log) = explode(' ', $line);
+                return date('c', $timestamp) . ' [' . $node_id . ']' . urldecode($log);
+            };
+        } else {
+            $category = "app-{$name}";
+            $log_filter = null;
+        }
+
+        if ($_GET['before']) {
+            list($file, $cursor) = explode(",", $_GET['before']);
+            $logs = Logger::getLog($category, array('cursor-before' => array('file' => $file, 'cursor' => $cursor)));
+        } elseif ($_GET['after']) {
+            list($file, $cursor) = explode(",", $_GET['after']);
+            $logs = Logger::getLog($category, array('cursor-after' => array('file' => $file, 'cursor' => $cursor)));
+        } else {
+            $logs = Logger::GetLog($category);
+        }
+
+        if (!is_null($log_filter)) {
+            for ($i = 0; $i < count($logs[0]); $i ++) {
+                $logs[0][$i] = $log_filter($logs[0][$i]);
+            }
+        }
+        return $this->json($logs);
+    }
 }
