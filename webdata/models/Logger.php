@@ -102,11 +102,11 @@ class Logger
                     array_push($return_logs, $log);
                     $cursor += (strlen($log) + 1);
                     if (count($return_logs) >= $line) {
-                        $return_cursor['cursor-send'] = array($filename, $cursor);
                         break 2;
                     }
                 }
             }
+            $return_cursor['cursor-end'] = array($filename, $cursor);
             return array($return_logs, $return_cursor);
         }
 
@@ -170,13 +170,13 @@ class Logger
                     array_unshift($return_logs, $log);
                     $cursor -= (strlen($log) + 1);
                     if (count($return_logs) >= $line) {
-                        $return_cursor['cursor-start'] = array($filename, $cursor);
                         break 3;
                     }
                 }
             }
         }
 
+        $return_cursor['cursor-start'] = array($filename, $cursor);
         return array($return_logs, $return_cursor);
     }
 }
