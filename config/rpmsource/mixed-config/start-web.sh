@@ -14,7 +14,8 @@ elif [ -f "/srv/web/app.py" ]; then
 elif [ -f "/srv/web/web.rb" ]; then
 # ruby
     env RACK_ENV=production PORT=`cat /etc/port.conf` HOME=/srv/web ruby web.rb -p `cat /etc/port.conf` > ${LOG_FILE} 2>&1 &
-elif [ -f "/srv/web/index.php" ]; then
+#elif [ -f "/srv/web/index.php" ]; then
+else
 # build /srv/env.conf
     env | awk -F '=' '{print "env[" $1 "]=" $2}' > /srv/logs/env.conf
 
