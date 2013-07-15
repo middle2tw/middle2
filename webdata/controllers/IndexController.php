@@ -11,9 +11,13 @@ class IndexController extends Pix_Controller
 
     public function loginAction()
     {
-        if (!$u = User::find_by_name(strval($_POST['user'])) or !$u->verifyPassword($_POST['password'])) {
-            // TODO: alert
-            return $this->redirect('/');
+        $alert_message = "Invalid user name or password";
+        if (!$u = User::find_by_name(strval($_POST['user']))) {
+            return $this->alert($alert_message, '/');
+        }
+       
+        if (!$u->verifyPassword($_POST['password'])) {
+            return $this->alert($alert_message, '/');
         }
 
         Pix_Session::set('user', $u->id);
