@@ -1,6 +1,8 @@
 <?php
 $categories = array(
     'login',
+    'lb-error',
+    'lb-notfound',
 );
 
 ?>
@@ -10,7 +12,7 @@ $categories = array(
     <div class="navbar-inner">
         <ul class="nav">
             <?php foreach ($categories as $category) { ?>
-            <li<?= $action == $this->action ? ' class="active"' : '' ?>><a href="/admin/log/<?= $this->escape($category) ?>"><?= $this->escape($category) ?></a></li>
+            <li<?= $category == $this->category ? ' class="active"' : '' ?>><a href="/admin/log/<?= $this->escape($category) ?>"><?= $this->escape($category) ?></a></li>
             <?php } ?>
         </ul>
     </div>
