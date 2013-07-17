@@ -29,9 +29,9 @@ apache
 ======
 sudo yum install httpd-devel
 cd /var/tmp
-wget http://ftp.tc.edu.tw/pub/Apache//httpd/httpd-2.2.22.tar.gz
-tar zxvf httpd-2.2.22.tar.gz
-cd httpd-2.2.22
+wget http://ftp.tc.edu.tw/pub/Apache//httpd/httpd-2.2.24.tar.gz
+tar zxvf httpd-2.2.24.tar.gz
+cd httpd-2.2.24
 cd srclib
 wget http://apache.cdpa.nsysu.edu.tw//apr/apr-1.4.6.tar.gz
 tar zxvf apr-1.4.6.tar.gz
@@ -50,15 +50,15 @@ wget 'https://github.com/ronnywang/mod_rpaf/tarball/master'
 tar zxvf master
 mv ronnywang-mod_rpaf-* mod_rpaf
 cd ../../
-rm -rf httpd-2.2.22.tar.gz
-tar zcvf httpd-2.2.22.tar.gz httpd-2.2.22
-mv httpd-2.2.22.tar.gz ~/rpmbuild/SOURCES/
+rm -rf httpd-2.2.24.tar.gz
+tar zcvf httpd-2.2.24.tar.gz httpd-2.2.24
+mv httpd-2.2.24.tar.gz ~/rpmbuild/SOURCES/
 vim ~/rpmbuild/SPECS/httpd.spec
 * 主要是修改 Group, License, URL, Source0, 刪掉 Require
 * %configure 後面要接上 --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker
 rpmbuild -ba ~/rpmbuild/SPECS/httpd.spec
 * 第一次會失敗
-echo "" | /usr/lib/rpm/check-files ~/rpmbuild/BUILDROOT/httpd-2.2.22
+echo "" | /usr/lib/rpm/check-files ~/rpmbuild/BUILDROOT/httpd-2.2.24
 * 上面指令可以取得產生的檔案，把他寫進 httpd.spec 中就好了
 
 thrift & scribe
