@@ -20,7 +20,9 @@ if (!count($addons)) {
     exit;
 }
 $i = 0;
+$conf['servers'] = array();
 foreach ($addons as $addon) {
+    $conf['servers'][$i] = array();
     if ($addon->project) {
         $conf['servers'][$i]['desc'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
     } elseif ($addon->verbose) {
@@ -36,6 +38,7 @@ foreach ($addons as $addon) {
     $conf['servers'][$i]['pg_dumpall_path'] = '/usr/bin/pg_dumpall';
     $i ++;
 }
+
 
 
 

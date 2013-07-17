@@ -1348,7 +1348,7 @@
 								'url' => 'servers.php',
 								'urlvars' => array (
 									'action' => 'logout',
-									'logoutServer' => "{$server_info['host']}:{$server_info['port']}:{$server_info['sslmode']}"
+									'logoutServer' => "{$server_info['host']}:{$server_info['port']}:{$server_info['sslmode']}:{$server_info['username']}"
 								)
 							),
 							'id' => 'toplink_logout',
@@ -2286,12 +2286,12 @@
 					$group = '';
 			
 			foreach($conf['servers'] as $idx => $info) {
-				$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'];
+				$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'].':'.$info['username'];
 				if (($group === false) 
 					or (isset($group[$idx]))
 					or ($group === 'all')
 				) {
-					$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'];
+					$server_id = $info['host'].':'.$info['port'].':'.$info['sslmode'].':'.$info['username'];
 					
 					if (isset($logins[$server_id])) $srvs[$server_id] = $logins[$server_id];
 					else $srvs[$server_id] = $info;
@@ -2351,7 +2351,7 @@
 
 			// Otherwise, look for it in the conf file
 			foreach($conf['servers'] as $idx => $info) {
-				if ($server_id == $info['host'].':'.$info['port'].':'.$info['sslmode']) {
+				if ($server_id == $info['host'].':'.$info['port'].':'.$info['sslmode'].':'.$info['username']) {
 					// Automatically use shared credentials if available
 					if (!isset($info['username']) && isset($_SESSION['sharedUsername'])) {
 						$info['username'] = $_SESSION['sharedUsername'];
