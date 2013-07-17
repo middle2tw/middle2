@@ -224,6 +224,7 @@ class Project extends Pix_Table
         return array(
             'php54' => 'PHP 5.4',
             'python26' => 'Python 2.6',
+            'python27' => 'Python 2.7',
             'nodejs' => 'NodeJS',
             'ruby20' => 'Ruby 2.0',
             'mixed' => 'PHP 5.4 + Python 2.6 + NodeJS + Ruby2.0',
