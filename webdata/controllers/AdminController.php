@@ -32,6 +32,47 @@ class AdminController extends Pix_Controller
     {
     }
 
+    public function logAction()
+    {
+        list(, /*admin*/, /*getlog*/, $category) = explode('/', $this->getURI());
+        if (!$category) {
+            $category = 'login';
+        }
+        $this->view->category = $category;
+    }
+
+    public function getlogAction()
+    {
+        list(, /*admin*/, /*getlog*/, $category) = explode('/', $this->getURI());
+
+        if (in_array($category, array('login'))) {
+            $log_filter = function($line){
+                $terms = explode(' ', $line);
+                $time = date('c', array_shift($terms));
+                return $time . ' ' . implode( ' ' , $terms);
+            };
+        } else {
+            $log_filter = null;
+        }
+
+        if ($_GET['before']) {
+            list($file, $cursor) = explode(",", $_GET['before']);
+            $logs = Logger::getLog($category, array('cursor-before' => array('file' => $file, 'cursor' => $cursor)));
+        } elseif ($_GET['after']) {
+            list($file, $cursor) = explode(",", $_GET['after']);
+            $logs = Logger::getLog($category, array('cursor-after' => array('file' => $file, 'cursor' => $cursor)));
+        } else {
+            $logs = Logger::GetLog($category);
+        }
+
+        if (!is_null($log_filter)) {
+            for ($i = 0; $i < count($logs[0]); $i ++) {
+                $logs[0][$i] = $log_filter($logs[0][$i]);
+            }
+        }
+        return $this->json($logs);
+    }
+
     public function nodeserveraddportAction()
     {
         list(, /*admin*/, /*nodeserveraddport*/, $ip, $port) = explode('/', $this->getURI());

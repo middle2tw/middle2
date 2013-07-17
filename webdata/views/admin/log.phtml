@@ -1,0 +1,58 @@
+<?php
+$categories = array(
+    'login',
+);
+
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+        <ul class="nav">
+            <?php foreach ($categories as $category) { ?>
+            <li<?= $action == $this->action ? ' class="active"' : '' ?>><a href="/admin/log/<?= $this->escape($category) ?>"><?= $this->escape($category) ?></a></li>
+            <?php } ?>
+        </ul>
+    </div>
+</div>
+<h3><?= $this->escape($this->category) ?></h3>
+<button class="older-button" data-log="error-log">Older</button>
+<button class="newer-button" data-log="error-log">Newer</button>
+<table class="table log-table" id="error-log" data-url="/admin/getlog/<?= $this->escape($this->category) ?>"></table>
+<script>
+$('.log-table').each(function(){
+    var $this = $(this);
+    $.get($this.attr('data-url'), function(ret){
+        for (var i = 0; i < ret[0].length; i ++) {
+            $this.append($('<tr></tr>').html($('<td></td>').text(ret[0][i])).addClass('info'));
+        }
+        $this.data('cursor-start', ret[1]['cursor-start']);
+        $this.data('cursor-end', ret[1]['cursor-end']);
+    }, 'json');
+});
+
+$('.older-button').click(function(e){
+    var $this = $('#' + $(this).attr('data-log'));
+    e.preventDefault();
+    $.get($this.attr('data-url') + '?before=' + $this.data('cursor-start').join(','), function(ret){
+        $this.children('tr').removeClass('info');
+        for (var i = ret[0].length - 1; i > 0; i --) {
+            $this.prepend($('<tr></tr>').html($('<td></td>').text(ret[0][i])).addClass('info'));
+        }
+        $this.data('cursor-start', ret[1]['cursor-start']);
+    }, 'json');
+});
+
+$('.newer-button').click(function(e){
+    var $this = $('#' + $(this).attr('data-log'));
+    e.preventDefault();
+    $.get($this.attr('data-url') + '?after=' + $this.data('cursor-end').join(','), function(ret){
+        $this.children('tr').removeClass('info');
+        for (var i = 0; i < ret[0].length; i ++) {
+            $this.append($('<tr></tr>').html($('<td></td>').text(ret[0][i])).addClass('info'));
+        }
+        $this.data('cursor-end', ret[1]['cursor-end']);
+    }, 'json');
+});
+</script>
+<?= $this->partial('/common/footer.phtml', $this) ?>
