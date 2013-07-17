@@ -18,7 +18,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 
 %build
-%configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker --sysconfdir=/etc/httpd
+%configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker --sysconfdir=/etc/httpd --enable-vhost-alias
 make %{?_smp_mflags}
 cd modules/fastcgi
 make top_dir=../../
