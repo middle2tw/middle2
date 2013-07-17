@@ -104,6 +104,7 @@ class Prebuilder
         proc_close($fp);
 
         unlink($root . '/requirements.txt');
+        system("rm -rf {$root}/tmp");
 
         // 把檔案弄進去
         chdir($root);
