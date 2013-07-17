@@ -22,18 +22,18 @@ if (!count($addons)) {
 $i = 0;
 foreach ($addons as $addon) {
     if ($addon->project) {
-        $conf['servers'][0]['desc'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
+        $conf['servers'][$i]['desc'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
     } elseif ($addon->verbose) {
-        $conf['servers'][0]['desc'] = $addon->verbose;
+        $conf['servers'][$i]['desc'] = $addon->verbose;
     }
-    $conf['servers'][0]['host'] = $addon->host;
-    $conf['servers'][0]['port'] = 5432;
-    $conf['servers'][0]['username'] = $addon->user_name;
-    $conf['servers'][0]['password'] = $addon->password;
-    $conf['servers'][0]['sslmode'] = 'allow';
-    $conf['servers'][0]['defaultdb'] = $addon->database;
-    $conf['servers'][0]['pg_dump_path'] = '/usr/bin/pg_dump';
-    $conf['servers'][0]['pg_dumpall_path'] = '/usr/bin/pg_dumpall';
+    $conf['servers'][$i]['host'] = $addon->host;
+    $conf['servers'][$i]['port'] = 5432;
+    $conf['servers'][$i]['username'] = $addon->user_name;
+    $conf['servers'][$i]['password'] = $addon->password;
+    $conf['servers'][$i]['sslmode'] = 'allow';
+    $conf['servers'][$i]['defaultdb'] = $addon->database;
+    $conf['servers'][$i]['pg_dump_path'] = '/usr/bin/pg_dump';
+    $conf['servers'][$i]['pg_dumpall_path'] = '/usr/bin/pg_dumpall';
     $i ++;
 }
 
