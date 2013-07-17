@@ -47,7 +47,7 @@ function main()
         }
         exec("chmod 1777 /srv/chroot/{$id}/tmp");
         $port = $uid = 20000 + $id;
-        exec("echo -e 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
+        exec("echo 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
         mkdir("/srv/chroot/{$id}/srv/logs");
         exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
         $spent = microtime(true) - $start;
