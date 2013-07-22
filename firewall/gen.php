@@ -57,6 +57,7 @@ class FirewallGenerator
         $mainpage_servers = $dev_servers;
         $git_servers = $dev_servers;
         $private_memcache_servers = $dev_servers;
+        $nfs_servers = $dev_servers;
 
         $this->_server_categories = $this->_category_servers = array();
         // dev server
@@ -107,6 +108,10 @@ class FirewallGenerator
         foreach ($private_memcache_servers as $ip) {
             $this->_addServer($ip, 'private_memcache');
         }
+
+        foreach ($nfs_servers as $ip) {
+            $this->_addServer($ip, 'nfs');
+        }
     }
 
     public function getAllowRules()
@@ -144,6 +149,14 @@ class FirewallGenerator
             'dev' => array(
                 array('22', array('PUBLIC')), // 以後要用 VPN 把這個 rule 拿掉
                 array('5566', array('PUBLIC')), // 以後要用 VPN 把這個 rule 拿掉
+            ),
+            'nfs' => array(
+                array('111', array('node')),
+                array('u111', array('node')),
+                array('2049', array('node')),
+                array('u2049', array('node')),
+                array('32764:32769', array('node')),
+                array('u32764:32769', array('node')),
             ),
             'ALL' => array(
                 array('22', array('dev')),
@@ -193,16 +206,21 @@ class FirewallGenerator
             }
 
             foreach ($match_rules as $port => $categories) {
+                $protocol = 'tcp';
+                if (preg_match('#^u(.*)#', $port, $matches)) {
+                    $port = $matches[1];
+                    $protocol = 'udp';
+                }
                 if (in_array('PUBLIC', $categories)) {
                     $rules[] = '# allow all from categories ' . implode(', ', $match_rule_categories[$port]);
-                    $rules[] = 'iptables -A INPUT -p tcp --dport ' . $port . ' -j ACCEPT';
+                    $rules[] = 'iptables -A INPUT -p ' . $protocol . ' --dport ' . $port . ' -j ACCEPT';
                 } else {
                     $rules[] = '# allow ' . implode(', ', $categories) . ' from categories ' . implode(', ', $match_rule_categories[$port]);
                     foreach ($this->getIPsFromCategories($categories) as $src_ip) {
                         if ($ip == $src_ip) {
                             continue;
                         }
-                        $rules[] = 'iptables -A INPUT -p tcp -s ' . $src_ip . ' --dport ' . $port . ' -j ACCEPT';
+                        $rules[] = 'iptables -A INPUT -p ' . $protocol . ' -s ' . $src_ip . ' --dport ' . $port . ' -j ACCEPT';
                     }
                 }
             }
