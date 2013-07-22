@@ -1,0 +1,1 @@
+/srv/project_data       *(rw,no_root_squash)
