@@ -30,7 +30,7 @@ $this->title = 'NodeServers Info :: ';
                         <tr>
                             <td>port</td>
                             <td>project</td>
-                            <td>template</td>
+                            <td>admins</td>
                             <td>status</td>
                             <td>start at</td>
                             <td>access at</td>
@@ -62,9 +62,9 @@ $this->title = 'NodeServers Info :: ';
                             <a href="/project/detail/<?= $node->project->name ?>" title="<?= $this->escape($node->project->getEAV('note')) ?>"><?= $node->project->name ?></a>
                             <?php } ?>
                         </td>
-                        <td>
+                        <td><!-- admins -->
                             <?php if ($node->project) { ?>
-                            <?= $this->escape($node->project->getTemplate()) ?>
+                            <?= $this->escape(implode(',', User::search(1)->searchIn('id', $node->project->members->search(array('is_admin' => 1))->toArray('user_id'))->toArray('name'))) ?>
                             <?php } ?>
                         </td>
                         <td><?= $this->escape($node->getStatusWord()) ?></td>
