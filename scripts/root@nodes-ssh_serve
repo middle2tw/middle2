@@ -85,7 +85,7 @@ function main()
             exec("chroot /srv/chroot/{$id}/ /init.sh {$port} {$option}");
         }
 
-        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ /start.sh {$port} {$option}");
+        exec("chroot --userspec={$uid}:99 --groups=nogroup /srv/chroot/{$id}/ /start.sh {$port} {$option}");
         break;
 
     case 'clone':
@@ -167,7 +167,7 @@ function main()
         }
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
-        exec("chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh");
+        exec("chroot --userspec={$uid}:99 --groups=nogroup /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh");
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [restart-web] done(spent: $spent)\n", FILE_APPEND);
@@ -194,7 +194,7 @@ function main()
 
         file_put_contents($log_file, date('c') . " [run] start\n", FILE_APPEND);
         $uid = 20000 + $id;
-	$cmd = "chroot --userspec={$uid}:99 /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
+	$cmd = "chroot --userspec={$uid}:99 --groups=nogroup /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         passthru($cmd);
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [run] done(spent: {$spent})\n", FILE_APPEND);
