@@ -44,7 +44,7 @@ $this->title = 'NodeServers Info :: ';
                         <?php if (WebNode::STATUS_SERVICE == $node->status) { ?>
                         <td>
                             <?php if ($project = $node->getServiceProject()) { ?>
-                            <a href="/admin/project/<?= $project->id ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
+                            <a href="/project/detail/<?= $project->name ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
                             <?php } ?>
                         </td>
                         <td>
@@ -59,7 +59,7 @@ $this->title = 'NodeServers Info :: ';
                         <?php } else { ?>
                         <td>
                             <?php if ($node->project) { ?>
-                            <a href="/admin/project/<?= $node->project_id ?>" title="<?= $this->escape($node->project->getEAV('note')) ?>"><?= $node->project->name ?></a>
+                            <a href="/project/detail/<?= $node->project->name ?>" title="<?= $this->escape($node->project->getEAV('note')) ?>"><?= $node->project->name ?></a>
                             <?php } ?>
                         </td>
                         <td>
