@@ -18,7 +18,7 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
-        if (!$project->isMember($this->user)) {
+        if (!$project->isMember($this->user) and !$this->user->isAdmin()) {
             return $this->alert('Project not found', '/');
         }
 

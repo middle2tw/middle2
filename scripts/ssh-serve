@@ -3,52 +3,62 @@
 
 include(__DIR__ . '/../webdata/init.inc.php');
 
-function error($message)
+class SSHServe
 {
-    error_log($message);
+    public function error($message)
+    {
+        error_log($message);
+    }
+
+    public function main()
+    {
+        if (!getenv('SSH_ORIGINAL_COMMAND')) {
+            return $this->error('There is no SSH_ORIGINAL_COMMAND env');
+        }
+
+        list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
+
+        switch ($command) {
+        case 'git-upload-pack':
+        case 'git-receive-pack':
+            return $this->gitCommand($command, $args);
+        default:
+            return $this->error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
+        }
+    }
+
+    public function gitCommand($command, $args)
+    {
+        $project_name = trim($args, "' ");
+        if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
+            $project_name = $matches[1];
+        }
+        if (FALSE !== strpos($project_name, '.')) {
+            return $this->error('invalid project name: ' . $project_name);
+        }
+
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return $this->error('project not found: ' . $project_name);
+        }
+
+        if (!$user = User::find_by_name(strval($_SERVER['argv'][1]))) {
+            return $this->error('invalid ssh key');
+        }
+
+        if (!$project->isMember($user)) {
+            return $this->error('project not found: ' . $project_name);
+        }
+
+        $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
+        if (!file_exists($absolute_path)) {
+            exec('git init --bare ' . escapeshellarg($absolute_path));
+            // add hooks
+            symlink('/srv/code/hisoku/scripts/post-receive', $absolute_path . '/hooks/post-receive');
+        }
+
+        passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
+    }
 }
 
-function main()
-{
-    if (!getenv('SSH_ORIGINAL_COMMAND')) {
-        return error('There is no SSH_ORIGINAL_COMMAND env');
-    }
-
-    list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
-
-    if (!in_array($command, array('git-upload-pack', 'git-receive-pack'))) {
-        return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
-    }
-
-    $project_name = trim($args, "' ");
-    if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
-        $project_name = $matches[1];
-    }
-    if (FALSE !== strpos($project_name, '.')) {
-        return error('invalid project name: ' . $project_name);
-    }
-
-    if (!$project = Project::find_by_name(strval($project_name))) {
-        return error('project not found: ' . $project_name);
-    }
-
-    if (!$user = User::find_by_name(strval($_SERVER['argv'][1]))) {
-        return error('invalid ssh key');
-    }
-
-    if (!$project->isMember($user)) {
-        return error('project not found: ' . $project_name);
-    }
-
-    $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
-    if (!file_exists($absolute_path)) {
-        exec('git init --bare ' . escapeshellarg($absolute_path));
-        // add hooks
-        symlink('/srv/code/hisoku/scripts/post-receive', $absolute_path . '/hooks/post-receive');
-    }
-
-    passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));
-    return;
-}
-
-main();
+$ssh_serve = new SSHServe;
+$ssh_serve->main();
