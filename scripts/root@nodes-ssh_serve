@@ -190,6 +190,9 @@ function main()
         foreach ($project->variables as $variable) {
             $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->value);
         }
+        if ($_ENV['TERM']) {
+            $params[] = 'TERM=' . $_ENV['TERM'];
+        }
         $run_cmd = 'cd /srv/web; ' . urldecode($run_cmd);
 
         file_put_contents($log_file, date('c') . " [run] start\n", FILE_APPEND);
