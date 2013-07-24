@@ -22,9 +22,93 @@ class SSHServe
         case 'git-upload-pack':
         case 'git-receive-pack':
             return $this->gitCommand($command, $args);
+        case 'run':
+            return $this->runCommand($command, $args);
         default:
             return $this->error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
         }
+    }
+
+    public function runCommand($command, $args)
+    {
+        list($project_name, $run_command) = explode(' ', $args, 2);
+        if (FALSE !== strpos($project_name, '.')) {
+            return $this->error('invalid project name: ' . $project_name);
+        }
+
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return $this->error('project not found: ' . $project_name);
+        }
+
+        if (!$user = User::find_by_name(strval($_SERVER['argv'][1]))) {
+            return $this->error('invalid ssh key');
+        }
+
+        if (!$project->isMember($user)) {
+            return $this->error('project not found: ' . $project_name);
+        }
+
+        error_log('allocate node...');
+        $node = $project->getCronNode();
+        $node->update(array(
+            'status' => WebNode::STATUS_CRONNODE,
+        ));
+        $node->updateAccessAt();
+
+        error_log('start...');
+
+        $term = $_ENV['TERM'];
+        if ($term) {
+            ncurses_init();
+            ncurses_getmaxyx(STDSCR, $y, $x);
+            ncurses_clear();
+            $ret = $node->runJob($run_command, array(
+                'term' => $term,
+                'width' => $x,
+                'height' => $y,
+            ));
+        } else {
+            $ret = $node->runJob($run_command);
+        }
+
+        $user_input = fopen('php://stdin', 'r');
+        $user_output = fopen('php://stdout', 'w');
+        $user_stderr = fopen('php://stderr', 'w');
+
+        $read_streams = array(
+            'node_output' => $ret->stdout,
+            'node_stderr' => $ret->stderr,
+            'user_input' => $user_input,
+        );
+        stream_set_blocking($ret->stdout, false);
+        stream_set_blocking($ret->stderr, false);
+        stream_set_blocking($user_input, false);
+
+        while (array_key_exists('node_output', $read_streams)) {
+            foreach ($read_streams as $key => $read_stream) {
+                if (false !== ($line = fread($read_stream, 4096))) {
+                    if (feof($read_stream)) {
+                        if ($key === 'user_input') {
+                            break 2;
+                        }
+                        unset($read_streams[$key]);
+                        break;
+                    }
+                    if ($line === '') {
+                        continue;
+                    }
+
+                    if ('node_output' == $key) {
+                        fwrite($user_output, $line);
+                    } elseif ('node_stderr' == $key) {
+                        fwrite($user_stderr, $line);
+                    } elseif ('user_input' == $key) {
+                        fwrite($ret->stdio, $line);
+                    }
+                }
+            }
+        }
+        $node->markAsWait();
     }
 
     public function gitCommand($command, $args)
