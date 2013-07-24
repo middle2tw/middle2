@@ -156,7 +156,7 @@ class WebNodeRow extends Pix_Table_Row
         return $ret;
     }
 
-    public function runJob($command)
+    public function runJob($command, $options = array())
     {
         $session = ssh2_connect(long2ip($this->ip), 22);
         if (false === $session) {
@@ -167,7 +167,11 @@ class WebNodeRow extends Pix_Table_Row
             throw new Exception('ssh key is wrong');
         }
         $node_id = $this->port - 20000;
-        $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command));
+        if ($options['term']) {
+            $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command), $options['term'], array(), $options['width'], $options['height']);
+        } else {
+            $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command));
+        }
         $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
         $ret = new StdClass;
         $ret->stdout = $stream;
