@@ -175,6 +175,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
                                 }
                                 callback({success: true, host: node.ip, port: node.port, project: project});
                             });
+                            ssh2.end();
                         });
                     });
                 });
