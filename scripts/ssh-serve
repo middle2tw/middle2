@@ -24,9 +24,38 @@ class SSHServe
             return $this->gitCommand($command, $args);
         case 'run':
             return $this->runCommand($command, $args);
+        case 'log':
+            return $this->logCommand($command, $args);
         default:
             return $this->error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
         }
+    }
+
+    public function logCommand($command, $args)
+    {
+        list($project_name, $type) = explode(' ', $args, 2);
+        if (FALSE !== strpos($project_name, '.')) {
+            return $this->error('invalid project name: ' . $project_name);
+        }
+
+        if (!$project = Project::find_by_name(strval($project_name))) {
+            return $this->error('project not found: ' . $project_name);
+        }
+
+        if (!$user = User::find_by_name(strval($_SERVER['argv'][1]))) {
+            return $this->error('invalid ssh key');
+        }
+
+        if (!$project->isMember($user)) {
+            return $this->error('project not found: ' . $project_name);
+        }
+
+        if ($type == 'error') {
+            $category = "app-{$project_name}-error";
+        } else {
+            $category = "app-{$project_name}";
+        }
+        system("tail -f /srv/logs/scribed/{$category}/{$category}_current");
     }
 
     public function runCommand($command, $args)
