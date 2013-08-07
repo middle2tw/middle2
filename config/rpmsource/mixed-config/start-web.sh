@@ -34,10 +34,21 @@ START_AT=`date +%s`
 END_AT=`expr 300 + $START_AT`
 HTTP_CODE=0
 
-while [ \( $HTTP_CODE -eq 0 -o $HTTP_CODE -eq 500 \) -a $END_AT -gt `date +%s` ]
+while [ $END_AT -gt `date +%s` ]
 do
         HTTP_CODE=`curl --connect-timeout 3 --stderr /dev/null --include http://0:$PORT | head -n 1 | awk '{print $2}'`
-        sleep 1
+        echo $HTTP_CODE | grep '^[0-9]\+$' > /dev/null
+        if [ "$?" -eq "1" ]; then
+            sleep 1
+        else
+            if [ "$HTTP_CODE" = "" ]; then
+                sleep 1
+            elif [ $HTTP_CODE -eq 0 -o $HTTP_CODE -eq 500 ]; then
+                sleep 1
+            else
+                END_AT=0
+            fi
+        fi
 done
 
-#TODO 失敗的話要讓 loadbalancer 知道
+#TODO 失敗的話要讓 loadbalancer 知道, 可以從 END_AT 判斷
