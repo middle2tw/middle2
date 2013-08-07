@@ -1,19 +1,23 @@
 #!/bin/sh
 
-LOG_FILE=/srv/logs/web.log
+export LOG_FILE=/srv/logs/web.log
+export PORT=`cat /etc/port.conf`
+export HOME=/srv/web
+
 cd /srv/web
 
 if [ -f "/srv/web/Procfile" ]; then
-    sleep 1
+    `cat /srv/web/Procfile | grep '^web:' |  awk '{print substr($0, 5); }' | sed "s/\\$PORT/$PORT/"` > ${LOG_FILE} 2>&1 &
 elif [ -f "/srv/web/manage.py" ]; then
  # python django
-    env PORT=`cat /etc/port.conf` HOME=/srv/web python ./manage.py runserver 0.0.0.0:`cat /etc/port.conf` --noreload > ${LOG_FILE} 2>&1 &
+    python ./manage.py runserver 0.0.0.0:`cat /etc/port.conf` --noreload > ${LOG_FILE} 2>&1 &
 elif [ -f "/srv/web/app.py" ]; then
 # python app.py
-    env PORT=`cat /etc/port.conf` HOME=/srv/web gunicorn app:app -b 0.0.0.0:`cat /etc/port.conf` > ${LOG_FILE} &
+    gunicorn app:app -b 0.0.0.0:`cat /etc/port.conf` > ${LOG_FILE} &
 elif [ -f "/srv/web/web.rb" ]; then
 # ruby
-    env RACK_ENV=production PORT=`cat /etc/port.conf` HOME=/srv/web ruby web.rb -p `cat /etc/port.conf` > ${LOG_FILE} 2>&1 &
+    export RACK_ENV=production
+    ruby web.rb -p `cat /etc/port.conf` > ${LOG_FILE} 2>&1 &
 #elif [ -f "/srv/web/index.php" ]; then
 else
 # build /srv/env.conf
