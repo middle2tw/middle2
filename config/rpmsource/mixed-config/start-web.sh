@@ -32,11 +32,12 @@ fi
 
 START_AT=`date +%s`
 END_AT=`expr 300 + $START_AT`
+HTTP_CODE=0
 
-#CHECK_FAIL="1"
-#while [ $CHECK_FAIL -gt "0" -a $END_AT -gt `date +%s` ]
-#do
-#        wget --timeout=5 http://0:`cat /etc/port.conf` -O /dev/null
-#        CHECK_FAIL=$?
-#        sleep 1
-#done
+while [ \( $HTTP_CODE -eq 0 -o $HTTP_CODE -eq 500 \) -a $END_AT -gt `date +%s` ]
+do
+        HTTP_CODE=`curl --connect-timeout 3 --stderr /dev/null --include http://0:$PORT | head -n 1 | awk '{print $2}'`
+        sleep 1
+done
+
+#TODO 失敗的話要讓 loadbalancer 知道
