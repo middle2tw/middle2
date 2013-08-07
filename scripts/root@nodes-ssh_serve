@@ -132,12 +132,14 @@ function main()
         file_put_contents($log_file, date('c') . " [clone] pull source code\n", FILE_APPEND);
         exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
 
-        file_put_contents($log_file, date('c') . " [clone] init project base\n", FILE_APPEND);
-        $tmp_name = tempnam('/tmp', '');
-        exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-base " . $project_name . " > {$tmp_name}.tar.gz");
-        exec("tar zxf {$tmp_name}.tar.gz -C /srv/chroot/{$id}");
-        @unlink($tmp_name);
-        @unlink("{$tmp_name}.tar.gz");
+        if ('no-project-base' != $flag) {
+            file_put_contents($log_file, date('c') . " [clone] init project base\n", FILE_APPEND);
+            $tmp_name = tempnam('/tmp', '');
+            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-base " . $project_name . " > {$tmp_name}.tar.gz");
+            exec("tar zxf {$tmp_name}.tar.gz -C /srv/chroot/{$id}");
+            @unlink($tmp_name);
+            @unlink("{$tmp_name}.tar.gz");
+        }
 
         file_put_contents($log_file, date('c') . " [clone] post-clone.sh\n", FILE_APPEND);
         if ('no-post-clone' != $flag and file_exists("/srv/chroot/{$id}/post-clone.sh")) {
