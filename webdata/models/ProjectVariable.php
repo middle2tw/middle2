@@ -8,6 +8,7 @@ class ProjectVariableRow extends Pix_Table_Row
             $webnode->update(array(
                 'project_id' => 0,
                 'commit' => '',
+                'status' => WebNode::STATUS_OVER,
             ));
         }
     }
