@@ -18,6 +18,11 @@ class SSHServe
 
         list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
 
+        Logger::log(array(array(
+            'category' => 'git-ssh-serve', 
+            'message' => time() . " {$_SERVER['argv'][1]} {$_SERVER['SSH_CLIENT']} {$command} {$args}"
+        )));
+
         switch ($command) {
         case 'git-upload-pack':
         case 'git-receive-pack':
