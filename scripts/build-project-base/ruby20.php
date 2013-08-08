@@ -81,7 +81,7 @@ class Prebuilder
         chdir("{$root}");
         system("cp $req_file {$root}/Gemfile");
         system("chroot {$root} gem install bundler");
-        passthru("chroot {$root} bundle install");
+        passthru("chroot {$root} bundle install --without development test");
         system("rm -rf {$root}/.bundle  {$root}/Gemfile {$root}/Gemfile.lock {$root}/vendor");
 
         // 把檔案弄進去
