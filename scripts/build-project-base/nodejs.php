@@ -78,8 +78,8 @@ class Prebuilder
         error_log('npm installing ...');
         // 安裝 nodejs package
         chdir("{$root}");
-        system("cp $package_file {$root}/root/package.json");
-        system("chroot {$root} sh -c \"cd /root; npm install --global\"");
+        system("cp $package_file {$root}/srv/package.json");
+        system("chroot {$root} sh -c \"cd /srv; npm install\"");
         system("rm -rf {$root}/root/package.json");
 
         // 把檔案弄進去
