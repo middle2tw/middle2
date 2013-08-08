@@ -48,11 +48,14 @@ function getProjectBaseByRepository($args)
 
     $template = $project->getTemplate();
     if ($info = getGitFileInfo('requirements.txt')) {
-        $template = in_array($template, array('python26', 'python27')) ? $template : 'python26';
+        $template = in_array($template, array('python26', 'python27')) ? $template : 'python27';
         $package_filename = 'requirements.txt';
     } elseif ($info = getGitFileInfo('Gemfile')) {
         $template = in_array($template, array('ruby20')) ? $template : 'ruby20';
         $package_filename = 'Gemfile';
+    } elseif ($info = getGitFileInfo('package.json')) {
+        $template = 'nodejs';
+        $package_filename = 'package.json';
     } else {
         return error('template ' . $template . ' package filename unknown');
     }

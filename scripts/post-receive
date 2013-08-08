@@ -45,11 +45,14 @@ if (!$project = Project::find(intval($matches[1]))) {
 $template = $project->getTemplate();
 $package_filename = null;
 if ($info = getGitFileInfo('requirements.txt')) {
-    $template = in_array($template, array('python26', 'python27')) ? $template : 'python26';
+    $template = in_array($template, array('python26', 'python27')) ? $template : 'python27';
     $package_filename = 'requirements.txt';
 } elseif ($info = getGitFileInfo('Gemfile')) {
     $template = in_array($template, array('ruby20')) ? $template : 'ruby20';
     $package_filename = 'Gemfile';
+} elseif ($info = getGitFileInfo('package.json')) {
+    $template = 'nodejs';
+    $package_filename = 'package.json';
 }
 
 if (!is_null($package_filename) and !is_null($info)) {
