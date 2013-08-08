@@ -47,7 +47,7 @@ class Prebuilder
         return $this->error("No avaiabled root");
     }
 
-    public function main($req_file)
+    public function main($req_file, $force_rebuild = false)
     {
         if (0 !== posix_getuid()) {
             return $this->error("Muse be root");
@@ -60,7 +60,7 @@ class Prebuilder
         $project_file = '/tmp/project-ruby20-' . md5_file($req_file);
 
         // 已經有了，不需要再做了
-        if (file_exists($project_file . '.tar.gz')) {
+        if (!$force_rebuild and file_exists($project_file . '.tar.gz')) {
             return;
         }
 
@@ -80,8 +80,8 @@ class Prebuilder
         // 安裝 ruby20 package
         chdir("{$root}");
         system("cp $req_file {$root}/Gemfile");
-        passthru("bundle install --path={$root}/vendor/bundle");
-        system("cp -r {$root}/vendor/bundle/ruby/2.0.0/* {$root}/usr/lib/ruby/gems/2.0.0/");
+        system("chroot {$root} gem install bundler");
+        passthru("chroot {$root} bundle install");
         system("rm -rf {$root}/.bundle  {$root}/Gemfile {$root}/Gemfile.lock {$root}/vendor");
 
         // 把檔案弄進去
@@ -90,9 +90,9 @@ class Prebuilder
         error_log('build tar.gz...');
         // TODO: 處理過程中會不會處理到一半的檔案被人拿走...
         // 處理檔案
-        system("find . -type f -printf \"%TY%Tm%Td %p\n\" | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
+        system("find . -type f -printf \"%TY%Tm%Td,,,%p\n\" | grep -v '^20000101' | awk -F,,, '{print \"\\\"\"$2\"\\\"\"}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
         // 處理 symbolic link
-        system("find . -type l -printf \"%TY%Tm%Td %p\n\" | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
+        system("find . -type l -printf \"%TY%Tm%Td,,,%p\n\" | grep -v '^20000101' | awk -F,,, '{print \"\\\"\"$2\"\\\"\"}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
 
         system("gzip {$project_file}.tar");
 
@@ -106,4 +106,4 @@ class Prebuilder
 }
 
 $p = new Prebuilder;
-$p->main($_SERVER['argv'][1]);
+$p->main($_SERVER['argv'][1], array_key_exists(2, $_SERVER['argv']) ? true : false);
