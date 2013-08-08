@@ -76,7 +76,7 @@ class Prebuilder
 
         error_log('untar python.tar.gz...');
         // 把 python package 解進去
-        system("tar zxf /srv/code/images/dev-" . TEMPLATE . ".tar.gz --directory={$root}");
+        system("tar zxf /srv/code/images/lang-" . TEMPLATE . ".tar.gz --directory={$root}");
 
         error_log('find diff file...');
         // 把新解進去的檔案都改成 2001/1/1
@@ -85,7 +85,7 @@ class Prebuilder
         error_log('pip installing ...');
         // 安裝 python package
         copy($req_file, $root . "/requirements.txt");
-        $cmd = "chroot {$root} pip install --requirement /requirements.txt --ignore-installed";
+        $cmd = "chroot {$root} pip --log /srv/logs/pip.log install --requirement /requirements.txt";
         $fp = proc_open($cmd, array(0 => array('pipe', 'r'), 1 => array('pipe' , 'w'), 2 => array('pipe', 'w')), $pipes, NULL, array('PYTHONUNBUFFERED' => 'x'));
 
         while (false !== ($line = fgets($pipes[1], 4096))) {
@@ -100,6 +100,11 @@ class Prebuilder
             if (0 === strpos($line, 'Downloading/unpacking')) {
                 echo trim(str_replace($req_file, 'requirements.txt', $line)) . "\n";
             }
+        }
+        $status = proc_get_status($fp);
+        if ($status['exitcode'] != 0) {
+            // TODO: 要 log 起來錯誤原因參考
+            return $this->error('build failed');
         }
         proc_close($fp);
 
