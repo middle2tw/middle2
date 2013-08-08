@@ -9,6 +9,16 @@
 // 5. used (用完了): 存在 /srv/chroot/1xxx.used 和 /srv/chroot/1xxx/ 資料夾
 //
 // 這個 script 只需要對 1 和 5 做事就行了
+//
+define('LOCK_FILE', '/tmp/hisoku-reset-init-base');
+$fp = fopen(LOCK_FILE, 'w+');
+if (!flock($fp, LOCK_EX | LOCK_NB)) {
+    throw new Exception(LOCK_FILE . ' is locking');
+}
+
+ftruncate($fp, 0);      // truncate file
+fwrite($fp, getmypid());
+fflush($fp);            // flush output before releasing the lock
 
 include(__DIR__ . '/../../webdata/init.inc.php');
 
@@ -72,3 +82,7 @@ class Initer
 
 $i = new Initer;
 $i->main();
+
+flock($fp, LOCK_UN);    // release the lock
+fclose($fp);
+unlink(LOCK_FILE);
