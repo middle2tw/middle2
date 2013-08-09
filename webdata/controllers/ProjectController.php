@@ -121,6 +121,7 @@ class ProjectController extends Pix_Controller
         $project->variables->insert(array(
             'key' => strval($_POST['key']),
             'value' => strval($_POST['value']),
+            'is_magic_value' => 0,
         ));
 
         return $this->redirect('/project/detail/' . $project->name);
@@ -255,6 +256,7 @@ class ProjectController extends Pix_Controller
 
         $variable->update(array(
             'value' => strval($_POST['value']),
+            'is_magic_value' => 0,
         ));
         return $this->redirect('/project/detail/' . $project->name);
     }
