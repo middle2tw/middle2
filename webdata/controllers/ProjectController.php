@@ -200,7 +200,7 @@ class ProjectController extends Pix_Controller
             return $this->alert('error', '/');
         }
 
-        list(, /*project*/, /*addmysqladdon*/, $name) = explode('/', $this->getURI());
+        list(, /*project*/, /*addmysqladdon*/, $name, $addon_id) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
         }
@@ -209,7 +209,19 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
-        Addon_MySQLDB::addDB($project);
+        $key = is_scalar($_POST['key']) ? $_POST['key'] : 'DATABASE_URL';
+
+        if ($addon_id) {
+            if (!$addon = Addon_MySQLDB::find(intval($addon_id))) {
+                return $this->alert('Addon not found', '/');
+            }
+            if (!$addon_member = $addon->members->search(array('project_id' => $project->id))->first()) {
+                return $this->alert('Addon not found', '/');
+            }
+            $addon_member->saveProjectVariable($key);
+        } else {
+            Addon_MySQLDB::addDB($project, $key);
+        }
 
         return $this->redirect('/project/detail/' . $project->name);
     }
