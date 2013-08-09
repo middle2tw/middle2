@@ -107,6 +107,16 @@ class UserRow extends Pix_Table_Row
     {
         return Admin::find($this->id) ? true : false;
     }
+
+    public function getOwnedMySQLDatabases()
+    {
+        $project_ids = $this->project_members->toArray('project_id');
+        if (!$project_ids) {
+            return array();
+        }
+
+        return Addon_MySQLDB::search(1)->searchIn('project_id', $project_ids);
+    }
 }
 
 class User extends Pix_Table
