@@ -45,7 +45,7 @@ class AdminController extends Pix_Controller
     {
         list(, /*admin*/, /*getlog*/, $category) = explode('/', $this->getURI());
 
-        if (in_array($category, array('login'))) {
+        if (in_array($category, array('login', 'git-ssh-serve'))) {
             $log_filter = function($line){
                 $terms = explode(' ', $line);
                 $time = date('c', array_shift($terms));
