@@ -17,6 +17,21 @@ class Addon_MySQLDBRow extends Pix_Table_Row
             ));
         }
     }
+
+    public function isMember($user)
+    {
+        return $this->project->isMember($user);
+    }
+
+    public function isAdmin($user)
+    {
+        return $this->project->isAdmin($user);
+    }
+
+    public function getEAVs()
+    {
+        return EAV::search(array('table' => 'AddonMySQLDB', 'id' => $this->id));
+    }
 }
 
 class Addon_MySQLDB extends Pix_Table
@@ -38,6 +53,10 @@ class Addon_MySQLDB extends Pix_Table
         $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
 
         $this->addIndex('project_id', array('project_id'));
+
+        $this->_hooks['eavs'] = array('get' => 'getEAVs');
+
+        $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
     }
 
     public static function addDB($project)
