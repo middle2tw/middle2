@@ -29,6 +29,7 @@ class Addon_MySQLDB extends Pix_Table
         $this->_primary = array('id');
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
+        $this->_columns['owner_id'] = array('type' => 'int');
         $this->_columns['project_id'] = array('type' => 'int');
         $this->_columns['host'] = array('type' => 'varchar', 'size' => 255);
         $this->_columns['user_name'] = array('type' => 'varchar', 'size' => 32);
@@ -38,6 +39,7 @@ class Addon_MySQLDB extends Pix_Table
         $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
 
         $this->addIndex('project_id', array('project_id'));
+        $this->addIndex('owner_id', array('owner_id'));
     }
 
     public static function addDB($project)
