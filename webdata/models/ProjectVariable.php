@@ -26,6 +26,11 @@ class ProjectVariableRow extends Pix_Table_Row
     public function getValue()
     {
         if ($this->is_magic_value) {
+            list($table, $id, $type) = explode(',', $this->value);
+            switch ($table . '-' . $type) {
+            case 'Addon_MySQLDB-DatabaseURL':
+                return Addon_MySQLDBMember::find(array(intval($id), $this->project_id))->getDatabaseURL();
+            }
             // TODO
         } else {
             return $this->value;
