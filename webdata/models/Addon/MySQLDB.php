@@ -21,6 +21,38 @@ class Addon_MySQLDBRow extends Pix_Table_Row
     {
         return EAV::search(array('table' => 'AddonMySQLDB', 'id' => $this->id));
     }
+
+    public function addProject($project, $readonly = true)
+    {
+        $username = Hisoku::uniqid(16);
+        $password = Hisoku::uniqid(16);
+
+        $link = new mysqli($this->host, getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
+        $db = new Pix_Table_Db_Adapter_Mysqli($link);
+
+        try {
+            $addon_member = Addon_MySQLDBMember::insert(array(
+                'project_id' => $project->id,
+                'addon_id' => $this->id,
+                'username' => $username,
+                'password' => $password,
+            ));
+            $db->query("CREATE USER '{$username}'@'%' IDENTIFIED BY '{$password}'");
+        } catch (Pix_Table_DuplicateException $e) {
+            $addon_member = Addon_MySQLDBMember::find(array($this->id, $project->id));
+            $db->query("REVOKE ALL PRIVILEGES,  GRANT OPTION FROM '{$addon_member->username}'@'%'");
+        }
+
+        $addon_member->update(array(
+            'readonly' => $readonly ? 1: 0,
+        ));
+
+        if ($readonly) {
+            $db->query("GRANT SELECT ON  `{$this->database}` . * TO  '{$addon_member->username}'@'%'");
+        } else {
+            $db->query("GRANT ALL PRIVILEGES ON  `{$this->database}` . * TO  '{$addon_member->username}'@'%'");
+        }
+    }
 }
 
 class Addon_MySQLDB extends Pix_Table
@@ -56,29 +88,18 @@ class Addon_MySQLDB extends Pix_Table
 
         $ips = Hisoku::getMysqlServers();
         $host = $ips[0];
-        $username = Hisoku::uniqid(16);
-        $password = Hisoku::uniqid(16);
         $database = 'user_' . $project->name;
 
         $link = new mysqli($ips[0], getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
         $db = new Pix_Table_Db_Adapter_Mysqli($link);
-        $db->query("CREATE USER '{$username}'@'%' IDENTIFIED BY '{$password}'");
         $db->query("CREATE DATABASE IF NOT EXISTS`{$database}` CHARACTER SET utf8");
-        $db->query("GRANT ALL PRIVILEGES ON  `{$database}` . * TO  '{$username}'@'%'");
 
         $addon = self::insert(array(
             'project_id' => $project->id,
             'host' => $host,
             'database' => $database,
         ));
-
-        Addon_MySQLDBMember::insert(array(
-            'project_id' => $project->id,
-            'addon_id' => $addon->id,
-            'username' => $username,
-            'password' => $password,
-        ));
-
+        $addon->addProject($project, false);
         $addon->saveProjectVariable($key);
     }
 }
