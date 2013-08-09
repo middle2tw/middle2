@@ -73,6 +73,36 @@ class AdminController extends Pix_Controller
         return $this->json($logs);
     }
 
+    public function nodeserverbulkaddportAction()
+    {
+        list(, /*admin*/, /*nodeserverbulkaddport*/, $ip, $num) = explode('/', $this->getURI());
+        if ($_POST['sToken'] != Hisoku::getStoken()) {
+            return $this->alert('wrong stoken', '/admin');
+        }
+
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $this->alert('wrong ip', '/admin');
+        }
+
+        $num = intval($_REQUEST['count']);
+        if ($num <= 0 or $num > 100) {
+            return $this->alert('num must in 1 ~ 100', '/admin');
+        }
+
+        for ($i = 1; $i <= $num ; $i ++) {
+            if (WebNode::find(array(ip2long($ip), 20000 + $i))) {
+                continue;
+            }
+            try {
+                WebNode::initNode($ip, $i);
+            } catch (Exception $e) {
+                return $this->alert($e->getMessage(), '/admin');
+            }
+        }
+
+        return $this->alert('done', '/admin');
+    }
+
     public function nodeserveraddportAction()
     {
         list(, /*admin*/, /*nodeserveraddport*/, $ip, $port) = explode('/', $this->getURI());

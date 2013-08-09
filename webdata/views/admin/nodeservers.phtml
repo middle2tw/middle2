@@ -25,6 +25,9 @@ $this->title = 'NodeServers Info :: ';
             <?php foreach ($grouped_nodes as $ip => $nodes) { ?>
             <div id="node-<?= $ip ?>">
                 <h3><?= long2ip($ip) ?>(<?= count($nodes) ?>)</h3>
+                <form method="post" action="/admin/nodeserverbulkaddport/<?= long2ip($ip) ?>">
+                    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+                補滿到 <input type="text" value="20" name="count" class="input-small"> 台機器<button type="submit">Go</button></form>
                 <table class="table">
                     <thead>
                         <tr>
