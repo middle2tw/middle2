@@ -4,18 +4,7 @@ class Addon_MySQLDBRow extends Pix_Table_Row
 {
     public function saveProjectVariable()
     {
-        try {
-            $this->project->variables->insert(array(
-                'key' => 'DATABASE_URL',
-                'value' => "mysql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
-            ));
-        } catch (Pix_Table_DuplicateException $e) {
-            $this->project->variables->search(array(
-                'key' => 'DATABASE_URL',
-            ))->update(array(
-                'value' => "mysql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
-            ));
-        }
+        Addon_MySQLDBMember::search(array('addon_id' => $this->id, 'project_id' => $this->project_id))->first()->saveProjectVariable();
     }
 
     public function isMember($user)
@@ -68,28 +57,26 @@ class Addon_MySQLDB extends Pix_Table
 
         $ips = Hisoku::getMysqlServers();
         $host = $ips[0];
-        $user_name = Hisoku::uniqid(16);
+        $username = Hisoku::uniqid(16);
         $password = Hisoku::uniqid(16);
         $database = 'user_' . $project->name;
 
         $link = new mysqli($ips[0], getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
         $db = new Pix_Table_Db_Adapter_Mysqli($link);
-        $db->query("CREATE USER '{$user_name}'@'%' IDENTIFIED BY '{$password}'");
+        $db->query("CREATE USER '{$username}'@'%' IDENTIFIED BY '{$password}'");
         $db->query("CREATE DATABASE IF NOT EXISTS`{$database}` CHARACTER SET utf8");
-        $db->query("GRANT ALL PRIVILEGES ON  `{$database}` . * TO  '{$user_name}'@'%'");
+        $db->query("GRANT ALL PRIVILEGES ON  `{$database}` . * TO  '{$username}'@'%'");
 
         $addon = self::insert(array(
             'project_id' => $project->id,
             'host' => $host,
-            'user_name' => $user_name,
-            'password' => $password,
             'database' => $database,
         ));
 
         Addon_MySQLDBMember::insert(array(
             'project_id' => $project->id,
             'addon_id' => $addon->id,
-            'username' => $user_name,
+            'username' => $username,
             'password' => $password,
         ));
 
