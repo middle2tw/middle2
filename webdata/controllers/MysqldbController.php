@@ -24,6 +24,30 @@ class MysqldbController extends Pix_Controller
         $this->view->addon_mysqldb = $addon;
     }
 
+    public function addprojectAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: log it
+            return $this->alert('error', '/');
+        }
+
+        list(, /*mysqldb*/, /*addproject*/, $id) = explode('/', $this->getURI());
+        if (!$addon = Addon_MySQLDB::find(intval($id))) {
+            return $this->alert('Addon not found', '/');
+        }
+
+        if (!$addon->isAdmin($this->user)) {
+            return $this->alert('Addon not found', '/');
+        }
+
+        if (!$project = Project::find_by_name(strval($_POST['project']))) {
+            return $this->alert('Project not found', '/mysqldb/detail/' . $addon->id);
+        }
+        $addon->addProject($project, $_POST['readonly'] ? 1 : 0);
+
+        return $this->redirect('/mysqldb/detail/' . $addon->id);
+    }
+
     public function editnoteAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {
