@@ -1,0 +1,26 @@
+<?php
+$this->project = $this->addon_mysqldb->project;
+$this->title = $this->project->name . (($note = $this->project->getEAV('note')) ? "({$note})" : '') . ' :: ';
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<h2>DB: <?= $this->escape($this->addon_mysqldb->database) ?></h2>
+Project: <a href="/project/detail/<?= $this->project->name ?>"><?= $this->project->name ?>(<?= $this->escape($this->project->getEAV('note')) ?>)</a><br>
+<form method="post" action="/mysqldb/editnote/<?= $this->addon_mysqldb->id ?>">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    Note: <input type="text" name="note" value="<?= $this->escape($this->addon_mysqldb->getEAV('note')) ?>">
+    <button type="submit">SAVE</button>
+</form>
+<hr>
+<h3>Connected Project</h3>
+<ul>
+    <?php foreach ($this->addon_mysqldb->members as $addon_member) { ?>
+    <li>
+    <?php if ($addon_member->project->isMember($this->user)) { ?>
+    <a href="/project/detail/<?= $addon_member->project->name ?>/"><?= $this->escape($addon_member->project->name) ?>(<?= $this->escape($addon_member->project->getEAV('note')) ?>)</a>
+    <?php } else { ?>
+    <?= $this->escape($addon_member->project->name) ?>
+    <?php } ?>
+    </li>
+<?php } ?>
+</ul>
+<?= $this->partial('/common/footer.phtml', $this) ?>
