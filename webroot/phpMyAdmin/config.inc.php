@@ -19,46 +19,48 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
         header('Location: /');
         exit;
     }
-    $addon = new StdClass;
-    $addon->host = getenv('MYSQL_HOST');
-    $addon->user_name = getenv('MYSQL_USER');
-    $addon->password = getenv('MYSQL_PASS');
-    $addon->database = getenv('MYSQL_DATABASE');
-    $addon->verbose = 'Main';
+    $addon_member = new StdClass;
+    $addon_member->addon = new StdClass;
+    $addon_member->addon->host = getenv('MYSQL_HOST');
+    $addon_member->username = getenv('MYSQL_USER');
+    $addon_member->password = getenv('MYSQL_PASS');
+    $addon_member->addon->database = getenv('MYSQL_DATABASE');
+    $addon_member->verbose = 'Main';
 
-    $addons = array($addon);
+    $addon_members = array($addon_member);
 
     foreach (Hisoku::getMysqlServers() as $ip) {
-        $addon = new StdClass;
-        $addon->host = $ip;
-        $addon->user_name = getenv('MYSQL_USERDB_USER');
-        $addon->password = getenv('MYSQL_USERDB_PASS');
-        $addon->verbose = 'UserDB';
-        $addons[] = $addon;
+        $addon_member = new StdClass;
+        $addon_member->addon = new StdClass;
+        $addon_member->addon->host = $ip;
+        $addon_member->username = getenv('MYSQL_USERDB_USER');
+        $addon_member->password = getenv('MYSQL_USERDB_PASS');
+        $addon_member->verbose = 'UserDB';
+        $addon_members[] = $addon_member;
     }
 
 } else {
-    $addons = Addon_MySQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
-    if (!count($addons)) {
+    $addon_members = Addon_MySQLDBMember::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
+    if (!count($addon_members)) {
         header('Location: /user/nodb');
         exit;
     }
 }
 $i = 0;
-foreach ($addons as $addon) {
+foreach ($addon_members as $addon_member) {
     $i++;
     /* Authentication type */
     $cfg['Servers'][$i]['auth_type'] = 'config';
     /* Server parameters */
-    $cfg['Servers'][$i]['host'] = $addon->host;
-    $cfg['Servers'][$i]['user'] = $addon->user_name;
-    if ($addon->project) {
-        $cfg['Servers'][$i]['verbose'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
-    } elseif ($addon->verbose) {
-        $cfg['Servers'][$i]['verbose'] = $addon->verbose;
+    $cfg['Servers'][$i]['host'] = $addon_member->addon->host;
+    $cfg['Servers'][$i]['user'] = $addon_member->username;
+    if ($addon_member->project) {
+        $cfg['Servers'][$i]['verbose'] = $addon_member->project->name . '(' . $addon_member->project->getEAV('note') . ')';
+    } elseif ($addon_member->verbose) {
+        $cfg['Servers'][$i]['verbose'] = $addon_member->verbose;
     }
-    $cfg['Servers'][$i]['password'] = $addon->password;
-    $cfg['Servers'][$i]['only_db'] = $addon->database;
+    $cfg['Servers'][$i]['password'] = $addon_member->password;
+    $cfg['Servers'][$i]['only_db'] = $addon_member->addon->database;
     $cfg['Servers'][$i]['connect_type'] = 'tcp';
     $cfg['Servers'][$i]['compress'] = false;
     /* Select mysql if your server does not have mysqli */
