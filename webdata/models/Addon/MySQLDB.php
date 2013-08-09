@@ -2,9 +2,9 @@
 
 class Addon_MySQLDBRow extends Pix_Table_Row
 {
-    public function saveProjectVariable()
+    public function saveProjectVariable($key = 'DATABASE_URL')
     {
-        Addon_MySQLDBMember::search(array('addon_id' => $this->id, 'project_id' => $this->project_id))->first()->saveProjectVariable();
+        Addon_MySQLDBMember::search(array('addon_id' => $this->id, 'project_id' => $this->project_id))->first()->saveProjectVariable($key);
     }
 
     public function isMember($user)
@@ -47,10 +47,10 @@ class Addon_MySQLDB extends Pix_Table
         $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
     }
 
-    public static function addDB($project)
+    public static function addDB($project, $key = 'DATABASE_URL')
     {
         if ($addon = self::search(array('project_id' => $project->id))->first()) {
-            $addon->saveProjectVariable();
+            $addon->saveProjectVariable($key);
             return;
         }
 
@@ -79,7 +79,6 @@ class Addon_MySQLDB extends Pix_Table
             'password' => $password,
         ));
 
-        $addon->saveProjectVariable();
-
+        $addon->saveProjectVariable($key);
     }
 }
