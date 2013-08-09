@@ -165,7 +165,7 @@ function main()
         file_put_contents($log_file, date('c') . " [restart-web] loading project variables\n", FILE_APPEND);
         $params = array('project=' . escapeshellcmd($project->name));
         foreach ($project->variables as $variable) {
-            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->value);
+            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
         }
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
@@ -190,7 +190,7 @@ function main()
         file_put_contents($log_file, date('c') . " [run] loading project variables\n", FILE_APPEND);
         $params = array('project=' . escapeshellarg($project->name));
         foreach ($project->variables as $variable) {
-            $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->value);
+            $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->getValue());
         }
         if ($_ENV['TERM']) {
             $params[] = 'TERM=' . $_ENV['TERM'];
