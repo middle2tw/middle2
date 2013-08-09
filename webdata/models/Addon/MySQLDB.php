@@ -85,6 +85,14 @@ class Addon_MySQLDB extends Pix_Table
             'password' => $password,
             'database' => $database,
         ));
+
+        Addon_MySQLDBMember::insert(array(
+            'project_id' => $project->id,
+            'addon_id' => $addon->id,
+            'username' => $user_name,
+            'password' => $password,
+        ));
+
         $addon->saveProjectVariable();
 
     }
