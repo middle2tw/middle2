@@ -27,7 +27,7 @@ foreach ($public_keys as $public_key) {
 }
 $content .= "# user keys\n";
 foreach (UserKey::search(1) as $user_key) {
-    $content .= 'command="/srv/code/hisoku/scripts/ssh-serve ' . $user_key->user->name . '",no-port-forwarding,no-X11-forwarding,no-agent-forwarding ' . $user_key->key_body . "\n";
+    $content .= "command=\"/srv/code/hisoku/scripts/ssh-serve {$user_key->user->name} {$user_key->id}\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding {$user_key->key_body}\n";
 }
 
 file_put_contents(getenv('HOME') . '/.ssh/authorized_keys', $content);
