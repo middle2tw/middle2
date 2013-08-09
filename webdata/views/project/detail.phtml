@@ -48,11 +48,15 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 <ul>
     <?php foreach ($this->project->variables as $variable) { ?>
     <li>
-    <form method="post" action="/project/editvariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>">
+    <form method="post" action="/project/editvariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>"<?= ($variable->is_magic_value) ? ' disabled="disabled"' : '' ?>>
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
         <?= $this->escape($variable->key) ?>
+        <?php if ($variable->is_magic_value) { ?>
+        <input type="text" name="value" value="<?= $this->escape($variable->getValue()) ?>" readonly="readonly">(本數值不能修改只能刪除)
+        <?php } else { ?>
         <input type="text" name="value" value="<?= $this->escape($variable->value) ?>">
         <button type="submit">EDIT</button>
+        <?php } ?>
     </form>
     <a href="/project/deletevariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($variable->key) ?> variable">Delete</a>
     </li>
