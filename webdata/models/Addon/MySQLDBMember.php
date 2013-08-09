@@ -13,5 +13,8 @@ class Addon_MySQLDBMember extends Pix_Table
         $this->_columns['password'] = array('type' => 'varchar', 'size' => 64);
 
         $this->addIndex('project_id', array('project_id'));
+
+        $this->_relations['addon'] = array('rel' => 'has_one', 'type' => 'Addon_MySQLDB', 'foreign_key' => 'addon_id');
+        $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
     }
 }
