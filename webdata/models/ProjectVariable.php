@@ -22,6 +22,15 @@ class ProjectVariableRow extends Pix_Table_Row
     {
         $this->_releaseNodes();
     }
+
+    public function getValue()
+    {
+        if ($this->is_magic_value) {
+            // TODO
+        } else {
+            return $this->value;
+        }
+    }
 }
 
 class ProjectVariable extends Pix_Table
@@ -35,6 +44,7 @@ class ProjectVariable extends Pix_Table
         $this->_columns['project_id'] = array('type' => 'int');
         $this->_columns['key'] = array('type' => 'varchar', 'size' => 32);
         $this->_columns['value'] = array('type' => 'text');
+        $this->_columns['is_magic_value'] = array('type' => 'text');
 
         $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
     }
