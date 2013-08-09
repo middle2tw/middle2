@@ -20,6 +20,11 @@ Project: <a href="/project/detail/<?= $this->project->name ?>"><?= $this->projec
     <?php } else { ?>
     <?= $this->escape($addon_member->project->name) ?>
     <?php } ?>
+
+    <?php if ($addon_member->addon->project_id == $addon_member->project_id) { ?>
+    [Primary]
+    <?php } else { ?>
+    <?php } ?>
     </li>
 <?php } ?>
 </ul>
