@@ -4,7 +4,7 @@ class Addon_MySQLDBMemberRow extends Pix_Table_Row
 {
     public function getDatabaseURL()
     {
-        return "mysql://{$this->username}:{$this->password}@{$this->addon->host}/{$this->addon->database}",
+        return "mysql://{$this->username}:{$this->password}@{$this->addon->host}/{$this->addon->database}";
     }
 
     public function saveProjectVariable()
@@ -12,13 +12,15 @@ class Addon_MySQLDBMemberRow extends Pix_Table_Row
         try {
             $this->project->variables->insert(array(
                 'key' => 'DATABASE_URL',
-                'value' => $this->getDatabaseURL(),
+                'value' => "Addon_MySQLDB:{$this->addon_id}:DatabaseURL",
+                'is_magic_value' => 1,
             ));
         } catch (Pix_Table_DuplicateException $e) {
             $this->project->variables->search(array(
                 'key' => 'DATABASE_URL',
             ))->update(array(
-                'value' => $this->getDatabaseURL(),
+                'value' => "Addon_MySQLDB:{$this->addon_id}:DatabaseURL",
+                'is_magic_value' => 1,
             ));
         }
     }
