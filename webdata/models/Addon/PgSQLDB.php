@@ -8,12 +8,14 @@ class Addon_PgSQLDBRow extends Pix_Table_Row
             $this->project->variables->insert(array(
                 'key' => 'DATABASE_URL',
                 'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+                'is_magic_value' => 0,
             ));
         } catch (Pix_Table_DuplicateException $e) {
             $this->project->variables->search(array(
                 'key' => 'DATABASE_URL',
             ))->update(array(
                 'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
+                'is_magic_value' => 0,
             ));
         }
     }

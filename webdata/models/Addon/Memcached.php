@@ -15,12 +15,14 @@ class Addon_MemcachedRow extends Pix_Table_Row
                 $this->project->variables->insert(array(
                     'key' => $key,
                     'value' => $value,
+                    'is_magic_value' => 0,
                 ));
             } catch (Pix_Table_DuplicateException $e) {
                 $this->project->variables->search(array(
                     'key' => $key,
                 ))->update(array(
                     'value' => $value,
+                    'is_magic_value' => 0,
                 ));
             }
         }
