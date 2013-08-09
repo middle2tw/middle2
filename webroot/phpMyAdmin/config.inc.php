@@ -40,7 +40,7 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
     }
 
 } else {
-    $addon_members = Addon_MySQLDBMember::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
+    $addon_members = Addon_MySQLDBMember::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'))->order('project_id');
     if (!count($addon_members)) {
         header('Location: /user/nodb');
         exit;
@@ -58,6 +58,9 @@ foreach ($addon_members as $addon_member) {
         $cfg['Servers'][$i]['verbose'] = $addon_member->project->name . '(' . $addon_member->project->getEAV('note') . ')';
     } elseif ($addon_member->verbose) {
         $cfg['Servers'][$i]['verbose'] = $addon_member->verbose;
+    }
+    if ($addon_member->readonly) {
+        $cfg['Servers'][$i]['verbose'] .= '(readonly)';
     }
     $cfg['Servers'][$i]['password'] = $addon_member->password;
     $cfg['Servers'][$i]['only_db'] = $addon_member->addon->database;
