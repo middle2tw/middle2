@@ -26,6 +26,14 @@ Project: <a href="/project/detail/<?= $this->project->name ?>"><?= $this->projec
     <?php } else { ?>
     <?php } ?>
     </li>
-<?php } ?>
+    <?php } ?>
+    <li>
+    <form method="post" action="/mysqldb/addproject/<?= $this->addon_mysqldb->id ?>" class="form-inline">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        Add Project: 
+        <input type="text" name="project"  placeholder="Project Id, Ex: Taipei-Ma-689689">
+        <label class="checkbox"><input type="checkbox" name="readonly" value="1">Readonly</label>
+        <button type="submit">Add</button>
+    </form>
 </ul>
 <?= $this->partial('/common/footer.phtml', $this) ?>
