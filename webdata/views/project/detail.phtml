@@ -81,6 +81,9 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     <?php foreach (Addon_MySQLDBMember::search(array('project_id' => $this->project->id)) as $addon_member) { ?>
     <li>
     [MySQLDB] Project: <?= $addon_member->addon->project->name ?><?= ($note = $addon_member->addon->getEAV('note')) ? "(" . $this->escape($note) . ")" : '' ?>
+    <?php if ($addon_member->addon->project_id == $this->project->id) { ?>
+    <a href="/mysqldb/detail/<?= $addon_member->addon_id ?>">Manage MySQL DB</a>
+    <?php } ?>
     <ul>
         <li>
             <form method="post" action="/project/addmysqladdon/<?= $this->project->name ?>/<?= $addon_member->addon_id ?>">
