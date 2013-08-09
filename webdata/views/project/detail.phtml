@@ -54,7 +54,7 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
         <?php if ($variable->is_magic_value) { ?>
         <input type="text" name="value" value="<?= $this->escape($variable->getValue()) ?>" readonly="readonly">(本數值不能修改只能刪除)
         <?php } else { ?>
-        <input type="text" name="value" value="<?= $this->escape($variable->value) ?>">
+        <input type="text" name="value" value="<?= $this->escape($variable->getValue()) ?>">
         <button type="submit">EDIT</button>
         <?php } ?>
     </form>
@@ -72,7 +72,7 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 </ul>
 <textarea readonly="readonly" class="span12">
 <?php foreach ($this->project->variables as $variable) { ?>
-putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->value) ?>');
+putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getValue()) ?>');
 <?php } ?>
 </textarea>
 <hr>
