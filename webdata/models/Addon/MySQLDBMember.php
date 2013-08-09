@@ -38,6 +38,7 @@ class Addon_MySQLDBMember extends Pix_Table
         $this->_columns['project_id'] = array('type' => 'int');
         $this->_columns['username'] = array('type' => 'varchar', 'size' => 64);
         $this->_columns['password'] = array('type' => 'varchar', 'size' => 64);
+        $this->_columns['readonly'] = array('type' => 'int', 'default' => 0);
 
         $this->addIndex('project_id', array('project_id'));
 
