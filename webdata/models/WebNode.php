@@ -281,7 +281,7 @@ class WebNode extends Pix_Table
 
             // 放出 commit 版本不正確的 commit
             if ($project = $node->project) {
-                if (in_array($node->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WAIT) and $project->commit != $node->commit) {
+                if (in_array($node->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WAIT)) and $project->commit != $node->commit) {
                     $node->markAsUnused();
                 }
             }
