@@ -20,7 +20,11 @@ class WebNodeRow extends Pix_Table_Row
     public function getStatusWord()
     {
         $node_status = WebNode::getTable()->_columns['status']['note'];
-        return isset($node_status[$this->status]) ? $node_status[$this->status] : 'Unknown';
+        $word = isset($node_status[$this->status]) ? $node_status[$this->status] : 'Unknown';
+        if ($this->status == WebNode::STATUS_CRONNODE) {
+            $word .= ':' . $this->getEAV('job');
+        }
+        return $word;
     }
 
     public function getServiceProject()
