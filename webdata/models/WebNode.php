@@ -223,6 +223,9 @@ class WebNode extends Pix_Table
         $this->_columns['access_at'] = array('type' => 'int', 'default' => 0);
 
         $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
+        $this->_relations['eavs'] = array('rel' => 'has_many', 'type' => 'WebNodeEAV', 'foreign_key' => array('ip', 'port'));
+
+        $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
 
         $this->addIndex('projectid_status_commit', array(
             'project_id',
