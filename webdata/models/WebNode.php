@@ -158,6 +158,8 @@ class WebNodeRow extends Pix_Table_Row
 
     public function runJob($command, $options = array())
     {
+        $this->setEAV('job', $command);
+
         $session = ssh2_connect(long2ip($this->ip), 22);
         if (false === $session) {
             throw new Exception('connect failed');
