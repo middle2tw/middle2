@@ -66,6 +66,7 @@ class ProjectRow extends Pix_Table_Row
             'project_id' => $this->id,
             'commit' => $this->commit,
             'start_at' => time(),
+            'access_at' => 0,
             'status' => WebNode::STATUS_CRONPROCESSING,
         ));
 
