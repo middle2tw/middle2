@@ -4,7 +4,7 @@ class Addon_PgSQLDBRow extends Pix_Table_Row
 {
     public function saveProjectVariable($key = 'DATABASE_URL')
     {
-        Addon_PgSQLDBMember::search(array('addon_id' => $this->id, 'project_id' => $this->project_id))->first()->saveProjectVariable();
+        Addon_PgSQLDBMember::search(array('addon_id' => $this->id, 'project_id' => $this->project_id))->first()->saveProjectVariable($key);
     }
 
     public function isMember($user)
