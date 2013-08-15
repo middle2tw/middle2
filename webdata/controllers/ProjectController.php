@@ -183,7 +183,7 @@ class ProjectController extends Pix_Controller
             return $this->alert('error', '/');
         }
 
-        list(, /*project*/, /*addpgsqladdon*/, $name) = explode('/', $this->getURI());
+        list(, /*project*/, /*addpgsqladdon*/, $name, $addon_id) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
         }
