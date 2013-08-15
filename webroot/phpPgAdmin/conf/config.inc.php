@@ -14,26 +14,26 @@ if (!class_exists('Pix_Session')) {
     }
 }
 
-$addons = Addon_PgSQLDB::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'));
-if (!count($addons)) {
+$addon_members = Addon_PgSQLDBMember::search(1)->searchIn('project_id', $user->project_members->toArraY('project_id'))->order('project_id');
+if (!count($addon_members)) {
     header('Location: /user/nodb');
     exit;
 }
 $i = 0;
 $conf['servers'] = array();
-foreach ($addons as $addon) {
+foreach ($addon_members as $addon_member) {
     $conf['servers'][$i] = array();
-    if ($addon->project) {
-        $conf['servers'][$i]['desc'] = $addon->project->name . '(' . $addon->project->getEAV('note') . ')';
-    } elseif ($addon->verbose) {
-        $conf['servers'][$i]['desc'] = $addon->verbose;
+    if ($addon_member->project) {
+        $conf['servers'][$i]['desc'] = $addon_member->project->name . '(' . $addon_member->project->getEAV('note') . ')';
+    } elseif ($addon_member->verbose) {
+        $conf['servers'][$i]['desc'] = $addon_member->verbose;
     }
-    $conf['servers'][$i]['host'] = $addon->host;
+    $conf['servers'][$i]['host'] = $addon_member->addon->host;
     $conf['servers'][$i]['port'] = 5432;
-    $conf['servers'][$i]['username'] = $addon->user_name;
-    $conf['servers'][$i]['password'] = $addon->password;
+    $conf['servers'][$i]['username'] = $addon_member->username;
+    $conf['servers'][$i]['password'] = $addon_member->password;
     $conf['servers'][$i]['sslmode'] = 'allow';
-    $conf['servers'][$i]['defaultdb'] = $addon->database;
+    $conf['servers'][$i]['defaultdb'] = $addon_member->addon->database;
     $conf['servers'][$i]['pg_dump_path'] = '/usr/bin/pg_dump';
     $conf['servers'][$i]['pg_dumpall_path'] = '/usr/bin/pg_dumpall';
     $i ++;
