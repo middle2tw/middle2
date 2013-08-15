@@ -30,6 +30,8 @@ class ProjectVariableRow extends Pix_Table_Row
             switch ($table . '-' . $type) {
             case 'Addon_MySQLDB-DatabaseURL':
                 return Addon_MySQLDBMember::find(array(intval($id), $this->project_id))->getDatabaseURL();
+            case 'Addon_PgSQLDB-DatabaseURL':
+                return Addon_PgSQLDBMember::find(array(intval($id), $this->project_id))->getDatabaseURL();
             }
             // TODO
         } else {
