@@ -56,7 +56,7 @@ class PgsqldbController extends Pix_Controller
         }
 
         list(, /*pgsqldb*/, /*editnote*/, $id, $key) = explode('/', $this->getURI());
-        if (!$addon = Addon_pgSQLDB::find(intval($id))) {
+        if (!$addon = Addon_PgSQLDB::find(intval($id))) {
             return $this->alert('Addon not found', '/');
         }
 
