@@ -86,7 +86,25 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     <?php } ?>
     <ul>
         <li>
-            <form method="post" action="/project/addmysqladdon/<?= $this->project->name ?>/<?= $addon_member->addon_id ?>">
+        <form method="post" action="/project/addmysqladdon/<?= $this->project->name ?>/<?= $addon_member->addon_id ?>">
+            <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+            Add to Variables, Key: 
+            <input type="text" name="key" value="DATABASE_URL">
+            <button type="submit">Add Variable</button>
+        </form>
+        </li>
+    </ul>
+    </li>
+    <?php } ?>
+    <?php foreach (Addon_PgSQLDBMember::search(array('project_id' => $this->project->id)) as $addon_member) { ?>
+    <li>
+    [PgSQLDB] Project: <?= $addon_member->addon->project->name ?><?= ($note = $addon_member->addon->getEAV('note')) ? "(" . $this->escape($note) . ")" : '' ?>
+    <?php if ($addon_member->addon->project_id == $this->project->id) { ?>
+    <a href="/pgsqldb/detail/<?= $addon_member->addon_id ?>">Manage PgSQL DB</a>
+    <?php } ?>
+    <ul>
+        <li>
+        <form method="post" action="/project/addpgsqladdon/<?= $this->project->name ?>/<?= $addon_member->addon_id ?>">
             <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
             Add to Variables, Key: 
             <input type="text" name="key" value="DATABASE_URL">
