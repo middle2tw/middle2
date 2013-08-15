@@ -14,6 +14,10 @@ class ProjectController extends Pix_Controller
     {
         list(, /*project*/, /*detail*/, $name) = explode('/', $this->getURI());
 
+        if (preg_match('#^\d+$#', $name) and $this->user->isAdmin()) {
+            $project = Project::find($name);
+            return $this->redirect('/project/detail/' . $project->name);
+        }
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
         }
