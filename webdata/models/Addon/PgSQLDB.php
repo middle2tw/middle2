@@ -45,18 +45,19 @@ class Addon_PgSQLDBRow extends Pix_Table_Row
             $db->query("ALTER GROUP \"appdb\" ADD USER \"{$username}\"");
         } catch (Pix_Table_DuplicateException $e) {
             $addon_member = Addon_PgSQLDBMember::find(array($this->id, $project->id));
-            $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$database}\" FROM \"{$username}\"");
+            $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$this->database}\" FROM \"{$addon_member->username}\"");
         }
 
         $addon_member->update(array(
             'readonly' => $readonly ? 1: 0,
         ));
 
-        if ($readonly) {
-            $db->query("GRANT SELECT PRIVILEGES ON DATABASE \"{$database}\" TO \"{$username}\"");
+        $db->query("GRANT ALL PRIVILEGES ON DATABASE \"{$this->database}\" TO \"{$addon_member->username}\"");
+        // TODO: 需要研究 postgresql 怎麼對整個 db readonly
+       /* if ($readonly) {
+            $db->query("GRANT SELECT ON DATABASE \"{$this->database}\" TO \"{$addon_member->username}\"");
         } else {
-            $db->query("GRANT ALL PRIVILEGES ON DATABASE \"{$database}\" TO \"{$username}\"");
-        }
+        }*/
     }
 }
 
