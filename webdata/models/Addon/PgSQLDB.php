@@ -2,21 +2,60 @@
 
 class Addon_PgSQLDBRow extends Pix_Table_Row
 {
-    public function saveProjectVariable()
+    public function saveProjectVariable($key = 'DATABASE_URL')
     {
+        Addon_PgSQLDBMember::search(array('addon_id' => $this->id, 'project_id' => $this->project_id))->first()->saveProjectVariable();
+    }
+
+    public function isMember($user)
+    {
+        return $this->project->isMember($user);
+    }
+
+    public function isAdmin($user)
+    {
+        return $this->project->isAdmin($user);
+    }
+
+    public function getEAVs()
+    {
+        return EAV::search(array('table' => 'AddonPgSQLDB', 'id' => $this->id));
+    }
+
+    public function addProject($project, $readonly = true)
+    {
+        $username = Hisoku::uniqid(16);
+        $password = Hisoku::uniqid(16);
+
+        $db = new Pix_Table_Db_Adapter_PgSQL(array(
+            'host' => getenv('PGSQL_USERDB_HOST'),
+            'port' => getenv('PGSQL_USERDB_PORT'),
+            'user' => getenv('PGSQL_USERDB_USER'),
+            'password' => getenv('PGSQL_USERDB_PASS'),
+        ));
+
         try {
-            $this->project->variables->insert(array(
-                'key' => 'DATABASE_URL',
-                'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
-                'is_magic_value' => 0,
+            $addon_member = Addon_PgSQLDBMember::insert(array(
+                'project_id' => $project->id,
+                'addon_id' => $this->id,
+                'username' => $username,
+                'password' => $password,
             ));
+            $db->query("CREATE USER \"{$username}\" WITH LOGIN PASSWORD '{$password}' NOINHERIT");
+            $db->query("ALTER GROUP \"appdb\" ADD USER \"{$username}\"");
         } catch (Pix_Table_DuplicateException $e) {
-            $this->project->variables->search(array(
-                'key' => 'DATABASE_URL',
-            ))->update(array(
-                'value' => "pgsql://{$this->user_name}:{$this->password}@{$this->host}/{$this->database}",
-                'is_magic_value' => 0,
-            ));
+            $addon_member = Addon_PgSQLDBMember::find(array($this->id, $project->id));
+            $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$database}\" FROM \"{$username}\"");
+        }
+
+        $addon_member->update(array(
+            'readonly' => $readonly ? 1: 0,
+        ));
+
+        if ($readonly) {
+            $db->query("GRANT SELECT PRIVILEGES ON DATABASE \"{$database}\" TO \"{$username}\"");
+        } else {
+            $db->query("GRANT ALL PRIVILEGES ON DATABASE \"{$database}\" TO \"{$username}\"");
         }
     }
 }
@@ -38,20 +77,23 @@ class Addon_PgSQLDB extends Pix_Table
         $this->_columns['database'] = array('type' => 'varchar', 'size' => 32);
 
         $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
+        $this->_relations['members'] = array('rel' => 'has_many', 'type' => 'Addon_PgSQLDBMember', 'foreign_key' => 'addon_id');
 
         $this->addIndex('project_id', array('project_id'));
+
+        $this->_hooks['eavs'] = array('get' => 'getEAVs');
+
+        $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
     }
 
-    public static function addDB($project)
+    public static function addDB($project, $key = 'DATABASE_URL')
     {
         if ($addon = self::search(array('project_id' => $project->id))->first()) {
-            $addon->saveProjectVariable();
+            $addon->saveProjectVariable($key);
             return;
         }
 
         $host = getenv('PGSQL_USERDB_HOST');
-        $user_name = Hisoku::uniqid(16);
-        $password = Hisoku::uniqid(16);
         $database = 'user_' . $project->name;
 
         $db = new Pix_Table_Db_Adapter_PgSQL(array(
@@ -60,20 +102,15 @@ class Addon_PgSQLDB extends Pix_Table
             'user' => getenv('PGSQL_USERDB_USER'),
             'password' => getenv('PGSQL_USERDB_PASS'),
         ));
-        $db->query("CREATE USER \"{$user_name}\" WITH LOGIN PASSWORD '{$password}' NOINHERIT");
         $db->query("CREATE DATABASE \"{$database}\"");
-        $db->query("GRANT ALL PRIVILEGES ON DATABASE \"{$database}\" TO \"{$user_name}\"");
         $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$database}\" FROM PUBLIC");
-        $db->query("ALTER DATABASE \"{$database}\" OWNER TO \"{$user_name}\"");
-        $db->query("ALTER GROUP \"appdb\" ADD USER \"{$user_name}\"");
 
         $addon = self::insert(array(
             'project_id' => $project->id,
             'host' => $host,
-            'user_name' => $user_name,
-            'password' => $password,
             'database' => $database,
         ));
-        $addon->saveProjectVariable();
+        $addon->addProject($project, false);
+        $addon->saveProjectVariable($key);
     }
 }
