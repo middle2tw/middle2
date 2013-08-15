@@ -188,7 +188,19 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
-        Addon_PgSQLDB::addDB($project);
+        $key = is_scalar($_POST['key']) ? $_POST['key'] : 'DATABASE_URL';
+
+        if ($addon_id) {
+            if (!$addon = Addon_PgSQLDB::find(intval($addon_id))) {
+                return $this->alert('Addon not found', '/');
+            }
+            if (!$addon_member = $addon->members->search(array('project_id' => $project->id))->first()) {
+                return $this->alert('Addon not found', '/');
+            }
+            $addon_member->saveProjectVariable($key);
+        } else {
+            Addon_PgSQLDB::addDB($project, $key);
+        }
 
         return $this->redirect('/project/detail/' . $project->name);
     }
