@@ -1,0 +1,39 @@
+<?php
+$this->project = $this->addon_pgsqldb->project;
+$this->title = $this->project->name . (($note = $this->project->getEAV('note')) ? "({$note})" : '') . ' :: ';
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<h2>DB: <?= $this->escape($this->addon_pgsqldb->database) ?></h2>
+Project: <a href="/project/detail/<?= $this->project->name ?>"><?= $this->project->name ?>(<?= $this->escape($this->project->getEAV('note')) ?>)</a><br>
+<form method="post" action="/pgsqldb/editnote/<?= $this->addon_pgsqldb->id ?>">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    Note: <input type="text" name="note" value="<?= $this->escape($this->addon_pgsqldb->getEAV('note')) ?>">
+    <button type="submit">SAVE</button>
+</form>
+<hr>
+<h3>Connected Project</h3>
+<ul>
+    <?php foreach ($this->addon_pgsqldb->members as $addon_member) { ?>
+    <li>
+    <?php if ($addon_member->project->isMember($this->user)) { ?>
+    <a href="/project/detail/<?= $addon_member->project->name ?>/"><?= $this->escape($addon_member->project->name) ?>(<?= $this->escape($addon_member->project->getEAV('note')) ?>)</a>
+    <?php } else { ?>
+    <?= $this->escape($addon_member->project->name) ?>
+    <?php } ?>
+
+    <?php if ($addon_member->addon->project_id == $addon_member->project_id) { ?>
+    [Primary]
+    <?php } else { ?>
+    <?php } ?>
+    </li>
+    <?php } ?>
+    <li>
+    <form method="post" action="/pgsqldb/addproject/<?= $this->addon_pgsqldb->id ?>" class="form-inline">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        Add Project: 
+        <input type="text" name="project"  placeholder="Project Id, Ex: Taipei-Ma-689689">
+        <label class="checkbox"><input type="checkbox" name="readonly" value="1">Readonly</label>
+        <button type="submit">Add</button>
+    </form>
+</ul>
+<?= $this->partial('/common/footer.phtml', $this) ?>
