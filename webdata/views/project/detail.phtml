@@ -22,6 +22,8 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
     <li><code>git remote add middle2 git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
     <li> or <code>git clone git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
     <li><code>git push middle2 master</code></li>
+    <li>Run Command: <code>ssh git@<?= GIT_SERVER ?> run <?= $this->project->name ?> {Your Command}</code></li>
+    <li>Use Shell: <code>ssh -t git@<?= GIT_SERVER ?> run <?= $this->project->name ?> bash</code></li>
 </ul>
 <hr>
 <h3>Custom domains: </h3>
