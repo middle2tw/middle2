@@ -30,8 +30,13 @@ class ApiController extends Pix_Controller
         $name = strval($_GET['name']);
         $status = $_POST['status'];
 
+        $machine = Machine::find_by_ip(ip2long($_SERVER['REMOTE_ADDR']));
+        if (!$machine) {
+            return $this->json(1);
+        }
+
         MachineStatus::insert(array(
-            'name' => $name,
+            'machine_id' => $machine->machine_id,
             'status' => $status,
             'updated_at' => time(),
         ));
