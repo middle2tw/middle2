@@ -30,7 +30,8 @@ $ret->disk = array_values($disks);
 $ret->process = trim(`top -b -n 1 -c`);
 $ret->dmesg = trim(`dmesg`);
 
-$curl = curl_init('http://hisoku.ronny.tw/api/updatemachinestatus?name=' . urlencode($ret->hostname));
+// TODO: 增加 firewall 是否有正常跑起來的資訊
+$curl = curl_init('http://middle2.com/api/updatemachinestatus');
 curl_setopt($curl, CURLOPT_POSTFIELDS, 'status=' . urlencode(json_encode($ret, JSON_UNESCAPED_UNICODE)));
 curl_exec($curl);
-
+curl_close($curl);
