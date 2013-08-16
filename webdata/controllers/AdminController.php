@@ -213,6 +213,9 @@ class AdminController extends Pix_Controller
 
     public function machinesAction()
     {
+        if ($machine_id = intval($_GET['machine_id']) and $machine = Machine::find($machine_id)) {
+            $this->view->machine = $machine;
+        }
     }
 
     public function addmachineAction()
@@ -225,9 +228,15 @@ class AdminController extends Pix_Controller
             return $this->alert('wrong ip', '/admin/machines');
         }
 
-        $machine = Machine::insert(array(
-            'ip' => ip2long($_REQUEST['ip']),
-        ));
+        if ($machine = Machine::find(intval($_GET['machine_id']))) {
+            $machine->update(array(
+                'ip' => ip2long($_REQUEST['ip']),
+            ));
+        } else {
+            $machine = Machine::insert(array(
+                'ip' => ip2long($_REQUEST['ip']),
+            ));
+        }
         $machine->setGroups($_REQUEST['groups']);
 
         return $this->alert('add machine done!', '/admin/machines');

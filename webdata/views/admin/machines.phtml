@@ -19,16 +19,17 @@
                 <?php } ?>
             </td>
             <td>
+                <a href="/admin/machines?machine_id=<?= $machine->machine_id ?>">Edit</a>
             </td>
         </tr>
         <?php } ?>
     </table>
     <hr>
     <h3>Add Machine</h3>
-    <form method="post" action="/admin/addmachine">
+    <form method="post" action="/admin/addmachine<?= $this->machine ? '?machine_id=' . $this->machine->machine_id : '' ?>">
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
-        IP: <input type="text" name="ip"><br>
-        Groups: <input type="text" name="groups"><br>
+        IP: <input type="text" name="ip" value="<?= $this->machine ? long2ip($this->machine->ip) : '' ?>"><br>
+        Groups: <input type="text" name="groups" value="<?= $this->machine ? implode(',', $this->machine->getGroups()) : '' ?>"><br>
         <button type="submit">Add Machine</button>
     </form>
 </div>
