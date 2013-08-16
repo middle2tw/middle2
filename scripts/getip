@@ -1,0 +1,6 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+echo implode(' ', Hisoku::getIPsByGroup($_SERVER['argv'][1]));
