@@ -27,4 +27,10 @@ class Machine extends Pix_Table
         // TODO: 之後搬出另一個 model
         $this->_columns['groups'] = array('type' => 'text');
     }
+
+    public static function getMachinesByGroup($group)
+    {
+        // TODO: 這邊應該要改成更好的方法
+        return Machine::search("groups LIKE '%" . urlencode($group) . "%'");
+    }
 }
