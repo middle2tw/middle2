@@ -2,39 +2,38 @@
 
 class Hisoku
 {
+    protected static function _getIPsByGroup($group)
+    {
+        $ips = array();
+        foreach (Machine::getMachinesByGroup($group) as $machine) {
+            $ips[] = long2ip($machine->ip);
+        }
+        return $ips;
+    }
+
     public function getLoadBalancers()
     {
-        return array(
-            '210.65.10.110',
-        );
+        return self::_getIPsByGroup('loadbalancer');
     }
 
     public function getMySQLServers()
     {
-        return array(
-            '210.65.11.197',
-        );
+        return self::_getIPsByGroup('mysql');
     }
 
     public function getNodeServers()
     {
-        return array(
-            '210.61.2.239',
-        );
+        return self::_getIPsByGroup('nodes');
     }
 
     public function getPgSQLServers()
     {
-        return array(
-            '210.65.11.197',
-        );
+        return self::_getIPsByGroup('pgsql');
     }
 
     public function getSearchServers()
     {
-        return array(
-            '210.65.11.197',
-        );
+        return self::_getIPsByGroup('search');
     }
 
     public static function getLoginUser()
