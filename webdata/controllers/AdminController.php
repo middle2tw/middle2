@@ -211,6 +211,28 @@ class AdminController extends Pix_Controller
         return $this->alert('done', '/admin');
     }
 
+    public function machinesAction()
+    {
+    }
+
+    public function addmachineAction()
+    {
+        if ($_POST['sToken'] != Hisoku::getStoken()) {
+            return $this->alert('wrong stoken', '/admin/machines');
+        }
+
+        if (!filter_var($_REQUEST['ip'], FILTER_VALIDATE_IP)) {
+            return $this->alert('wrong ip', '/admin/machines');
+        }
+
+        $machine = Machine::insert(array(
+            'ip' => ip2long($_REQUEST['ip']),
+        ));
+        $machine->setGroups($_REQUEST['groups']);
+
+        return $this->alert('add machine done!', '/admin/machines');
+    }
+
     public function searchesAction()
     {
     }

@@ -1,0 +1,37 @@
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<div class="container-fluid">
+    <table class="table">
+        <thead>
+            <tr>
+                <td>IP</td>
+                <td>Groups</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach (Machine::search(1) as $machine) { ?>
+        <tr>
+            <td><?= long2ip($machine->ip) ?></td>
+            <td>
+                <?php foreach ($machine->getGroups() as $group) { ?>
+                [<?= $this->escape($group) ?>]
+                <?php } ?>
+            </td>
+            <td>
+            </td>
+        </tr>
+        <?php } ?>
+    </table>
+    <hr>
+    <h3>Add Machine</h3>
+    <form method="post" action="/admin/addmachine">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        IP: <input type="text" name="ip"><br>
+        Groups: <input type="text" name="groups"><br>
+        <button type="submit">Add Machine</button>
+    </form>
+</div>
+<script><!--
+//--></script>
+<?= $this->partial('/common/footer.phtml', $this) ?>
