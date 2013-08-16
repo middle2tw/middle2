@@ -2,7 +2,7 @@
 
 class Hisoku
 {
-    protected static function _getIPsByGroup($group)
+    public static function getIPsByGroup($group)
     {
         $ips = array();
         foreach (Machine::getMachinesByGroup($group) as $machine) {
@@ -13,32 +13,32 @@ class Hisoku
 
     public function getDevServers()
     {
-        return self::_getIPsByGroup('dev');
+        return self::getIPsByGroup('dev');
     }
 
     public function getLoadBalancers()
     {
-        return self::_getIPsByGroup('loadbalancer');
+        return self::getIPsByGroup('loadbalancer');
     }
 
     public function getMySQLServers()
     {
-        return self::_getIPsByGroup('mysql');
+        return self::getIPsByGroup('mysql');
     }
 
     public function getNodeServers()
     {
-        return self::_getIPsByGroup('nodes');
+        return self::getIPsByGroup('nodes');
     }
 
     public function getPgSQLServers()
     {
-        return self::_getIPsByGroup('pgsql');
+        return self::getIPsByGroup('pgsql');
     }
 
     public function getSearchServers()
     {
-        return self::_getIPsByGroup('search');
+        return self::getIPsByGroup('search');
     }
 
     public static function getLoginUser()
