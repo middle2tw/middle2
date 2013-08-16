@@ -50,9 +50,7 @@ class FirewallGenerator
 
     public function initServers()
     {
-        $dev_servers = array(
-            '210.65.10.110',
-        );
+        $dev_servers = Hisoku::getDevServers();
         $scribe_servers = $dev_servers;
         $mainpage_servers = $dev_servers;
         $git_servers = $dev_servers;

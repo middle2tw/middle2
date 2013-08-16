@@ -11,6 +11,11 @@ class Hisoku
         return $ips;
     }
 
+    public function getDevServers()
+    {
+        return self::_getIPsByGroup('dev');
+    }
+
     public function getLoadBalancers()
     {
         return self::_getIPsByGroup('loadbalancer');
