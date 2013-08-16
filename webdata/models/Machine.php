@@ -26,6 +26,8 @@ class Machine extends Pix_Table
         $this->_columns['ip'] = array('type' => 'int', 'unsigned' => true);
         // TODO: 之後搬出另一個 model
         $this->_columns['groups'] = array('type' => 'text');
+
+        $this->_relations['statuses'] = array('rel' => 'has_many', 'type' => 'MachineStatus');
     }
 
     public static function getMachinesByGroup($group)
