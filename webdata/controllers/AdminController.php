@@ -245,4 +245,14 @@ class AdminController extends Pix_Controller
     public function searchesAction()
     {
     }
+
+    public function machinelogAction()
+    {
+        list(, /*admin*/, /*machinelog*/, $machine_id, $time) = explode('/', $this->getURI());
+        if (!$status = MachineStatus::find(array(intval($machine_id), intval($time)))) {
+            return $this->redirect('/admin/machines');
+        }
+
+        $this->view->status = $status;
+    }
 }

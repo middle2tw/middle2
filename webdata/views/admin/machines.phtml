@@ -6,6 +6,7 @@
             <tr>
                 <td>IP</td>
                 <td>Groups</td>
+                <td>LastStatus</td>
                 <td>Action</td>
             </tr>
         </thead>
@@ -18,6 +19,10 @@
                 [<?= $this->escape($group) ?>]
                 <?php } ?>
             </td>
+            <td>
+                <?php if ($status = $machine->statuses->order('updated_at DESC')->first()) { ?>
+                <a href="/admin/machinelog/<?= $machine->machine_id ?>/<?= $status->updated_at ?>"><?= $this->partial('/helper/counttime.phtml', array('time' => $status->updated_at)) ?></a>
+                <?php } ?>
             <td>
                 <a href="/admin/machines?machine_id=<?= $machine->machine_id ?>">Edit</a>
             </td>
