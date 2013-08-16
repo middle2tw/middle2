@@ -3,4 +3,10 @@
 
 include(__DIR__ . '/../webdata/init.inc.php');
 
-echo implode(' ', Hisoku::getIPsByGroup($_SERVER['argv'][1]));
+$ips = array();
+for ($i = 1; $i < count($_SERVER['argv']); $i ++) {
+    foreach (Hisoku::getIPsByGroup($_SERVER['argv'][$i]) as $ip) {
+        $ips[$ip] = true;
+    }
+}
+echo implode(' ', array_keys($ips));
