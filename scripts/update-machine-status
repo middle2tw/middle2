@@ -28,7 +28,7 @@ $ret->disk = array_values($disks);
 
 // cpu 資訊
 $ret->process = trim(`top -b -n 1 -c`);
-$ret->dmesg = trim(`dmesg`);
+$ret->dmesg = trim(`dmesg | tail -n 100`);
 
 // TODO: 增加 firewall 是否有正常跑起來的資訊
 $curl = curl_init('http://middle2.com/api/updatemachinestatus');
