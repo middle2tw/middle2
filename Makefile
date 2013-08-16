@@ -1,10 +1,4 @@
-DEV_HOSTS= 210.65.10.110
-LB_HOSTS= 
-NODES_HOSTS= 210.61.2.239
-DB_HOSTS= 210.65.11.197
-
-HOSTS?= ${DEV_HOSTS} ${LB_HOSTS} ${NODES_HOSTS} ${DB_HOSTS}
-
+HOSTS?= `./scripts/getip dev loadbalancer nodes mysql pgsql`
 
 all:
 	@git pull -v
