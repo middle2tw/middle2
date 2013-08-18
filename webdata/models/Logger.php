@@ -76,7 +76,7 @@ class Logger
                     unset($options['cursor-after']);
                 }
 
-                error_log("opening {$log_file}...");
+                //error_log("opening {$log_file}...");
                 $filesize = filesize($log_file);
                 if (0 == $filesize) {
                     continue;
