@@ -124,7 +124,7 @@ class Logger
                 $cursor = $options['cursor-before']['cursor'];
                 unset($options['cursor-before']);
             }
-            error_log("opening {$log_file}...");
+            //error_log("opening {$log_file}...");
             if (0 == filesize($log_file)) {
                 continue;
             }
@@ -137,13 +137,13 @@ class Logger
             while ($cursor > 0) {
                 // 從 $cursor 往前爬 $perbyte byte
                 if ($cursor > $perbyte) {
-                    error_log("loading {$log_file} before {$cursor}...");
+                    //error_log("loading {$log_file} before {$cursor}...");
                     fseek($fp, $cursor - $perbyte);
                     $content = fread($fp, $perbyte);
                     $head = false;
                 } else {
                     fseek($fp, 0);
-                    error_log("loading {$log_file} from start...");
+                    //error_log("loading {$log_file} from start...");
                     $content = fread($fp, $cursor);
                     $head = true;
                 }
