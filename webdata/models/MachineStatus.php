@@ -12,6 +12,12 @@ class MachineStatusRow extends Pix_Table_Row
         return $this->_obj;
     }
 
+    public function getDiskInfos()
+    {
+        $obj = $this->getObject();
+        return $obj->disk;
+    }
+
     public function getLoads()
     {
         $obj = $this->getObject();
