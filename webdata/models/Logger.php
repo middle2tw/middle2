@@ -55,7 +55,7 @@ class Logger
     public static function getLog($category, $options = array())
     {
         // 抓最新的 $perbyte bytes ，想辦法湊到 20 行
-        $perbyte = 1000;
+        $perbyte = 1024;
         $line = array_key_exists('line', $options) ? intval($options['ine']) : 20;
 
         $log_files = glob("/srv/logs/scribed/{$category}/{$category}-*");
@@ -133,13 +133,15 @@ class Logger
             if (is_null($cursor)) {
                 $cursor = filesize($log_file);
             }
+
+            $current_perbyte = $perbyte;
             // 每次爬 $perbyte byte
             while ($cursor > 0) {
-                // 從 $cursor 往前爬 $perbyte byte
-                if ($cursor > $perbyte) {
-                    //error_log("loading {$log_file} before {$cursor}...");
-                    fseek($fp, $cursor - $perbyte);
-                    $content = fread($fp, $perbyte);
+                // 從 $cursor 往前爬 $current_perbyte byte
+                if ($cursor > $current_perbyte) {
+                    //error_log("loading {$log_file} before {$cursor} - {$current_perbyte}...");
+                    fseek($fp, $cursor - $current_perbyte);
+                    $content = fread($fp, $current_perbyte);
                     $head = false;
                 } else {
                     fseek($fp, 0);
@@ -155,7 +157,13 @@ class Logger
                 if (!$head) {
                     // 如果沒有到頭的話，第一行拿掉，因為可能是被腰斬
                     array_pop($logs);
+                    // pop 完後沒任何東西，就表示只有一行被腰斬還超過 $current_perbyte, 所以應該加倍再來一次
+                    if (!$logs) {
+                        $current_perbyte *= 2;
+                        continue;
+                    }
                 }
+                $current_perbyte = $perbyte;
 
                 foreach ($logs as $log) {
                     if ('' == $log) {
