@@ -1,0 +1,6 @@
+# Cron Server
+* * * * * root /srv/code/hisoku/cron/cron.php 1min
+*/5 * * * * root /srv/code/hisoku/cron/cron.php 5min
+
+# All Server
+*/5 * * * * root /srv/code/hisoku/scripts/update-machine-status
