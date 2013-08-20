@@ -23,7 +23,10 @@ class Crawler
             $obj->path = $path;
             $obj->file_size = filesize($path);
             $obj->fp = fopen($path, 'r');
-            fseek($obj->fp, $obj->file_size);
+            // 如果建立時間超過 10 秒，就不用從頭開始取資料了，以免 script 重跑時 log 會重噴一次
+            if (time() - filectime($path) > 10) {
+                fseek($obj->fp, $obj->file_size);
+            }
             $obj->project = file_get_contents("/srv/chroot/{$id}.project");
             $this->_file_objects[$id] = $obj;
         }
