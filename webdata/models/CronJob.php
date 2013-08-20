@@ -16,7 +16,7 @@ class CronJobRow extends Pix_Table_Row
         stream_set_blocking($ret->stdout, true);
         stream_set_blocking($ret->stderr, true);
         stream_set_blocking($ret->stdio, true);
-        // TODO: log error/stdout
+
         $output = (stream_get_contents($ret->stdout));
         $output = (stream_get_contents($ret->stderr));
         $output = (stream_get_contents($ret->stdio));
