@@ -67,9 +67,11 @@ class Prebuilder
         error_log('find available root...');
         $root = $this->findAvailableRootAndLock();
 
-        error_log('untar nodejs.tar.gz...');
-        // 把 nodejs package 解進去
-        system("tar zxf /srv/code/images/lang-nodejs.tar.gz --directory={$root}");
+        error_log('untar lang-mixed.tar.gz...');
+        // 把 mixed package 解進去
+        system("tar zxf /srv/code/images/lang-mixed.tar.gz --directory={$root}");
+        exec("dpkg --root=${root} -i /srv/code/images/dev/*.deb");
+        copy("{$root}/usr/bin/gcc", "{$root}/usr/bin/cc");
 
         error_log('find diff file...');
         // 把新解進去的檔案都改成 2001/1/1
