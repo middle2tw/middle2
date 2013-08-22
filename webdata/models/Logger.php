@@ -42,6 +42,19 @@ class Logger
     }
 
     /**
+     * 只塞一筆記錄進 scribe
+     * 
+     * @param array $message array('category' => 'xxx', 'message' => 'xxx')
+     * @static
+     * @access public
+     * @return void
+     */
+    public static function logOne($message)
+    {
+        return self::log(array($message));
+    }
+
+    /**
      * 取得這個 category 的 log，預設一次抓 20 行
      * 
      * @param string $category 
