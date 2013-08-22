@@ -15,6 +15,14 @@ class WebNodeRow extends Pix_Table_Row
             'commit' => '',
             'status' => WebNode::STATUS_OVER,
         ));
+
+        Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
+            'time' => microtime(true),
+            'ip' => $this->ip,
+            'port' => $this->port,
+            'commit' => $this->commit,
+            'status' => 'over',
+        ));
     }
 
     public function getStatusWord()
@@ -42,6 +50,14 @@ class WebNodeRow extends Pix_Table_Row
     {
         $this->update(array(
             'status' => WebNode::STATUS_WAIT,
+        ));
+
+        Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
+            'time' => microtime(true),
+            'ip' => $this->ip,
+            'port' => $this->port,
+            'commit' => $this->commit,
+            'status' => 'wait',
         ));
     }
 
@@ -172,6 +188,17 @@ class WebNodeRow extends Pix_Table_Row
         if (false === $ret) {
             throw new Exception('ssh key is wrong');
         }
+
+        Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
+            'time' => microtime(true),
+            'ip' => $this->ip,
+            'port' => $this->port,
+            'commit' => $this->commit,
+            'type' => 'cron',
+            'status' => 'start',
+            'command' => $command,
+        ));
+
         $node_id = $this->port - 20000;
         if ($options['term']) {
             $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command), $options['term'], array(), $options['width'], $options['height']);
