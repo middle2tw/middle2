@@ -5,6 +5,9 @@
 // 就要寄信警告
 include(__DIR__ . '/../../webdata/init.inc.php');
 
+// 先睡 20 秒，這樣可以等各機器的資料傳好，比較即時判斷
+sleep(20);
+
 $cache = new Pix_Cache;
 
 $messages = array();
