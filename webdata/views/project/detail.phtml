@@ -179,6 +179,10 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
 <button class="older-button" data-log="error-log">Older</button>
 <button class="newer-button" data-log="error-log">Newer</button>
 <table class="table log-table" id="error-log" data-url="/project/getlog/<?= $this->project->name ?>/error"></table>
+<h3>Node Log</h3>
+<button class="older-button" data-log="node-log">Older</button>
+<button class="newer-button" data-log="node-log">Newer</button>
+<table class="table log-table" id="node-log" data-url="/project/getlog/<?= $this->project->name ?>/node"></table>
 <script>
 $('.log-table').each(function(){
     var $this = $(this);

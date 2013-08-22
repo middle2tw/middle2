@@ -443,6 +443,21 @@ class ProjectController extends Pix_Controller
                 list($timestamp, $node_id, $log) = explode(' ', $line);
                 return date('c', $timestamp) . ' [' . $node_id . ']' . urldecode($log);
             };
+        } elseif ('node' == $type) {
+            $category = "app-{$name}-node";
+            $log_filter = function($line){
+                $data = json_decode($line);
+                if ('start' == $data->status) {
+                    $message = "Start a {$data->type} node";
+                    if ($data->type == 'cron') {
+                        $message .= ': ' . $data->command;
+                    }
+                } elseif ('over' == $data->status or 'wait' == $data->status) {
+                    $message = "Stop the node, spent: {$data->spent}";
+                }
+
+                return date('c', $data->time) . "[{$data->ip}-{$data->port}] {$message}";
+            };
         } else {
             $category = "app-{$name}";
             $log_filter = null;
