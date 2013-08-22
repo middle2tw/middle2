@@ -173,6 +173,17 @@ lb_core._initProjectOnNode = function(project, node, callback){
                                 if (rows.affectedRows != 1) {
                                     return callback({success: false, message: 'Init new node failed'});
                                 }
+
+                                // log node start
+                                scribe.send('app-' + project.name + '-node', JSON.stringify({
+                                    time: (new Date()).getTime() / 1000,
+                                    ip: node.ip,
+                                    port: node.port,
+                                    commit: project.commit,
+                                    type: 'web',
+                                    status: 'start'
+                                }));
+
                                 callback({success: true, host: node.ip, port: node.port, project: project});
                             });
                             ssh2.end();
