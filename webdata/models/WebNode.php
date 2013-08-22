@@ -21,6 +21,7 @@ class WebNodeRow extends Pix_Table_Row
             'ip' => $this->ip,
             'port' => $this->port,
             'commit' => $this->commit,
+            'spent' => (time() - $this->start_at),
             'status' => 'over',
         ))));
     }
@@ -57,6 +58,7 @@ class WebNodeRow extends Pix_Table_Row
             'ip' => $this->ip,
             'port' => $this->port,
             'commit' => $this->commit,
+            'spent' => (time() - $this->start_at),
             'status' => 'wait',
         ))));
     }
