@@ -22,7 +22,7 @@ class WebNodeRow extends Pix_Table_Row
             'port' => $this->port,
             'commit' => $this->commit,
             'status' => 'over',
-        ));
+        ))));
     }
 
     public function getStatusWord()
@@ -58,7 +58,7 @@ class WebNodeRow extends Pix_Table_Row
             'port' => $this->port,
             'commit' => $this->commit,
             'status' => 'wait',
-        ));
+        ))));
     }
 
     protected function _sshDeletePort()
@@ -197,7 +197,7 @@ class WebNodeRow extends Pix_Table_Row
             'type' => 'cron',
             'status' => 'start',
             'command' => $command,
-        ));
+        ))));
 
         $node_id = $this->port - 20000;
         if ($options['term']) {
