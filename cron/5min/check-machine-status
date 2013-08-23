@@ -24,7 +24,7 @@ foreach (Machine::search(1) as $machine) {
     if (!$loads = $machine_status->getLoads()) {
         $messages[] = array($machine, "無法正確取得 cpu load");
     } else {
-        if ($loads[0] > 3) {
+        if ($loads[0] > 4) {
             $messages[] = array($machine, "CPU Loading 過高: " . $loads[0]);
             // TODO: 要回傳 process list
         }
