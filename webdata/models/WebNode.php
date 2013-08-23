@@ -10,12 +10,18 @@ class WebNodeRow extends Pix_Table_Row
      */
     public function markAsUnused()
     {
+        $type_map = array(
+            WebNode::STATUS_WEBNODE => 'web',
+            WebNode::STATUS_CRONNODE => 'cron',
+        );
+
         Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
             'time' => microtime(true),
             'ip' => $this->ip,
             'port' => $this->port,
             'commit' => $this->commit,
             'spent' => (time() - $this->start_at),
+            'type' => array_key_exists($this->status, $type_map) ? $type_map[$this->status] : ("other-{$this->status}"),
             'status' => 'over',
         ))));
 
