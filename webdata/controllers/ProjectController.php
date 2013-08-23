@@ -453,7 +453,7 @@ class ProjectController extends Pix_Controller
                         $message .= ': ' . $data->command;
                     }
                 } elseif ('over' == $data->status or 'wait' == $data->status) {
-                    $message = "Stop the node, spent: {$data->spent}";
+                    $message = "Stop the {$data->type} node, spent: {$data->spent}";
                 }
 
                 return date('c', $data->time) . "[{$data->ip}-{$data->port}] {$message}";
