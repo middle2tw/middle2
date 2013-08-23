@@ -372,6 +372,6 @@ class WebNode extends Pix_Table
             WebNode::STATUS_WEBNODE => 'web',
             WebNode::STATUS_CRONNODE => 'cron',
         );
-        return array_key_exists($status, $type_map) ? $type_map[$status] : ("other-{$status}"),
+        return array_key_exists($status, $type_map) ? $type_map[$status] : ("other-{$status}");
     }
 }
