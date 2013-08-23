@@ -10,12 +10,6 @@ class WebNodeRow extends Pix_Table_Row
      */
     public function markAsUnused()
     {
-        $this->update(array(
-            'project_id' => 0,
-            'commit' => '',
-            'status' => WebNode::STATUS_OVER,
-        ));
-
         Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
             'time' => microtime(true),
             'ip' => $this->ip,
@@ -24,6 +18,12 @@ class WebNodeRow extends Pix_Table_Row
             'spent' => (time() - $this->start_at),
             'status' => 'over',
         ))));
+
+        $this->update(array(
+            'project_id' => 0,
+            'commit' => '',
+            'status' => WebNode::STATUS_OVER,
+        ));
     }
 
     public function getStatusWord()
