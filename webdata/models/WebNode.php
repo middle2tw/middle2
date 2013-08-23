@@ -10,18 +10,13 @@ class WebNodeRow extends Pix_Table_Row
      */
     public function markAsUnused()
     {
-        $type_map = array(
-            WebNode::STATUS_WEBNODE => 'web',
-            WebNode::STATUS_CRONNODE => 'cron',
-        );
-
         Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
             'time' => microtime(true),
             'ip' => $this->ip,
             'port' => $this->port,
             'commit' => $this->commit,
             'spent' => (time() - $this->start_at),
-            'type' => array_key_exists($this->status, $type_map) ? $type_map[$this->status] : ("other-{$this->status}"),
+            'type' => WebNode::getNodeTypeByStatus($this->status),
             'status' => 'over',
         ))));
 
@@ -55,18 +50,19 @@ class WebNodeRow extends Pix_Table_Row
      */
     public function markAsWait()
     {
-        $this->update(array(
-            'status' => WebNode::STATUS_WAIT,
-        ));
-
         Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
             'time' => microtime(true),
             'ip' => $this->ip,
             'port' => $this->port,
             'commit' => $this->commit,
+            'type' => WebNode::getNodeTypeByStatus($this->status),
             'spent' => (time() - $this->start_at),
             'status' => 'wait',
         ))));
+
+        $this->update(array(
+            'status' => WebNode::STATUS_WAIT,
+        ));
     }
 
     protected function _sshDeletePort()
@@ -368,5 +364,14 @@ class WebNode extends Pix_Table
                 $node->resetNode();
             }
         }
+    }
+
+    public static function getNodeTypeByStatus($status)
+    {
+        $type_map = array(
+            WebNode::STATUS_WEBNODE => 'web',
+            WebNode::STATUS_CRONNODE => 'cron',
+        );
+        return array_key_exists($status, $type_map) ? $type_map[$status] : ("other-{$status}"),
     }
 }
