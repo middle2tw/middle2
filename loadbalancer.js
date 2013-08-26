@@ -98,7 +98,7 @@ lb_core.cache = {};
 
 lb_core.getBackendHost2 = function(host, port, callback){
     if (config.MAINPAGE_DOMAIN == host) {
-        return callback({success: true, host: main_page_host, port: main_page_port});
+        return callback({success: true, host: main_page_host, port: main_page_port, is_main_page: true});
     }
 
     // TODO: 要限內部網路才能做這件事
@@ -380,26 +380,29 @@ var http_request_callback = function(protocol){
             });
 
             backend_response.on('end', function(){
-                if ('object' == typeof(options.project)) {
-                    var referer = main_request.headers['referer'];
-                    if (typeof(referer) != 'string') {
-                        referer = '-';
-                    }
-                    var useragent = main_request.headers['user-agent'];
-                    if (typeof(useragent) != 'string') {
-                        useragent = '-';
-                    }
-                    var log = (host
-                        + ' ' + main_request.headers['x-forwarded-for']
-                        + ' - - ' + apachedate()
-                        + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
-                        + ' ' + backend_response.statusCode + ' ' + return_length 
-                        + ' "' + referer + '"'
-                        + ' "' + useragent + '"'); 
-                    scribe.send('app-' + options.project.name, log);
-                    recent_logs.push(log);
-                    recent_logs = recent_logs.slice(recent_logs.length - 10);
+                var referer = main_request.headers['referer'];
+                if (typeof(referer) != 'string') {
+                    referer = '-';
                 }
+                var useragent = main_request.headers['user-agent'];
+                if (typeof(useragent) != 'string') {
+                    useragent = '-';
+                }
+                var log = (host
+                    + ' ' + main_request.headers['x-forwarded-for']
+                    + ' - - ' + apachedate()
+                    + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
+                    + ' ' + backend_response.statusCode + ' ' + return_length 
+                    + ' "' + referer + '"'
+                    + ' "' + useragent + '"'); 
+
+                if ('object' == typeof(options.project)) {
+                    scribe.send('app-' + options.project.name, log);
+                } else if (options.is_main_page) {
+                    scribe.send('mainpage', log);
+                }
+                recent_logs.push(log);
+                recent_logs = recent_logs.slice(recent_logs.length - 10);
                 main_response.end();
                 request_count --;
                 delete(request_pools[current_request]);
