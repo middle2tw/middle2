@@ -46,9 +46,13 @@ class ProjectRow extends Pix_Table_Row
     {
         // 先拿 wait node 來用
         if ($node = WebNode::search(array('project_id' => $this->id, 'commit' => $this->commit, 'status' => WebNode::STATUS_WAIT))->first()) {
-            $node->update(array(
-                'status' => WebNode::STATUS_CRONPROCESSING,
-            ));
+            $db = WebNode::getDB();
+            $db->query(sprintf("UPDATE webnode SET `status` = %d WHERE `ip` = %d AND `port` = %d AND `project_id` = %d AND `commit` = '%s' AND `status` = %d LIMIT 1", WebNode::STATUS_CRONPROCESSING, $node->ip, $node->port, $this->id, $this->commit, WebNode::STATUS_WAIT));
+
+            // 如果上面那個動作沒有修改成功，表示遇到 race condition 兩個 job 同時改到一個，那就跳過重來
+            if (!$db->getAffectedRows()) {
+                return $this->getCronNode();
+            }
             return $node;
         }
 
