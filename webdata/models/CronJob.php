@@ -85,13 +85,7 @@ class CronJob extends Pix_Table
                     continue;
                 }
 
-                //error_log('child run : ' . $cronjob->job);
-                try {
-                    $cronjob->runJob();
-                } catch (Exception $e) {
-                    // TODO: log it ...
-                }
-                //error_log('child done : ' . $cronjob->job);
+                $cronjob->runJob();
                 exit;
             }
         }
