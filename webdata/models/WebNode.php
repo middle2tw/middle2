@@ -8,7 +8,7 @@ class WebNodeRow extends Pix_Table_Row
      * @access public
      * @return void
      */
-    public function markAsUnused()
+    public function markAsUnused($reason = '')
     {
         Logger::logOne(array('category' => "app-{$this->project->name}-node", 'message' => json_encode(array(
             'time' => microtime(true),
@@ -18,6 +18,7 @@ class WebNodeRow extends Pix_Table_Row
             'spent' => (time() - $this->start_at),
             'type' => WebNode::getNodeTypeByStatus($this->status),
             'status' => 'over',
+            'reason' => $reason,
         ))));
 
         $this->update(array(
@@ -322,7 +323,7 @@ class WebNode extends Pix_Table
             // 放出 commit 版本不正確的 commit
             if ($project = $node->project) {
                 if (in_array($node->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WAIT)) and $project->commit != $node->commit) {
-                    $node->markAsUnused();
+                    $node->markAsUnused('commit change');
                 }
             }
 
@@ -331,7 +332,7 @@ class WebNode extends Pix_Table
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
-                    $node->markAsUnused();
+                    $node->markAsUnused('no alive process');
                 }
             }
 
@@ -339,7 +340,7 @@ class WebNode extends Pix_Table
             if (in_array($node->status, array(WebNode::STATUS_WEBNODE)) and (time() - $node->getAccessAt()) > 3600) {
                 if ($project = $node->project and $project->getEAV('always-alive')) {
                 } else {
-                    $node->markAsUnused();
+                    $node->markAsUnused('wait 1hour');
                 }
             }
 
@@ -348,7 +349,7 @@ class WebNode extends Pix_Table
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port}(status=processing) had no alive process, release it", E_USER_WARNING);
-                    $node->markAsUnused();
+                    $node->markAsUnused('process too long');
                 } else {
                     trigger_error("{$node->ip}:{$node->port}(status=processing) is processing too long, start_at: " . date('c', $node->start_at), E_USER_WARNING);
                 }
@@ -356,7 +357,7 @@ class WebNode extends Pix_Table
 
             // Wait node 保留兩小時
             if (in_array($node->status, array(WebNode::STATUS_WAIT)) and (time() - $node->getAccessAt()) > 7200) {
-                $node->markAsUnused();
+                $node->markAsUnused('wait over');
             }
 
             // 如果是 over 要放出來
