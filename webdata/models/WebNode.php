@@ -328,7 +328,7 @@ class WebNode extends Pix_Table
             }
 
             // 如果是 cronnode or webnode 卻沒有任何 process 就 end
-            if (in_array($node->status, array(WebNode::STATUS_CRONNODE, WebNode::STATUS_WEBNODE))) {
+            if (time() - $node->start_at > 60 and in_array($node->status, array(WebNode::STATUS_CRONNODE, WebNode::STATUS_WEBNODE))) {
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
