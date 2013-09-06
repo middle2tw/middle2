@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+include(__DIR__ . '/../webdata/init.inc.php');
+
 ini_set('error_log', '/tmp/sftp-err');
 
 // from http://tools.ietf.org/html/draft-ietf-secsh-filexfer-00
@@ -295,18 +297,34 @@ class SFTPServer
         $this->send(SSH_FXP_NAME, $data);
     }
 
+    protected $_projects = null;
     public function getProjectsByUser()
     {
-        // TODO: implement me
-        return array('matsu-tsao-127002', 'matsu-lang-307312');
+        if (is_null($this->_projects)) {
+            $project_ids = $this->user->project_members->toArray('project_id');
+            $projects = array();
+            foreach (Project::search(1)->searchIn('id', $project_ids)->toArray('name') as $name) {
+                if (file_exists("/srv/project_data/{$name}")) {
+                    $projects[] = $name;
+                }
+            }
+            $this->_projects = $projects;
+        }
+
+        return $this->_projects;
     }
 
-    public function main()
+    public function main($user)
     {
         $this->logger("start");
         $this->fp = fopen('php://stdin', 'rb');
         $this->output = fopen('php://output', 'wb');
         $this->path = '/';
+
+        if (!$user = User::find_by_name($user)) {
+            return;
+        }
+        $this->user = $user;
 
         while (true) {
             $ret = $this->read();
@@ -434,4 +452,4 @@ class SFTPServer
 }
 
 $server = new SFTPServer;
-$server->main();
+$server->main($_SERVER['argv'][1]);
