@@ -256,6 +256,11 @@ class SFTPServer
         return $data;
     }
 
+    public function getAccount()
+    {
+        return substr($this->user->name, 0, 8);
+    }
+
     public function return_name_info($request_id, $base, $filenames, $options = array())
     {
         $full = array_key_exists('full', $options) ? intval($options['full']) : 0;
@@ -269,7 +274,7 @@ class SFTPServer
                 if ($absolute_path) {
                     $filename = '/';
                 }
-                $longname = sprintf("%10s %3d %8s %8s %-8d %12s %s", 'drwx------', 1, 'you', 'you', 4096, 'Feb 31 00:00', $filename);
+                $longname = sprintf("%10s %3d %8s %8s %-8d %12s %s", 'drwx------', 1, $this->getAccount(), $this->getAccount(), 4096, 'Feb 31 00:00', $filename);
             } else {
                 if ($absolute_path) {
                     $filename = $path;
@@ -278,8 +283,8 @@ class SFTPServer
                 list($atime, $mtime) = $this->getFileTime($project, $project_path);
                 $longname = sprintf("%10s %3d %8s %8s %-8d %12s %s", $this->getPermWord($this->getFilePermission($project, $project_path)),
                     1,
-                    'you',
-                    'you',
+                    $this->getAccount(),
+                    $this->getAccount(),
                     $this->getFileSize($project, $project_path),
                     date('M j H:i', $mtime),
                     $filename
