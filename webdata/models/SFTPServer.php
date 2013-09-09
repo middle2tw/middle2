@@ -619,6 +619,41 @@ class SFTPServer
                 }
                 break;
 
+            case SSH_FXP_FSETSTAT:
+            case SSH_FXP_SETSTAT:
+                $ret = unpack('Nid/Npathhandle_length', $data);
+                $request_id = $ret['id'];
+                $pathhandle = substr($data, 8, $ret['pathhandle_length']);
+                $attrs = substr($data, 8 + $ret['pathhandle_length']);
+
+                if (SSH_FXP_FSETSTAT == $type) {
+                    $handle = $pathhandle;
+                    if (!array_key_exists($handle, $this->_handle_infos) or !array_key_exists('fp', $this->_handle_infos[$handle])) {
+                        $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_FAILURE));
+                        break;
+                    }
+                    $path = $this->_handle_infos[$handle]['path'];
+                } else {
+                    $path = $pathhandle;
+                }
+
+                $ftp_path = $this->getFTPAbsolutePath($this->path, $path);
+                list($project, $project_path) = $this->parsePath($ftp_path);
+                $path = $this->getRealPath($project, $project_path);
+                if (!file_exists($path)) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_NO_SUCH_FILE));
+                    break;
+                }
+                $attrs = $this->parseAttrs($attrs);
+                if ($attrs['mtime'] and $attrs['atime']) {
+                    touch($path, $attrs['mtime'], $attrs['atime']);
+                }
+                if ($attrs['permissions']) {
+                    chmod($path, $attrs['permissions']);
+                }
+                $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_OK));
+                break;
+
             default:
                 $ret = unpack('Nid', $data);
                 $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_OP_UNSUPPORTED));
