@@ -398,8 +398,8 @@ class SFTPServer
 
         if ($flag != '') {
             $attrs = $this->parseAttrs($attrs);
-            if ($attrs['mtime'] and $attr['atime']) {
-                touch($path, $attrs['mtime'], $attr['atime']);
+            if ($attrs['mtime'] and $attrs['atime']) {
+                touch($path, $attrs['mtime'], $attrs['atime']);
             }
             if ($attrs['permissions']) {
                 chmod($path, $attrs['permissions']);
