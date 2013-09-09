@@ -683,6 +683,22 @@ class SFTPServer
                 $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_OK));
                 break;
 
+            case SSH_FXP_REMOVE:
+                $ret = unpack('Nid/Nfilename_length', $data);
+                $request_id = $ret['id'];
+                $filename = substr($data, 8, $ret['filename_length']);
+
+                $path = $this->getFTPAbsolutePath($this->path, $filename);
+                list($project, $project_path) = $this->parsePath($path);
+                $real_path = $this->getRealPath($project, $project_path);
+
+                if (unlink($real_path)) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_OK));
+                } else {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_FAILURE));
+                }
+                break;
+
             default:
                 $ret = unpack('Nid', $data);
                 $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_OP_UNSUPPORTED));
