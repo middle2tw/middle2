@@ -31,6 +31,10 @@ class SSHServe
             return $this->runCommand($command, $args);
         case 'log':
             return $this->logCommand($command, $args);
+        case '/usr/lib/openssh/sftp-server':
+            $server = new SFTPServer;
+            $server->main($_SERVER['argv'][1]);
+            return;
         default:
             return $this->error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
         }
