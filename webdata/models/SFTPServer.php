@@ -554,6 +554,35 @@ class SFTPServer
                 }
                 break;
 
+            case SSH_FXP_MKDIR:
+                $ret = unpack('Nid/Npath_length', $data);
+                $path = substr($data, 8, $ret['path_length']);
+                $path = $this->getFTPAbsolutePath($this->path, $path);
+                list($project, $project_path) = $this->parsePath($path);
+                $real_path = $this->getRealPath($project, $project_path);
+
+                $this->logger($real_path);
+                if (mkdir($real_path)) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_OK));
+                } else {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_FAILURE));
+                }
+                break;
+
+            case SSH_FXP_RMDIR:
+                $ret = unpack('Nid/Npath_length', $data);
+                $path = substr($data, 8, $ret['path_length']);
+                $path = $this->getFTPAbsolutePath($this->path, $path);
+                list($project, $project_path) = $this->parsePath($path);
+                $real_path = $this->getRealPath($project, $project_path);
+
+                if (rmdir($real_path)) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_OK));
+                } else {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_FAILURE));
+                }
+                break;
+
             case SSH_FXP_OPEN:
                 $ret = unpack('Nid/Nfilename_length', $data);
                 $request_id = $ret['id'];
