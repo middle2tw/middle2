@@ -210,6 +210,43 @@ class SFTPServer
         return '/' . implode('/', $terms);
     }
 
+    public function parseAttrs($attrs)
+    {
+        $ret = array();
+        $r = unpack('Nflags', $attrs);
+        $attrs = substr($attrs, 4);
+
+        $ret = array_merge($ret, $r);
+        $flags = $r['flags'];
+
+        if ($flags & SSH_FILEXFER_ATTR_SIZE) {
+            $r = unpack('Nsize', $attrs);
+            $attrs = substr($attrs, 4);
+            $ret = array_merge($ret, $r);
+        }
+
+        if ($flags & SSH_FILEXFER_ATTR_UIDGID) {
+            $r = unpack('Nuid/Ngid', $attrs);
+            $attrs = substr($attrs, 8);
+            $ret = array_merge($ret, $r);
+        }
+
+        if ($flags & SSH_FILEXFER_ATTR_PERMISSIONS) {
+            $r = unpack('Npermissions', $attrs);
+            $attrs = substr($attrs, 4);
+            $ret = array_merge($ret, $r);
+        }
+
+        if ($flags & SSH_FILEXFER_ATTR_ACMODTIME) {
+            $r = unpack('Natime/Nmtime', $attrs);
+            $attrs = substr($attrs, 8);
+            $ret = array_merge($ret, $r);
+        }
+
+        // XXX: 還有 SSH_FILEXFER_ATTR_EXTENDED
+        return $ret;
+    }
+
     public function getattrs($path, $options = array())
     {
         $full = array_key_exists('full', $options) ? intval($options['full']) : 0;
