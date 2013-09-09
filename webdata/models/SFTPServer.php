@@ -115,6 +115,11 @@ class SFTPServer
         return $info;
     }
 
+    public function getRealPath($project, $project_path)
+    {
+        return "/srv/project_data/{$project}{$project_path}";
+    }
+
     public function read()
     {
         while (true) {
@@ -175,17 +180,17 @@ class SFTPServer
 
     public function getFileSize($project, $path)
     {
-        return filesize('/srv/project_data/' . $project . $path);
+        return filesize($this->getRealPath($project, $path));
     }
 
     public function getFilePermission($project, $path)
     {
-        return fileperms('/srv/project_data/' . $project . $path);
+        return fileperms($this->getRealPath($project, $path));
     }
 
     public function getFileTime($project, $path)
     {
-        $path = '/srv/project_data/' . $project . $path;
+        $path = $this->getRealPath($project, $path);
         return array(fileatime($path), filemtime($path));
     }
 
@@ -253,7 +258,7 @@ class SFTPServer
         $absolute_path = array_key_exists('absolute_path', $options) ? intval($options['absolute_path']) : 0;
 
         list($project, $path) = $this->parsePath($path);
-        if (!file_exists("/srv/project_data/{$project}{$path}")) {
+        if (!file_exists($this->getRealPath($project, $path))) {
             throw new Exception("file not found", 404);
         }
 
@@ -358,7 +363,7 @@ class SFTPServer
             $project_ids = $this->user->project_members->toArray('project_id');
             $projects = array();
             foreach (Project::search(1)->searchIn('id', $project_ids)->toArray('name') as $name) {
-                if (file_exists("/srv/project_data/{$name}")) {
+                if (file_exists($this->getRealPath($name, '/'))) {
                     $projects[] = $name;
                 }
             }
@@ -389,7 +394,7 @@ class SFTPServer
             $flag .= 'w';
         }
 
-        $path = "/srv/project_data/{$project}{$project_path}";
+        $path = $this->getRealPath($project, $project_path);
 
         if ($flag != '') {
             $attrs = $this->parseAttrs($attrs);
@@ -411,12 +416,12 @@ class SFTPServer
         $flag .= 'b';
 
 
-        $infos['fp'] = fopen("/srv/project_data/{$project}{$project_path}", $flag);
+        $infos['fp'] = fopen($path, $flag);
         if (!$infos['fp']) {
             $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_FAILURE));
             return;
         }
-        $infos['filesize'] = filesize("/srv/project_data/{$project}{$project_path}");
+        $infos['filesize'] = filesize($path);
         $this->_handle_infos[$handle] = $infos;
         $this->send(SSH_FXP_HANDLE, pack('NN', $request_id, strlen($handle)) . $handle);
     }
@@ -471,7 +476,7 @@ class SFTPServer
                 if (!$project) {
                     $infos['files'] = $this->getProjectsByUser();
                 } else {
-                    $infos['dir'] = opendir("/srv/project_data/{$project}{$project_path}");
+                    $infos['dir'] = opendir($this->getRealPath($project, $project_path));
                 }
                 $this->_handle_infos[$handle] = $infos;
                 $this->send(SSH_FXP_HANDLE, pack('NN', $ret['id'], strlen($handle)), $handle);
