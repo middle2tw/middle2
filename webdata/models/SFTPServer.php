@@ -134,9 +134,14 @@ class SFTPServer
             exit;
         }
         // 再來把資料取出來
-        $packet = fread($this->fp, $length);
+        $packet = fread($this->fp, 1);
         $array = unpack('CType', $packet);
-        $data = substr($packet, 1);
+        $length = $length - 1;
+        $data = '';
+
+        while ($length > strlen($data)) {
+            $data .= fread($this->fp, $length - strlen($data));
+        }
         return array($array['Type'], $data);
     }
 
