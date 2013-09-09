@@ -194,7 +194,7 @@ class SFTPServer
         return array(fileatime($path), filemtime($path));
     }
 
-    public function getAbsolutePath($base, $dir)
+    public function getFTPAbsolutePath($base, $dir)
     {
         if ($dir[0] == '/') {
             $terms = array();
@@ -324,7 +324,7 @@ class SFTPServer
         $data = pack('NN', $request_id, count($filenames));
 
         foreach ($filenames as $filename) {
-            $path = $this->getAbsolutePath($base, $filename);
+            $path = $this->getFTPAbsolutePath($base, $filename);
             if ($path == '/') {
                 if ($absolute_path) {
                     $filename = '/';
@@ -451,7 +451,7 @@ class SFTPServer
 
             case SSH_FXP_REALPATH:
                 $ret = unpack('Nid/Npath_length/a*path', $data);
-                $path = $this->getAbsolutePath($this->path, $ret['path']);
+                $path = $this->getFTPAbsolutePath($this->path, $ret['path']);
 
                 try {
                     $this->return_name_info($ret['id'], $path, array(''), array('absolute_path' => true));
@@ -467,7 +467,7 @@ class SFTPServer
 
             case SSH_FXP_OPENDIR:
                 $ret = unpack('Nid/Npath_length/a*path', $data);
-                $path = $this->getAbsolutePath($this->path, $ret['path']);
+                $path = $this->getFTPAbsolutePath($this->path, $ret['path']);
                 list($project, $project_path) = $this->parsePath($path);
                 $handle = $this->_handle_serial ++;
                 $infos = array();
