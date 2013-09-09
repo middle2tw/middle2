@@ -377,10 +377,46 @@ class SFTPServer
 
         if (!$project) {
             $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_NO_SUCH_FILE));
-        } else {
-            $infos['fp'] = fopen("/srv/project_data/{$project}{$project_path}", "rb");
-            $infos['filesize'] = filesize("/srv/project_data/{$project}{$project_path}");
+            return;
+        } 
+
+        $flag = '';
+        if ($pflags & SSH_FXF_CREAT) {
+            $flag .= 'c';
+        } elseif ($pflags & SSH_FXF_APPEND) {
+            $flag .= 'a';
+        } elseif ($pflags & SSH_FXF_WRITE) {
+            $flag .= 'w';
         }
+
+        $path = "/srv/project_data/{$project}{$project_path}";
+
+        if ($flag != '') {
+            $attrs = $this->parseAttrs($attrs);
+            if ($attrs['mtime'] and $attr['atime']) {
+                touch($path, $attrs['mtime'], $attr['atime']);
+            }
+            if ($attrs['permissions']) {
+                chmod($path, $attrs['permissions']);
+            }
+        }
+
+        if ($pflags & SSH_FXF_READ) {
+            if ($flag == '') {
+                $flag .= 'r';
+            } else {
+                $flag .= '+';
+            }
+        }
+        $flag .= 'b';
+
+
+        $infos['fp'] = fopen("/srv/project_data/{$project}{$project_path}", $flag);
+        if (!$infos['fp']) {
+            $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_FAILURE));
+            return;
+        }
+        $infos['filesize'] = filesize("/srv/project_data/{$project}{$project_path}");
         $this->_handle_infos[$handle] = $infos;
         $this->send(SSH_FXP_HANDLE, pack('NN', $request_id, strlen($handle)) . $handle);
     }
@@ -520,13 +556,30 @@ class SFTPServer
                 $filename = substr($data, 8, $filename_length);
                 $ret = unpack('Npflags/a*attrs', substr($data, 8 + $filename_length));
 
-                if ($ret['pflags'] == SSH_FXF_READ) {
-                    $this->openFile($request_id, $filename, $ret['pflags'], $ret['attrs']);
+                $this->openFile($request_id, $filename, $ret['pflags'], $ret['attrs']);
+                break;
+
+            case SSH_FXP_WRITE:
+                $ret = unpack('Nid/Nhandle_length', $data);
+                $request_id = $ret['id'];
+                $handle_length = $ret['handle_length'];
+                $handle = substr($data, 8, $handle_length);
+                $ret = unpack('Noffset_upper/Noffset_lower/Ndata_length', substr($data, 8 + $handle_length));
+                $offset = $ret['offset_upper'] * 0x100000000 + $ret['offset_lower'];
+                $data = substr($data, 8 + $handle_length + 12, $ret['data_length']);
+
+                if (!array_key_exists($handle, $this->_handle_infos) or !array_key_exists('fp', $this->_handle_infos[$handle])) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_FAILURE));
                     break;
-                } else {
-                    // TODO: 把剩下完成
-                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_OP_UNSUPPORTED));
                 }
+                $fp = $this->_handle_infos[$handle]['fp'];
+                // TODO: 檢查不合法的 offset, len
+                if (fseek($fp, $offset) < 0) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_FAILURE));
+                    break;
+                }
+                fwrite($fp, $data);
+                $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_OK));
                 break;
 
             case SSH_FXP_READ:
