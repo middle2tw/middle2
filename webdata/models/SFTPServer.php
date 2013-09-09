@@ -699,6 +699,31 @@ class SFTPServer
                 }
                 break;
 
+            case SSH_FXP_RENAME:
+                $ret = unpack('Nid/Noldpath_length', $data);
+                $request_id = $ret['id'];
+                $oldpath = substr($data, 8, $ret['oldpath_length']);
+                $ret = unpack('Nnewpath_length', substr($data, 8 + $ret['oldpath_length']));
+                $newpath = substr($data, 8 + strlen($oldpath) + 4, $ret['newpath_length']);
+
+                $this->logger($oldpath);
+                $this->logger($newpath);
+
+                $path = $this->getFTPAbsolutePath($this->path, $oldpath);
+                list($project, $project_path) = $this->parsePath($path);
+                $old_real_path = $this->getRealPath($project, $project_path);
+
+                $path = $this->getFTPAbsolutePath($this->path, $newpath);
+                list($project, $project_path) = $this->parsePath($path);
+                $new_real_path = $this->getRealPath($project, $project_path);
+
+                if (rename($old_real_path, $new_real_path)) {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_OK));
+                } else {
+                    $this->send(SSH_FXP_STATUS, pack('NN', $request_id, SSH_FX_FAILURE));
+                }
+                break;
+
             default:
                 $ret = unpack('Nid', $data);
                 $this->send(SSH_FXP_STATUS, pack('NN', $ret['id'], SSH_FX_OP_UNSUPPORTED));
