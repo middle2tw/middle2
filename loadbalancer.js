@@ -296,7 +296,7 @@ var http_request_callback = function(protocol){
             return;
         }
         if (chunk !== null) {
-            main_request_pending_data.unshift(chunk);
+            main_request_pending_data.push(chunk);
         }
     };
 
