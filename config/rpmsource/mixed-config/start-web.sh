@@ -43,7 +43,7 @@ do
         else
             if [ "$HTTP_CODE" = "" ]; then
                 sleep 1
-            elif [ $HTTP_CODE -eq 0 -o $HTTP_CODE -eq 500 ]; then
+            elif [ $HTTP_CODE -eq 0 ]; then
                 sleep 1
             else
                 END_AT=0
