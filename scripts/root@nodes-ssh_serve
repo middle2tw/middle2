@@ -59,7 +59,17 @@ function main()
         mkdir("/srv/chroot/{$id}/srv/logs");
         exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
         $spent = microtime(true) - $start;
+
+        file_put_contents($log_file, date('c') . " [init] install mixed lang base\n", FILE_APPEND);
+        $lang_base_file = "/srv/code/images/lang-mixed.tar.gz";
+        if (file_exists($lang_base_file)) {
+            exec("tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
+        } else {
+            exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/mixed/*.deb");
+        }
+
         file_put_contents($log_file, date('c') . " [init] done(spent: {$spent})\n", FILE_APPEND);
+
         echo json_encode(array('error' => false, 'port' => $port));
         break;
 
@@ -106,11 +116,13 @@ function main()
         file_put_contents($log_file, date('c') . " [clone] init lang base\n", FILE_APPEND);
         file_put_contents("/srv/chroot/{$id}.project", $project_name);
 
-        $lang_base_file = "/srv/code/images/lang-{$template}.tar.gz";
-        if (file_exists($lang_base_file)) {
-            exec("tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
-        } else {
-            exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/{$template}/*.deb");
+        if ($template != 'mixed') {
+            $lang_base_file = "/srv/code/images/lang-{$template}.tar.gz";
+            if (file_exists($lang_base_file)) {
+                exec("tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
+            } else {
+                exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/{$template}/*.deb");
+            }
         }
 
         if (file_exists('/srv/project_data/' . $project_name)) {
