@@ -282,15 +282,28 @@ var http_request_callback = function(protocol){
         host = host.split(':')[0];
     }
 
-    var main_request_pending_data = '';
-    var main_request_is_end = false;
+    var main_request_pending_data = [];
+    var backend_cb = null;
 
     var main_request_data = function(chunk){
-        main_request_pending_data += chunk;
+        if ('function' == typeof(backend_cb)) {
+            while (main_request_pending_data.length) {
+                backend_cb(main_request_pending_data.shift());
+            }
+            if (chunk !== null) {
+                backend_cb(chunk);
+            }
+            return;
+        }
+        if (chunk !== null) {
+            main_request_pending_data.unshift(chunk);
+        }
     };
+
     var main_request_end = function(){
-        main_request_is_end = true;
+        main_request_data(false);
     };
+
     if (!main_request.headers['x-forwarded-for']) {
         main_request.headers['x-forwarded-for'] = main_request.socket.remoteAddress;
         main_request.headers['x-forwarded-port'] = main_request.socket.address().port;
@@ -420,17 +433,16 @@ var http_request_callback = function(protocol){
             delete(request_pools[current_request]);
         });
 
-        main_request_data = function(chunk){
-            backend_request.write(chunk);
+        var write_to_backend = function(data){
+            if (data === false) {
+                backend_request.end();
+                return;
+            }
+            backend_request.write(data);
         };
-        main_request_end = function(){
-            backend_request.end();
-        };
-        main_request_data(main_request_pending_data);
 
-        if (main_request_is_end) {
-            main_request_end();
-        }
+        backend_cb = write_to_backend;
+        main_request_data(null);
 
         return;
     });
