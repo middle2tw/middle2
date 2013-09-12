@@ -86,10 +86,8 @@ $this->title = 'NodeServers Info :: ';
                             <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverdeleteport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Delete</button>
                             <?php if (WebNode::STATUS_STOP == $node->status) { ?>
                             <button class="btn post-link confirm" data-confirm="確定要打開 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverreleaseport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Start</button>
-                            <?php } elseif (WebNode::STATUS_UNUSED != $node->status) { ?>
-                            <button class="btn post-link confirm" data-confirm="確定要放出 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverreleaseport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Release</button>
-                            <button class="btn post-link confirm" data-confirm="確定要暫停 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverstopport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Stop</button>
                             <?php } else { ?>
+                            <button class="btn post-link confirm" data-confirm="確定要放出 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverreleaseport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Release</button>
                             <button class="btn post-link confirm" data-confirm="確定要暫停 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverstopport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Stop</button>
                             <?php } ?>
                         </td>
