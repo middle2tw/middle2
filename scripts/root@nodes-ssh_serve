@@ -19,7 +19,7 @@ function main()
     list($method) = explode(' ', $command, 2);
     switch ($method) {
     case 'init':
-        list(, $id) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
+        list(, $id, $option) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
         if (!$id) {
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
             break;
@@ -60,12 +60,14 @@ function main()
         exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
         $spent = microtime(true) - $start;
 
-        file_put_contents($log_file, date('c') . " [init] install mixed lang base\n", FILE_APPEND);
-        $lang_base_file = "/srv/code/images/lang-mixed.tar.gz";
-        if (file_exists($lang_base_file)) {
-            exec("nice -n 19 tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
-        } else {
-            exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/mixed/*.deb");
+        if ($option != 'without-lang-base') {
+            file_put_contents($log_file, date('c') . " [init] install mixed lang base\n", FILE_APPEND);
+            $lang_base_file = "/srv/code/images/lang-mixed.tar.gz";
+            if (file_exists($lang_base_file)) {
+                exec("nice -n 19 tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
+            } else {
+                exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/mixed/*.deb");
+            }
         }
 
         file_put_contents($log_file, date('c') . " [init] done(spent: {$spent})\n", FILE_APPEND);
