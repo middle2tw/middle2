@@ -1,0 +1,3 @@
+sudo -u search /srv/search/elasticsearch-0.20.4/bin/elasticsearch -f -Des.config=/srv/search/config/elasticsearch.yml -Xmx90m -Xms90m &
+sudo /usr/bin/env NODE_PATH=/usr/local/lib/node_modules node /srv/code/hisoku/loadbalancer.js 0 80
+env LD_LIBRARY_PATH=/usr/local/lib scribed /srv/code/hisoku/config/scribed.conf
