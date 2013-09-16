@@ -29,7 +29,7 @@ apache
 ======
 sudo yum install httpd-devel
 cd /var/tmp
-wget http://ftp.tc.edu.tw/pub/Apache//httpd/httpd-2.2.24.tar.gz
+wget https://lnamp-web-server.googlecode.com/files/httpd-2.2.24.tar.gz
 tar zxvf httpd-2.2.24.tar.gz
 cd httpd-2.2.24
 cd srclib
@@ -94,8 +94,8 @@ php54
 =====
 sudo yum install -y libxml2-devel
 cd /var/tmp
-wget 'http://tw2.php.net/get/php-5.4.10.tar.bz2/from/tw1.php.net/mirror'
-cp php-5.4.10.tar.bz2 ~/rpmbuild/SOURCES/
+wget 'http://tw2.php.net/get/php-5.4.16.tar.bz2/from/tw1.php.net/mirror'
+cp php-5.4.16.tar.bz2 ~/rpmbuild/SOURCES/
 vim ~/rpmbuild/SPECS/php54.spec
 * 主要是修改 Group, License, URL, Source0, 刪掉 Require
 * 修改 %install
@@ -103,7 +103,7 @@ DESTDIR 改成 INSTALL_ROOT
 
 rpmbuild -ba ~/rpmbuild/SPECS/php54.spec
 * 這次會失敗
-echo "" | /usr/lib/rpm/check-files ~/rpmbuild/BUILDROOT/php-5.4.10-1.amzn1.x86_64/ > ~/output.txt
+echo "" | /usr/lib/rpm/check-files ~/rpmbuild/BUILDROOT/php-5.4.16-1.amzn1.x86_64/ > ~/output.txt
 * 把上面的 output.txt 的內容塞進 php54.spec 的 %file 
 rpmbuild -ba ~/rpmbuild/SPECS/php54.spec
 
