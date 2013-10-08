@@ -1,19 +1,19 @@
 Name:		php54-pecl-apc
-Version:	3.1.9
+Version:	3.1.13
 Release:	1%{?dist}
 Summary:	php54-pecl-apc
-# http://pecl.php.net/get/APC-3.1.9.tgz
+# http://pecl.php.net/get/APC-3.1.13.tgz
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	APC-3.1.9.tgz
+Source0:	APC-3.1.13.tgz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
 
 %prep
-%setup -q -n APC-3.1.9
+%setup -q -n APC-3.1.13
 
 
 %build
