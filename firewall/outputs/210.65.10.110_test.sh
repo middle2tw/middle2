@@ -17,20 +17,27 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 # allow loadbalancer, node from categories scribe
 iptables -A INPUT -p tcp -s 210.65.11.197 --dport 1426 -j ACCEPT
+iptables -A INPUT -p tcp -s 203.66.168.148 --dport 1426 -j ACCEPT
 # allow loadbalancer from categories mainpage
 # allow loadbalancer, mainpage from categories private_memcache
 # allow node from categories nfs
 iptables -A INPUT -p tcp -s 210.65.11.197 --dport 111 -j ACCEPT
+iptables -A INPUT -p tcp -s 203.66.168.148 --dport 111 -j ACCEPT
 # allow node from categories nfs
 iptables -A INPUT -p udp -s 210.65.11.197 --dport 111 -j ACCEPT
+iptables -A INPUT -p udp -s 203.66.168.148 --dport 111 -j ACCEPT
 # allow node from categories nfs
 iptables -A INPUT -p tcp -s 210.65.11.197 --dport 2049 -j ACCEPT
+iptables -A INPUT -p tcp -s 203.66.168.148 --dport 2049 -j ACCEPT
 # allow node from categories nfs
 iptables -A INPUT -p udp -s 210.65.11.197 --dport 2049 -j ACCEPT
+iptables -A INPUT -p udp -s 203.66.168.148 --dport 2049 -j ACCEPT
 # allow node from categories nfs
 iptables -A INPUT -p tcp -s 210.65.11.197 --dport 32764:32769 -j ACCEPT
+iptables -A INPUT -p tcp -s 203.66.168.148 --dport 32764:32769 -j ACCEPT
 # allow node from categories nfs
 iptables -A INPUT -p udp -s 210.65.11.197 --dport 32764:32769 -j ACCEPT
+iptables -A INPUT -p udp -s 203.66.168.148 --dport 32764:32769 -j ACCEPT
 sleep 30
 iptables -F
 iptables -X
