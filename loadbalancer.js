@@ -247,6 +247,7 @@ lb_core.getBackendHost = function(host, port, callback){
 
 var http_main_request = http.createServer();
 var https_options = {
+    ca: [fs.readFileSync('/srv/config/middle2.ca.crt')],
     key: fs.readFileSync('/srv/config/middle2.key'),
     cert: fs.readFileSync('/srv/config/middle2.crt')
 };
