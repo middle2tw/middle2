@@ -85,7 +85,7 @@ class Prebuilder
         error_log('pip installing ...');
         // 安裝 python package
         copy($req_file, $root . "/requirements.txt");
-        $cmd = "chroot {$root} pip --log /srv/logs/pip.log install --requirement /requirements.txt";
+        $cmd = "chroot {$root} /usr/local/bin/pip --log /srv/logs/pip.log install --requirement /requirements.txt";
         $fp = proc_open($cmd, array(0 => array('pipe', 'r'), 1 => array('pipe' , 'w'), 2 => array('pipe', 'w')), $pipes, NULL, array('PYTHONUNBUFFERED' => 'x'));
 
         while (false !== ($line = fgets($pipes[1], 4096))) {
