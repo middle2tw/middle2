@@ -1,12 +1,13 @@
 Name:		libmemcached
-Version:	1.0.10
+Version:	1.0.17
 Release:	1%{?dist}
 Summary:        libmemcached
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	libmemcached-1.0.10.tar.gz
+Source0:	libmemcached-1.0.17.tar.gz
+# https://launchpad.net/libmemcached/1.0/1.0.17/+download/libmemcached-1.0.17.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description

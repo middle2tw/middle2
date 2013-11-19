@@ -780,22 +780,9 @@ rm -rf %{buildroot}
 /usr/lib64/ruby/2.0.0/webrick/ssl.rb
 /usr/lib64/ruby/2.0.0/webrick/utils.rb
 /usr/lib64/ruby/2.0.0/webrick/version.rb
-/usr/lib64/ruby/2.0.0/fiddle.rb
-/usr/lib64/ruby/2.0.0/fiddle/closure.rb
-/usr/lib64/ruby/2.0.0/fiddle/cparser.rb
-/usr/lib64/ruby/2.0.0/fiddle/function.rb
-/usr/lib64/ruby/2.0.0/fiddle/import.rb
-/usr/lib64/ruby/2.0.0/fiddle/pack.rb
-/usr/lib64/ruby/2.0.0/fiddle/struct.rb
-/usr/lib64/ruby/2.0.0/fiddle/types.rb
-/usr/lib64/ruby/2.0.0/fiddle/value.rb
-/usr/lib64/ruby/2.0.0/x86_64-linux/dbm.so
-/usr/lib64/ruby/2.0.0/x86_64-linux/fiddle.so
-/usr/lib64/ruby/2.0.0/x86_64-linux/gdbm.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/bigdecimal.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/continuation.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/coverage.so
-/usr/lib64/ruby/2.0.0/x86_64-linux/curses.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/date_core.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/digest.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/digest/bubblebabble.so
@@ -876,7 +863,6 @@ rm -rf %{buildroot}
 /usr/lib64/ruby/2.0.0/x86_64-linux/pty.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/racc/cparse.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/rbconfig.rb
-/usr/lib64/ruby/2.0.0/x86_64-linux/readline.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/ripper.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/sdbm.so
 /usr/lib64/ruby/2.0.0/x86_64-linux/socket.so
@@ -915,6 +901,5 @@ rm -rf %{buildroot}
 /usr/share/man/man1/rake.1.gz
 /usr/share/man/man1/ri.1.gz
 /usr/share/man/man1/ruby.1.gz
-
 
 %changelog

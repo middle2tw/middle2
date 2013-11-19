@@ -1,13 +1,13 @@
-Name:		php54
+Name:		php55
 Version:	5.5.6
 Release:	1%{?dist}
-Summary:	PHP54
+Summary:	PHP55
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
 Source0:	php-5.5.6.tar.gz
-# http://www.php.net/get/php-5.5.6.tar.gz/from/a/mirror
+# http://us2.php.net/get/php-5.5.6.tar.gz/from/jp1.php.net/mirror
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %description
 
@@ -43,6 +43,7 @@ rm -rf %{buildroot}
 /.filemap
 /.lock
 /etc/pear.conf
+/etc/php-fpm.conf.default
 /usr/bin/pear
 /usr/bin/peardev
 /usr/bin/pecl
@@ -80,6 +81,7 @@ rm -rf %{buildroot}
 /usr/include/php/Zend/zend_extensions.h
 /usr/include/php/Zend/zend_float.h
 /usr/include/php/Zend/zend_gc.h
+/usr/include/php/Zend/zend_generators.h
 /usr/include/php/Zend/zend_globals.h
 /usr/include/php/Zend/zend_globals_macros.h
 /usr/include/php/Zend/zend_hash.h
@@ -132,6 +134,22 @@ rm -rf %{buildroot}
 /usr/include/php/ext/ereg/regex/regex2.h
 /usr/include/php/ext/ereg/regex/utils.h
 /usr/include/php/ext/filter/php_filter.h
+/usr/include/php/ext/gd/gd_compat.h
+/usr/include/php/ext/gd/gdcache.h
+/usr/include/php/ext/gd/libgd/gd.h
+/usr/include/php/ext/gd/libgd/gd_intern.h
+/usr/include/php/ext/gd/libgd/gd_io.h
+/usr/include/php/ext/gd/libgd/gdcache.h
+/usr/include/php/ext/gd/libgd/gdfontg.h
+/usr/include/php/ext/gd/libgd/gdfontl.h
+/usr/include/php/ext/gd/libgd/gdfontmb.h
+/usr/include/php/ext/gd/libgd/gdfonts.h
+/usr/include/php/ext/gd/libgd/gdfontt.h
+/usr/include/php/ext/gd/libgd/gdhelpers.h
+/usr/include/php/ext/gd/libgd/jisx0208.h
+/usr/include/php/ext/gd/libgd/wbmp.h
+/usr/include/php/ext/gd/libgd/webpimg.h
+/usr/include/php/ext/gd/php_gd.h
 /usr/include/php/ext/hash/php_hash.h
 /usr/include/php/ext/hash/php_hash_adler32.h
 /usr/include/php/ext/hash/php_hash_crc32.h
@@ -158,6 +176,28 @@ rm -rf %{buildroot}
 /usr/include/php/ext/iconv/php_php_iconv_impl.h
 /usr/include/php/ext/json/php_json.h
 /usr/include/php/ext/libxml/php_libxml.h
+/usr/include/php/ext/mysqli/mysqli_mysqlnd.h
+/usr/include/php/ext/mysqli/php_mysqli_structs.h
+/usr/include/php/ext/mysqlnd/config-win.h
+/usr/include/php/ext/mysqlnd/mysqlnd.h
+/usr/include/php/ext/mysqlnd/mysqlnd_alloc.h
+/usr/include/php/ext/mysqlnd/mysqlnd_block_alloc.h
+/usr/include/php/ext/mysqlnd/mysqlnd_charset.h
+/usr/include/php/ext/mysqlnd/mysqlnd_debug.h
+/usr/include/php/ext/mysqlnd/mysqlnd_enum_n_def.h
+/usr/include/php/ext/mysqlnd/mysqlnd_ext_plugin.h
+/usr/include/php/ext/mysqlnd/mysqlnd_libmysql_compat.h
+/usr/include/php/ext/mysqlnd/mysqlnd_net.h
+/usr/include/php/ext/mysqlnd/mysqlnd_portability.h
+/usr/include/php/ext/mysqlnd/mysqlnd_priv.h
+/usr/include/php/ext/mysqlnd/mysqlnd_result.h
+/usr/include/php/ext/mysqlnd/mysqlnd_result_meta.h
+/usr/include/php/ext/mysqlnd/mysqlnd_reverse_api.h
+/usr/include/php/ext/mysqlnd/mysqlnd_statistics.h
+/usr/include/php/ext/mysqlnd/mysqlnd_structs.h
+/usr/include/php/ext/mysqlnd/mysqlnd_wireprotocol.h
+/usr/include/php/ext/mysqlnd/php_mysqlnd.h
+/usr/include/php/ext/mysqlnd/php_mysqlnd_config.h
 /usr/include/php/ext/pcre/pcrelib/config.h
 /usr/include/php/ext/pcre/pcrelib/pcre.h
 /usr/include/php/ext/pcre/pcrelib/pcre_internal.h
@@ -166,6 +206,7 @@ rm -rf %{buildroot}
 /usr/include/php/ext/pcre/php_pcre.h
 /usr/include/php/ext/pdo/php_pdo.h
 /usr/include/php/ext/pdo/php_pdo_driver.h
+/usr/include/php/ext/phar/php_phar.h
 /usr/include/php/ext/session/mod_files.h
 /usr/include/php/ext/session/mod_user.h
 /usr/include/php/ext/session/php_session.h
@@ -225,6 +266,7 @@ rm -rf %{buildroot}
 /usr/include/php/ext/standard/php_mail.h
 /usr/include/php/ext/standard/php_math.h
 /usr/include/php/ext/standard/php_metaphone.h
+/usr/include/php/ext/standard/php_password.h
 /usr/include/php/ext/standard/php_rand.h
 /usr/include/php/ext/standard/php_smart_str.h
 /usr/include/php/ext/standard/php_smart_str_public.h
@@ -248,7 +290,6 @@ rm -rf %{buildroot}
 /usr/include/php/main/SAPI.h
 /usr/include/php/main/build-defs.h
 /usr/include/php/main/fopen_wrappers.h
-/usr/include/php/main/logos.h
 /usr/include/php/main/php.h
 /usr/include/php/main/php_compat.h
 /usr/include/php/main/php_config.h
@@ -256,7 +297,6 @@ rm -rf %{buildroot}
 /usr/include/php/main/php_getopt.h
 /usr/include/php/main/php_globals.h
 /usr/include/php/main/php_ini.h
-/usr/include/php/main/php_logos.h
 /usr/include/php/main/php_main.h
 /usr/include/php/main/php_memory_streams.h
 /usr/include/php/main/php_network.h
@@ -294,6 +334,8 @@ rm -rf %{buildroot}
 /usr/lib64/build/run-tests.php
 /usr/lib64/build/scan_makefile_in.awk
 /usr/lib64/build/shtool
+/usr/lib64/extensions/no-debug-non-zts-20121212/opcache.a
+/usr/lib64/extensions/no-debug-non-zts-20121212/opcache.so
 /usr/lib64/php/.channels/.alias/pear.txt
 /usr/lib64/php/.channels/.alias/pecl.txt
 /usr/lib64/php/.channels/.alias/phpdocs.txt
@@ -462,51 +504,15 @@ rm -rf %{buildroot}
 /usr/lib64/php/test/XML_Util/tests/testBasic_splitQualifiedName.phpt
 /usr/lib64/php/test/XML_Util/tests/testBug_4950.phpt
 /usr/lib64/php/test/XML_Util/tests/testBug_5392.phpt
+/usr/sbin/php-fpm
+/usr/share/fpm/status.html
+/usr/share/man/man1/phar.1.gz
+/usr/share/man/man1/phar.phar.1.gz
+/usr/share/man/man1/php-cgi.1.gz
 /usr/share/man/man1/php-config.1.gz
 /usr/share/man/man1/php.1.gz
 /usr/share/man/man1/phpize.1.gz
-/etc/php-fpm.conf.default
-/usr/sbin/php-fpm
-/usr/share/fpm/status.html
 /usr/share/man/man8/php-fpm.8.gz
-/usr/include/php/ext/mysqli/mysqli_mysqlnd.h
-/usr/include/php/ext/mysqli/php_mysqli_structs.h
-/usr/include/php/ext/mysqlnd/config-win.h
-/usr/include/php/ext/mysqlnd/mysqlnd.h
-/usr/include/php/ext/mysqlnd/mysqlnd_alloc.h
-/usr/include/php/ext/mysqlnd/mysqlnd_block_alloc.h
-/usr/include/php/ext/mysqlnd/mysqlnd_charset.h
-/usr/include/php/ext/mysqlnd/mysqlnd_debug.h
-/usr/include/php/ext/mysqlnd/mysqlnd_enum_n_def.h
-/usr/include/php/ext/mysqlnd/mysqlnd_ext_plugin.h
-/usr/include/php/ext/mysqlnd/mysqlnd_libmysql_compat.h
-/usr/include/php/ext/mysqlnd/mysqlnd_net.h
-/usr/include/php/ext/mysqlnd/mysqlnd_portability.h
-/usr/include/php/ext/mysqlnd/mysqlnd_priv.h
-/usr/include/php/ext/mysqlnd/mysqlnd_result.h
-/usr/include/php/ext/mysqlnd/mysqlnd_result_meta.h
-/usr/include/php/ext/mysqlnd/mysqlnd_reverse_api.h
-/usr/include/php/ext/mysqlnd/mysqlnd_statistics.h
-/usr/include/php/ext/mysqlnd/mysqlnd_structs.h
-/usr/include/php/ext/mysqlnd/mysqlnd_wireprotocol.h
-/usr/include/php/ext/mysqlnd/php_mysqlnd.h
-/usr/include/php/ext/mysqlnd/php_mysqlnd_config.h
-/usr/include/php/ext/gd/gdcache.h
-/usr/include/php/ext/gd/libgd/gd.h
-/usr/include/php/ext/gd/libgd/gd_compat.h
-/usr/include/php/ext/gd/libgd/gd_intern.h
-/usr/include/php/ext/gd/libgd/gd_io.h
-/usr/include/php/ext/gd/libgd/gdcache.h
-/usr/include/php/ext/gd/libgd/gdfontg.h
-/usr/include/php/ext/gd/libgd/gdfontl.h
-/usr/include/php/ext/gd/libgd/gdfontmb.h
-/usr/include/php/ext/gd/libgd/gdfonts.h
-/usr/include/php/ext/gd/libgd/gdfontt.h
-/usr/include/php/ext/gd/libgd/gdhelpers.h
-/usr/include/php/ext/gd/libgd/jisx0208.h
-/usr/include/php/ext/gd/libgd/wbmp.h
-/usr/include/php/ext/gd/libgd/webpimg.h
-/usr/include/php/ext/gd/php_gd.h
 
 %changelog
 

@@ -1,13 +1,14 @@
 Name:		httpd
 
-Version:	2.2.24
+Version:	2.2.26
 Release:	1%{?dist}
 Summary:	httpd
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	httpd-2.2.24.tar.gz
+# http://apache.cdpa.nsysu.edu.tw/httpd/httpd-2.2.26.tar.gz
+Source0:	httpd-2.2.26.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
@@ -18,7 +19,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 
 %build
-%configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker --sysconfdir=/etc/httpd --enable-vhost-alias
+%configure --enable-rewrite --enable-deflate --with-included-apr --with-mpm=worker --sysconfdir=/etc/httpd --enable-vhost-alias --localstatedir=/srv
 make %{?_smp_mflags}
 cd modules/fastcgi
 make top_dir=../../
@@ -189,6 +190,7 @@ rm -rf %{buildroot}
 /usr/include/util_script.h
 /usr/include/util_time.h
 /usr/include/util_xml.h
+/usr/lib/rpm/httpd.exp
 /usr/lib64/apr-util-1/apr_dbd_pgsql-1.so
 /usr/lib64/apr-util-1/apr_dbd_pgsql.a
 /usr/lib64/apr-util-1/apr_dbd_pgsql.la
@@ -203,15 +205,14 @@ rm -rf %{buildroot}
 /usr/lib64/libapr-1.la
 /usr/lib64/libapr-1.so
 /usr/lib64/libapr-1.so.0
-/usr/lib64/libapr-1.so.0.4.6
+/usr/lib64/libapr-1.so.0.4.8
 /usr/lib64/libaprutil-1.a
 /usr/lib64/libaprutil-1.la
 /usr/lib64/libaprutil-1.so
 /usr/lib64/libaprutil-1.so.0
-/usr/lib64/libaprutil-1.so.0.4.1
+/usr/lib64/libaprutil-1.so.0.5.2
 /usr/lib64/pkgconfig/apr-1.pc
 /usr/lib64/pkgconfig/apr-util-1.pc
-/usr/libexec/httpd.exp
 /usr/sbin/ab
 /usr/sbin/apachectl
 /usr/sbin/apxs
@@ -499,5 +500,11 @@ rm -rf %{buildroot}
 /usr/share/man/man8/logresolve.8.gz
 /usr/share/man/man8/rotatelogs.8.gz
 /usr/share/man/man8/suexec.8.gz
+/usr/include/expat.h
+/usr/lib64/libexpat.a
+/usr/lib64/libexpat.la
+/usr/lib64/libexpat.so
+/usr/lib64/libexpat.so.0
+/usr/lib64/libexpat.so.0.5.0
 
 %changelog

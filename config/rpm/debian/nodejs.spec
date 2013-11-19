@@ -1,20 +1,20 @@
 Name:		node
-Version:	v0.10.15
+Version:	0.10.22
 Release:	1%{?dist}
 Summary:	nodejs
 
 Group:		Hisoku
 License:	No
 URL:		http://hisoku.ronny.tw/
-Source0:	node-v0.10.15.tar.gz
-# http://nodejs.org/dist/v0.10.15/node-v0.10.15.tar.gz
+Source0:	node-v0.10.22.tar.gz
+# http://nodejs.org/dist/v0.10.22/node-v0.10.22.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
 
 
 %prep
-%setup -q
+%setup -q -n node-v0.10.22
 
 %build
 ./configure 
@@ -87,6 +87,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/doc/api/npm-view.md
 /usr/local/lib/node_modules/npm/doc/api/npm-whoami.md
 /usr/local/lib/node_modules/npm/doc/api/npm.md
+/usr/local/lib/node_modules/npm/doc/api/repo.md
 /usr/local/lib/node_modules/npm/doc/cli/npm-adduser.md
 /usr/local/lib/node_modules/npm/doc/cli/npm-bin.md
 /usr/local/lib/node_modules/npm/doc/cli/npm-bugs.md
@@ -133,6 +134,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/doc/cli/npm-view.md
 /usr/local/lib/node_modules/npm/doc/cli/npm-whoami.md
 /usr/local/lib/node_modules/npm/doc/cli/npm.md
+/usr/local/lib/node_modules/npm/doc/cli/repo.md
 /usr/local/lib/node_modules/npm/doc/files/npm-folders.md
 /usr/local/lib/node_modules/npm/doc/files/npmrc.md
 /usr/local/lib/node_modules/npm/doc/files/package.json.md
@@ -185,6 +187,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/html/doc/api/npm-view.html
 /usr/local/lib/node_modules/npm/html/doc/api/npm-whoami.html
 /usr/local/lib/node_modules/npm/html/doc/api/npm.html
+/usr/local/lib/node_modules/npm/html/doc/api/repo.html
 /usr/local/lib/node_modules/npm/html/doc/cli/npm-adduser.html
 /usr/local/lib/node_modules/npm/html/doc/cli/npm-bin.html
 /usr/local/lib/node_modules/npm/html/doc/cli/npm-bugs.html
@@ -231,6 +234,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/html/doc/cli/npm-view.html
 /usr/local/lib/node_modules/npm/html/doc/cli/npm-whoami.html
 /usr/local/lib/node_modules/npm/html/doc/cli/npm.html
+/usr/local/lib/node_modules/npm/html/doc/cli/repo.html
 /usr/local/lib/node_modules/npm/html/doc/files/npm-folders.html
 /usr/local/lib/node_modules/npm/html/doc/files/npm-global.html
 /usr/local/lib/node_modules/npm/html/doc/files/npm-json.html
@@ -284,6 +288,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/lib/prune.js
 /usr/local/lib/node_modules/npm/lib/publish.js
 /usr/local/lib/node_modules/npm/lib/rebuild.js
+/usr/local/lib/node_modules/npm/lib/repo.js
 /usr/local/lib/node_modules/npm/lib/restart.js
 /usr/local/lib/node_modules/npm/lib/root.js
 /usr/local/lib/node_modules/npm/lib/run-script.js
@@ -319,6 +324,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/lib/visnup.js
 /usr/local/lib/node_modules/npm/lib/whoami.js
 /usr/local/lib/node_modules/npm/lib/xmas.js
+/usr/local/lib/node_modules/npm/make.bat
 /usr/local/lib/node_modules/npm/man/man1/npm-README.1
 /usr/local/lib/node_modules/npm/man/man1/npm-adduser.1
 /usr/local/lib/node_modules/npm/man/man1/npm-bin.1
@@ -366,6 +372,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/man/man1/npm-view.1
 /usr/local/lib/node_modules/npm/man/man1/npm-whoami.1
 /usr/local/lib/node_modules/npm/man/man1/npm.1
+/usr/local/lib/node_modules/npm/man/man1/repo.1
 /usr/local/lib/node_modules/npm/man/man3/npm-bin.3
 /usr/local/lib/node_modules/npm/man/man3/npm-bugs.3
 /usr/local/lib/node_modules/npm/man/man3/npm-commands.3
@@ -404,6 +411,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/man/man3/npm-view.3
 /usr/local/lib/node_modules/npm/man/man3/npm-whoami.3
 /usr/local/lib/node_modules/npm/man/man3/npm.3
+/usr/local/lib/node_modules/npm/man/man3/repo.3
 /usr/local/lib/node_modules/npm/man/man5/npm-folders.5
 /usr/local/lib/node_modules/npm/man/man5/npm-global.5
 /usr/local/lib/node_modules/npm/man/man5/npm-json.5
@@ -425,11 +433,10 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/abbrev/package.json
 /usr/local/lib/node_modules/npm/node_modules/ansi/.npmignore
 /usr/local/lib/node_modules/npm/node_modules/ansi/README.md
+/usr/local/lib/node_modules/npm/node_modules/ansi/color-spaces.pl
 /usr/local/lib/node_modules/npm/node_modules/ansi/examples/beep/index.js
 /usr/local/lib/node_modules/npm/node_modules/ansi/examples/clear/index.js
 /usr/local/lib/node_modules/npm/node_modules/ansi/examples/cursorPosition.js
-/usr/local/lib/node_modules/npm/node_modules/ansi/examples/imgcat/index.js
-/usr/local/lib/node_modules/npm/node_modules/ansi/examples/imgcat/yoshi.png
 /usr/local/lib/node_modules/npm/node_modules/ansi/examples/progress/index.js
 /usr/local/lib/node_modules/npm/node_modules/ansi/examples/starwars.js
 /usr/local/lib/node_modules/npm/node_modules/ansi/lib/ansi.js
@@ -458,10 +465,12 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/chownr/chownr.js
 /usr/local/lib/node_modules/npm/node_modules/chownr/package.json
 /usr/local/lib/node_modules/npm/node_modules/cmd-shim/.npmignore
+/usr/local/lib/node_modules/npm/node_modules/cmd-shim/.travis.yml
 /usr/local/lib/node_modules/npm/node_modules/cmd-shim/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/cmd-shim/README.md
 /usr/local/lib/node_modules/npm/node_modules/cmd-shim/index.js
 /usr/local/lib/node_modules/npm/node_modules/cmd-shim/package.json
+/usr/local/lib/node_modules/npm/node_modules/editor/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/editor/README.markdown
 /usr/local/lib/node_modules/npm/node_modules/editor/example/beep.json
 /usr/local/lib/node_modules/npm/node_modules/editor/example/edit.js
@@ -508,6 +517,19 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/fstream/lib/socket-reader.js
 /usr/local/lib/node_modules/npm/node_modules/fstream/lib/writer.js
 /usr/local/lib/node_modules/npm/node_modules/fstream/package.json
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/.npmignore
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/History.md
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/Makefile
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/Readme.md
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/index.js
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/package.json
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-git/test.js
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-username-repo/.npmignore
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-username-repo/.travis.yml
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-username-repo/LICENSE
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-username-repo/README.md
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-username-repo/index.js
+/usr/local/lib/node_modules/npm/node_modules/github-url-from-username-repo/package.json
 /usr/local/lib/node_modules/npm/node_modules/glob/.npmignore
 /usr/local/lib/node_modules/npm/node_modules/glob/.travis.yml
 /usr/local/lib/node_modules/npm/node_modules/glob/LICENSE
@@ -525,7 +547,9 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/inherits/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/inherits/README.md
 /usr/local/lib/node_modules/npm/node_modules/inherits/inherits.js
+/usr/local/lib/node_modules/npm/node_modules/inherits/inherits_browser.js
 /usr/local/lib/node_modules/npm/node_modules/inherits/package.json
+/usr/local/lib/node_modules/npm/node_modules/inherits/test.js
 /usr/local/lib/node_modules/npm/node_modules/ini/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/ini/README.md
 /usr/local/lib/node_modules/npm/node_modules/ini/ini.js
@@ -553,9 +577,9 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/lru-cache/AUTHORS
 /usr/local/lib/node_modules/npm/node_modules/lru-cache/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/lru-cache/README.md
+/usr/local/lib/node_modules/npm/node_modules/lru-cache/bench.js
 /usr/local/lib/node_modules/npm/node_modules/lru-cache/lib/lru-cache.js
 /usr/local/lib/node_modules/npm/node_modules/lru-cache/package.json
-/usr/local/lib/node_modules/npm/node_modules/lru-cache/s.js
 /usr/local/lib/node_modules/npm/node_modules/minimatch/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/minimatch/README.md
 /usr/local/lib/node_modules/npm/node_modules/minimatch/minimatch.js
@@ -729,17 +753,11 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/AUTHORS
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/README.md
+/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/core_module_names.json
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/extract_description.js
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/fixer.js
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/normalize.js
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/lib/typos.json
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/.npmignore
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/History.md
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/Makefile
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/Readme.md
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/index.js
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/package.json
-/usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/node_modules/github-url-from-git/test.js
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/node_modules/normalize-package-data/package.json
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/package.json
 /usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js
@@ -754,9 +772,13 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/read/node_modules/mute-stream/package.json
 /usr/local/lib/node_modules/npm/node_modules/read/package.json
 /usr/local/lib/node_modules/npm/node_modules/read/rs.js
+/usr/local/lib/node_modules/npm/node_modules/request/.npmignore
 /usr/local/lib/node_modules/npm/node_modules/request/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/request/README.md
 /usr/local/lib/node_modules/npm/node_modules/request/index.js
+/usr/local/lib/node_modules/npm/node_modules/request/lib/copy.js
+/usr/local/lib/node_modules/npm/node_modules/request/lib/debug.js
+/usr/local/lib/node_modules/npm/node_modules/request/lib/getSafe.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/aws-sign/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/aws-sign/README.md
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/aws-sign/index.js
@@ -773,14 +795,9 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/forever-agent/README.md
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/forever-agent/index.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/forever-agent/package.json
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/.npmignore
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/.travis.yml
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/License
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/Makefile
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/Readme.md
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/lib/form_data.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node-form-data.sublime-project
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node-form-data.sublime-workspace
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node_modules/async/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node_modules/async/README.md
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node_modules/async/component.json
@@ -799,7 +816,6 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/node_modules/combined-stream/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/package.json
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/form-data/sftp-config.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/.npmignore
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/.travis.yml
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/LICENSE
@@ -823,16 +839,6 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/images/boom.png
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/index.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/lib/index.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/.npmignore
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/.travis.yml
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/LICENSE
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/Makefile
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/README.md
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/images/hoek.png
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/index.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/escape.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/index.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/boom/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/cryptiles/.npmignore
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/cryptiles/.travis.yml
@@ -861,16 +867,6 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/examples/time.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/index.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/lib/index.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/.npmignore
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/.travis.yml
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/LICENSE
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/Makefile
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/README.md
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/images/hoek.png
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/index.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/escape.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/index.js
-/usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/node_modules/sntp/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/hawk/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/http-signature/.dir-locals.el
@@ -959,6 +955,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/node-uuid/benchmark/bench.sh
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/node-uuid/benchmark/benchmark-native.c
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/node-uuid/benchmark/benchmark.js
+/usr/local/lib/node_modules/npm/node_modules/request/node_modules/node-uuid/component.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/node-uuid/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/node-uuid/uuid.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/oauth-sign/LICENSE
@@ -976,6 +973,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/tunnel-agent/index.js
 /usr/local/lib/node_modules/npm/node_modules/request/node_modules/tunnel-agent/package.json
 /usr/local/lib/node_modules/npm/node_modules/request/package.json
+/usr/local/lib/node_modules/npm/node_modules/request/request.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/googledoodle.jpg
 /usr/local/lib/node_modules/npm/node_modules/request/tests/run.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/server.js
@@ -994,6 +992,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/tests/ssl/npm-ca.crt
 /usr/local/lib/node_modules/npm/node_modules/request/tests/ssl/test.crt
 /usr/local/lib/node_modules/npm/node_modules/request/tests/ssl/test.key
+/usr/local/lib/node_modules/npm/node_modules/request/tests/test-agentOptions.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-basic-auth.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-body.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-defaults.js
@@ -1009,6 +1008,7 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-httpModule.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-https-strict.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-https.js
+/usr/local/lib/node_modules/npm/node_modules/request/tests/test-isUrl.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-localAddress.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-oauth.js
 /usr/local/lib/node_modules/npm/node_modules/request/tests/test-onelineproxy.js
@@ -1049,7 +1049,6 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/semver/foot.js
 /usr/local/lib/node_modules/npm/node_modules/semver/head.js
 /usr/local/lib/node_modules/npm/node_modules/semver/package.json
-/usr/local/lib/node_modules/npm/node_modules/semver/r.js
 /usr/local/lib/node_modules/npm/node_modules/semver/semver.browser.js
 /usr/local/lib/node_modules/npm/node_modules/semver/semver.browser.js.gz
 /usr/local/lib/node_modules/npm/node_modules/semver/semver.js
@@ -1059,6 +1058,25 @@ rm -rf %{buildroot}
 /usr/local/lib/node_modules/npm/node_modules/sha/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/sha/README.md
 /usr/local/lib/node_modules/npm/node_modules/sha/index.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/LICENSE
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/README.md
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/duplex.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/examples/CAPSLOCKTYPER.JS
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/examples/typer-fsr.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/examples/typer.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/float.patch
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/fs.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/lib/_stream_duplex.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/lib/_stream_passthrough.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/lib/_stream_readable.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/lib/_stream_transform.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/lib/_stream_writable.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/package.json
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/passthrough.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/readable.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/transform.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/writable.js
+/usr/local/lib/node_modules/npm/node_modules/sha/node_modules/readable-stream/zlib.js
 /usr/local/lib/node_modules/npm/node_modules/sha/package.json
 /usr/local/lib/node_modules/npm/node_modules/slide/LICENSE
 /usr/local/lib/node_modules/npm/node_modules/slide/README.md
