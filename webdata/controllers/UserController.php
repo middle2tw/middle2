@@ -77,7 +77,7 @@ class UserController extends Pix_Controller
         }
 
         if (!$this->user->verifyPassword($_POST['oldpassword'])) {
-            Logger::log(array(array('category' => 'login', 'message' => time() . " change-password-wrong-password {$_SERVER['REMOTE_ADDR']} user=" . urlencode($_POST['user']) . ",agent=" . urlencode($_SERVER['HTTP_USER_AGENT']))));
+            Logger::log(array(array('category' => 'login', 'message' => time() . " change-password-wrong-password {$_SERVER['REMOTE_ADDR']} user=" . urlencode($this->user->name) . ",agent=" . urlencode($_SERVER['HTTP_USER_AGENT']))));
             return $this->alert('Wrong password', '/');
         }
 
@@ -90,7 +90,7 @@ class UserController extends Pix_Controller
         }
 
         $this->user->setPassword($_POST['newpassword']);
-        Logger::log(array(array('category' => 'login', 'message' => time() . " change-password {$_SERVER['REMOTE_ADDR']} user=" . urlencode($_POST['user']) . ",agent=" . urlencode($_SERVER['HTTP_USER_AGENT']))));
+        Logger::log(array(array('category' => 'login', 'message' => time() . " change-password {$_SERVER['REMOTE_ADDR']} user=" . urlencode($this->user->name) . ",agent=" . urlencode($_SERVER['HTTP_USER_AGENT']))));
 
         return $this->alert('success!', '/');
 
