@@ -134,7 +134,7 @@ function main()
             file_put_contents($log_file, date('c') . " [clone] mounting nfs project directory\n", FILE_APPEND);
             $uid = $id + 20000;
             mkdir("/srv/chroot/{$id}/srv/data");
-            system('python ' . __DIR__ . "/xmp.py -o allow_other -o root=/srv/project_data/{$project_name} -o uid={$uid} -o gid=99 /srv/chroot/{$id}/srv/data");
+            system("mount --bind /srv/project_data/{$project_name} /srv/chroot/{$id}/srv/data");
             touch("/srv/chroot/{$id}.mounting");
         }
 
@@ -181,6 +181,7 @@ function main()
 
         file_put_contents($log_file, date('c') . " [restart-web] loading project variables\n", FILE_APPEND);
         $params = array('project=' . escapeshellcmd($project->name));
+        $params[] = 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
         foreach ($project->variables as $variable) {
             $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
         }
@@ -212,6 +213,7 @@ function main()
         if ($_ENV['TERM']) {
             $params[] = 'TERM=' . $_ENV['TERM'];
         }
+        $params[] = 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
         $run_cmd = 'cd /srv/web; ' . urldecode($run_cmd);
 
         file_put_contents($log_file, date('c') . " [run] start\n", FILE_APPEND);
