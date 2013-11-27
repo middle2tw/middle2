@@ -21,7 +21,7 @@ elif [ -f "/srv/web/web.rb" ]; then
 #elif [ -f "/srv/web/index.php" ]; then
 else
 # build /srv/env.conf
-    env | awk -F '=' '{print "env[" $1 "]=" $2}' > /srv/logs/env.conf
+    env | awk -F '=' '{print "env[" $1 "]=\"" substr($0, index($0, "=") + 1) "\""}' > /srv/logs/env.conf
 
     # start php-fpm
     /usr/sbin/php-fpm
