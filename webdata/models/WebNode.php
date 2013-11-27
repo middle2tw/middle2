@@ -210,6 +210,9 @@ class WebNodeRow extends Pix_Table_Row
         } else {
             $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command));
         }
+        if ($session === false) {
+            throw new Exception("ssh2_exec failed");
+        }
         $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
         $ret = new StdClass;
         $ret->stdout = $stream;

@@ -124,6 +124,10 @@ class SSHServe
 
         while (array_key_exists('node_output', $read_streams)) {
             foreach ($read_streams as $key => $read_stream) {
+                if (!is_resource($read_stream)) {
+                    unset($read_stream[$key]);
+                    continue;
+                }
                 if (false !== ($line = fread($read_stream, 4096))) {
                     if (feof($read_stream)) {
                         if ($key === 'user_input') {
