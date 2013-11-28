@@ -67,6 +67,13 @@ class SSHServe
         system("tail -f /srv/logs/scribed/{$category}/{$category}_current");
     }
 
+    public function signal_handler($signal)
+    {
+        if ($signal == SIGINT) {
+            fwrite($this->node_stdio, chr(3));
+        }
+    }
+
     public function runCommand($command, $args)
     {
         list($project_name, $run_command) = explode(' ', $args, 2);
@@ -121,6 +128,10 @@ class SSHServe
         stream_set_blocking($ret->stdout, false);
         stream_set_blocking($ret->stderr, false);
         stream_set_blocking($user_input, false);
+
+        declare(ticks = 1);
+        $this->node_stdio = $ret->stdio;
+        pcntl_signal(SIGINT, array($this, "signal_handler"));
 
         while (array_key_exists('node_output', $read_streams)) {
             foreach ($read_streams as $key => $read_stream) {
