@@ -4,6 +4,7 @@
 define('LOCK_FILE', '/tmp/hisoku-run-cron');
 $fp = fopen(LOCK_FILE, 'w+');
 if (!flock($fp, LOCK_EX | LOCK_NB)) {
+    Hisoku::alert("Middle2 Cron error", "Cron is locking");
     throw new Exception(LOCK_FILE . ' is locking');
 }
 
