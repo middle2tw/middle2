@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+include(__DIR__ . '/../../webdata/init.inc.php');
 define('LOCK_FILE', '/tmp/hisoku-run-cron');
 $fp = fopen(LOCK_FILE, 'w+');
 if (!flock($fp, LOCK_EX | LOCK_NB)) {
@@ -12,7 +13,6 @@ ftruncate($fp, 0);      // truncate file
 fwrite($fp, getmypid());
 fflush($fp);            // flush output before releasing the lock
 
-include(__DIR__ . '/../../webdata/init.inc.php');
 CronJob::runPendingJobs();
 
 flock($fp, LOCK_UN);    // release the lock
