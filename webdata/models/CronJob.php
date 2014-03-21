@@ -85,6 +85,9 @@ class CronJob extends Pix_Table
                     continue;
                 }
 
+                if (function_exists('setproctitle')) {
+                    setproctitle("php-fpm: Cron {$cronjob->project->name}: {$cronjob->job}");
+                }
                 $cronjob->runJob();
                 exit;
             }
