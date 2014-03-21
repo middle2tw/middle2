@@ -7,6 +7,7 @@ $fp = fopen(LOCK_FILE, 'w+');
 if (!flock($fp, LOCK_EX | LOCK_NB)) {
     list($time, $pid) = explode(' ', file_get_contents(LOCK_FILE . '.pid'));
     if ($time < time() - 3600) {
+        file_put_contents(LOCK_FILE . '.pid', time() . ' ' . $pid);
         Hisoku::alert("Middle2 Cron error", "Cron is locking since " . date('Y/m/d H:i:s', $time));
     }
     throw new Exception(LOCK_FILE . ' is locking');
