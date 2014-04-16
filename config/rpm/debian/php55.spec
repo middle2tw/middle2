@@ -16,7 +16,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %setup -q -n php-5.5.6
 
 %build
-%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc --enable-mysqlnd --with-mysql --with-pgsql --with-pdo-mysql --with-pdo-pgsql --with-mysqli --with-zlib --with-gettext --enable-pcntl --with-curl --with-openssl --with-gd
+%configure --enable-fpm --with-config-file-scan-dir=/etc/php.d/ --with-config-file-path=/etc --enable-mysqlnd --with-mysql --with-pgsql --with-pdo-mysql --with-pdo-pgsql --with-mysqli --with-zlib --with-gettext --enable-pcntl --with-curl --with-openssl --with-gd --with-libjpeg
 make %{?_smp_mflags}
 
 
