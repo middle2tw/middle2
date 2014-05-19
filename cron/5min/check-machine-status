@@ -16,7 +16,7 @@ foreach (Machine::search(1) as $machine) {
 
     // 看看十分鐘內有沒有記錄
     if (!$machine_status or (time() - $machine_status->updated_at > 600)) {
-        $messages[] = array($machine, "超過十分鐘沒有回傳記錄了, 上次時間：" . date('c', $machine->updated_at));
+        $messages[] = array($machine, "超過十分鐘沒有回傳記錄了, 上次時間：" . date('c', $machine_status->updated_at));
         continue;
     }
 
