@@ -52,6 +52,7 @@ function main()
         exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
         exec("chmod 666 /srv/chroot/{$id}/dev/*");
         exec("chown -R deploy:nogroup /srv/chroot/{$id}");
+        exec("mount -o hidepid=2 proc /srv/chroot/{$id}/proc -t proc");
         exec("chmod 755 /srv/chroot/{$id}");
         if (!file_exists("/srv/chroot/{$id}/tmp")) {
             exec("mkdir /srv/chroot/{$id}/tmp");
@@ -275,6 +276,10 @@ function main()
             system("umount /srv/chroot/{$id}/srv/data");
             // TODO: 要確保真的有被 umount
             unlink("/srv/chroot/{$id}.mounting");
+        }
+
+        if (file_exists("/srv/chroot/{$id}/proc")) {
+            system("umount /srv/chroot/{$id}/proc");
         }
 
         file_put_contents($log_file, date('c') . " [shutdown] delete /srv/chroot/{$id}\n", FILE_APPEND);
