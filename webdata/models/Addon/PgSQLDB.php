@@ -47,6 +47,7 @@ class Addon_PgSQLDBRow extends Pix_Table_Row
             $addon_member = Addon_PgSQLDBMember::find(array($this->id, $project->id));
             $db->query("REVOKE ALL PRIVILEGES ON DATABASE \"{$this->database}\" FROM \"{$addon_member->username}\"");
         }
+        $db->query("ALTER DATABASE \"{$this->database}\" OWNER TO \"{$username}\"");
 
         $addon_member->update(array(
             'readonly' => $readonly ? 1: 0,
