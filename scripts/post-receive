@@ -77,3 +77,6 @@ if (!is_null($package_filename) and !is_null($info)) {
 $project->update(array('commit' => $newrev));
 
 error_log('deploy finished. visit http://' . $project->getFirstDomain() . '/');
+foreach ($project->custom_domains as $domain) {
+    error_log(' or http://' . $domain->domain);
+}
