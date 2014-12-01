@@ -87,7 +87,7 @@ class Addon_MySQLDB extends Pix_Table
         }
 
         $ips = Hisoku::getMysqlServers();
-        $host = $ips[0];
+        $host = array_pop($ips);
         $database = 'user_' . $project->name;
 
         $link = new mysqli($ips[0], getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
