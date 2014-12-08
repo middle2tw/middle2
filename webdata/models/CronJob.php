@@ -17,6 +17,7 @@ class CronJobRow extends Pix_Table_Row
             'start_at' => time(),
         ));
         $node->updateAccessAt();
+        $node->update(array('cron_id' => $this->id));
         $ret = $node->runJob($this->job);
 
         stream_set_blocking($ret->stdout, true);
@@ -27,6 +28,7 @@ class CronJobRow extends Pix_Table_Row
         $output = (stream_get_contents($ret->stderr));
         $output = (stream_get_contents($ret->stdio));
         $node->markAsWait();
+        $node->update(array('cron_id' => 0));
     }
 
     public function getNextRunAt()
