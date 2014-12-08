@@ -146,7 +146,6 @@ class FirewallGenerator
             ),
             'dev' => array(
                 array('22', array('PUBLIC')), // 以後要用 VPN 把這個 rule 拿掉
-                array('5566', array('PUBLIC')), // 以後要用 VPN 把這個 rule 拿掉
             ),
             'nfs' => array(
                 array('111', array('node')),
