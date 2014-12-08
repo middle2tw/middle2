@@ -24,6 +24,7 @@ class WebNodeRow extends Pix_Table_Row
         $this->update(array(
             'project_id' => 0,
             'commit' => '',
+            'cron_id' => 0,
             'status' => WebNode::STATUS_OVER,
         ));
     }
