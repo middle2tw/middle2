@@ -139,6 +139,7 @@ class CronJob extends Pix_Table
                         setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                         error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     }
+                    Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job}, with commit change");
                     $node->markAsUnused('commit change');
                     $node->resetNode();
                     $workerjob->runJob();
@@ -159,6 +160,7 @@ class CronJob extends Pix_Table
                         setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                         error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     }
+                    Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job} with no process found on " . long2ip($node->ip) . ":{$node->port}");
                     $workerjob->runJob();
                     exit;
                 }
@@ -175,6 +177,7 @@ class CronJob extends Pix_Table
                     setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                 }
+                Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job}");
                 $workerjob->runJob();
                 exit;
             }
