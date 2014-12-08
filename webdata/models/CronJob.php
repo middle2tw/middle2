@@ -139,6 +139,7 @@ class CronJob extends Pix_Table
                         setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                         error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     }
+                    $node->markAsUnused('commit change');
                     $node->resetNode();
                     $workerjob->runJob();
                     exit;
