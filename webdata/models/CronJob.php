@@ -2,6 +2,11 @@
 
 class CronJobRow extends Pix_Table_Row
 {
+    public function getEAVs()
+    {
+        return EAV::search(array('table' => 'CronJob', 'id' => $this->id));
+    }
+
     public function runJob()
     {
         $this->update(array('last_run_at' => time()));
@@ -67,6 +72,10 @@ class CronJob extends Pix_Table
 
         $this->addIndex('project', array('project_id'));
         $this->addIndex('period_lastrunat', array('period', 'last_run_at'));
+
+        $this->_hooks['eavs'] = array('get' => 'getEAVs');
+
+        $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
     }
 
     public static function getPeriodTime($period_id)
