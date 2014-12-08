@@ -101,6 +101,10 @@ lb_core.getBackendHost2 = function(host, port, callback){
         return callback({success: true, host: main_page_host, port: main_page_port, is_main_page: true});
     }
 
+    if (host.match('\.srwang-dev\.ronny\.tw')) {
+        return callback({success: true, host: 'localhost', port: 5566});
+    }
+
     // TODO: 要限內部網路才能做這件事
     if ('healthcheck' == host) {
         return callback({success: true, type: 'healthcheck'});
