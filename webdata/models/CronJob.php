@@ -53,6 +53,7 @@ class CronJob extends Pix_Table
         2 => 3600,
         3 => 86400,
         4 => 60,
+        99 => 0,
     );
 
     public function init()
@@ -64,7 +65,7 @@ class CronJob extends Pix_Table
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['project_id'] = array('type' => 'int');
-        // 0 - disable, 1 - 10minutes, 2 - hourly, 3 - daily, 4 - 1munute
+        // 0 - disable, 1 - 10minutes, 2 - hourly, 3 - daily, 4 - 1munute, 99 - worker
         $this->_columns['period'] = array('type' => 'tinyint');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
         $this->_columns['last_run_at'] = array('type' => 'int');
@@ -109,5 +110,74 @@ class CronJob extends Pix_Table
         }
         $status = 0;
         pcntl_wait($status);
+    }
+
+    public function runWorker()
+    {
+        // 檢查所有 Worker 是否活著或是版本有更新
+        foreach (self::search(array('period' => 99)) as $workerjob) {
+            $nodes = WebNode::search(array('cron_id' => $workerjob->id));
+            
+            if (count($nodes) > 1) {
+                // TODO: 跑了多隻 worker ，應該要砍掉一隻，未來再支援同時多隻 worker
+            }
+
+            $node = $nodes->first();
+
+            if ($node) {
+                // 線上跑的版本不相同，表示該砍掉重跑
+                if ($node->commit != $workerjob->project->commit) {
+                    // 砍掉重跑
+                    $pid = pcntl_fork();
+
+                    if ($pid) {
+                        Pix_Table_Db_Adapter_MysqlConf::resetConnect();
+                        continue;
+                    }
+
+                    if (function_exists('setproctitle')) {
+                        setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                        error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                    }
+                    $node->resetNode();
+                    $workerjob->runJob();
+                    exit;
+                }
+
+                $processes = $node->getNodeProcesses();
+                if (0 == count($processes)) {
+                    // 沒有任何 process 了，應該要重跑 worker (不需要 resetNode ，因為在 WebNode 那邊會做)
+                    $pid = pcntl_fork();
+
+                    if ($pid) {
+                        Pix_Table_Db_Adapter_MysqlConf::resetConnect();
+                        continue;
+                    }
+
+                    if (function_exists('setproctitle')) {
+                        setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                        error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                    }
+                    $workerjob->runJob();
+                    exit;
+                }
+            } else {
+                // 沒有任何 process 了，應該要重跑 worker (不需要 resetNode ，因為在 WebNode 那邊會做)
+                $pid = pcntl_fork();
+
+                if ($pid) {
+                    Pix_Table_Db_Adapter_MysqlConf::resetConnect();
+                    continue;
+                }
+
+                if (function_exists('setproctitle')) {
+                    setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                    error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                }
+                $workerjob->runJob();
+                exit;
+            }
+        }
+        $status = 0;
     }
 }
