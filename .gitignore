@@ -1,3 +1,4 @@
 .*.swp
 webdata/config.php
 webdata/config
+firewall/outputs
