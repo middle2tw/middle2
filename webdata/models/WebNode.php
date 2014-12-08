@@ -262,6 +262,8 @@ class WebNode extends Pix_Table
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
         $this->_columns['access_at'] = array('type' => 'int', 'default' => 0);
+        // 記錄他是哪個 cron 生出來的
+        $this->_columns['cron_id'] = array('type' => 'int', 'default' => 0);
 
         $this->_relations['project'] = array('rel' => 'has_one', 'type' => 'Project', 'foreign_key' => 'project_id');
         $this->_relations['eavs'] = array('rel' => 'has_many', 'type' => 'WebNodeEAV', 'foreign_key' => array('ip', 'port'));
