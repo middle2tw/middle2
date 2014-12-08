@@ -5,11 +5,7 @@ class ProjectVariableRow extends Pix_Table_Row
     protected function _releaseNodes()
     {
         foreach ($this->project->webnodes as $webnode) {
-            $webnode->update(array(
-                'project_id' => 0,
-                'commit' => '',
-                'status' => WebNode::STATUS_OVER,
-            ));
+            $webnode->markAsUnused('change project variable');
         }
     }
 
