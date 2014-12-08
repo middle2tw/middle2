@@ -41,6 +41,7 @@ class CronJobRow extends Pix_Table_Row
 class CronJob extends Pix_Table
 {
     protected static $_period_map = array(
+        0 => 0,
         1 => 600,
         2 => 3600,
         3 => 86400,
@@ -56,7 +57,7 @@ class CronJob extends Pix_Table
 
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['project_id'] = array('type' => 'int');
-        // 1 - 10minutes, 2 - hourly, 3 - daily, 4 - 1munute
+        // 0 - disable, 1 - 10minutes, 2 - hourly, 3 - daily, 4 - 1munute
         $this->_columns['period'] = array('type' => 'tinyint');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
         $this->_columns['last_run_at'] = array('type' => 'int');
@@ -76,6 +77,9 @@ class CronJob extends Pix_Table
     public static function runPendingJobs()
     {
         foreach (self::$_period_map as $period_id => $time) {
+            if (!$time) {
+                continue;
+            }
             // 多給 5 秒的彈性..這樣才不會 10 分鐘 cron 跑到 11 分鐘
             foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (5 + time() - $time)) as $cronjob) {
                 $pid = pcntl_fork();
