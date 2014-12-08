@@ -187,5 +187,12 @@ class CronJob extends Pix_Table
             }
         }
         $status = 0;
+
+        foreach (WebNode::search("cron_id > 0") as $webnode) {
+            // 如果找不到 job 了，或者是他已經變成 disable job 了，就殺了他
+            if (!$job = CronJob::find($webnode->cron_id) or $job->period == 0) {
+                $webnode->markAsUnused('job not found or is disabled');
+            }
+        }
     }
 }
