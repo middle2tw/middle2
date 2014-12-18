@@ -27,7 +27,7 @@ for ($i = 1; $i < count($df_result); $i ++) {
 $ret->disk = array_values($disks);
 
 // cpu 資訊
-$ret->process = trim(`top -b -n 1 -c`);
+$ret->process = trim(`top -b -n 1 -c -w 150`);
 $ret->dmesg = trim(`dmesg | tail -n 100`);
 
 // TODO: 增加 firewall 是否有正常跑起來的資訊
