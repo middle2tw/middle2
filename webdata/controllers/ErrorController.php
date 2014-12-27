@@ -15,5 +15,6 @@ class ErrorController extends Pix_Controller
 
     public function notfoundAction()
     {
+        header("HTTP/1.0 404 Not Found");
     }
 }
