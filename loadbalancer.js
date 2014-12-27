@@ -101,7 +101,7 @@ lb_core.getBackendHost2 = function(host, port, callback){
         return callback({success: true, host: main_page_host, port: main_page_port, is_main_page: true});
     }
 
-    if (host.match('\.srwang-dev\.ronny\.tw')) {
+    if (host == config.TEST_HOST) {
         return callback({success: true, host: 'localhost', port: 5566});
     }
 
