@@ -1,0 +1,30 @@
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<ul>
+    <?php foreach (SSLKey::search(1) as $ssl_key) { ?>
+    <li><?= $this->escape($ssl_key->domain) ?>
+    <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= $this->escape($ssl_key->domain) ?> 的 SSL" data-link="/admin/deletesslkey?domain=<?= urlencode($ssl_key->domain) ?>">Delete</button>
+    </li>
+    <?php } ?>
+</ul>
+新增 Key:
+<form method="post" action="/admin/addsslkey">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    domain: <input type="text" name="domain"><br>
+    Key : <textarea name="key"></textarea><br>
+    CERT: <textarea name="cert"></textarea><br>
+    CA: <textarea name="ca[]"></textarea><br>
+    <button id="add-ca">More CA</button>
+    <button type="submit">Add Key</button>
+</form>
+<script>
+$('#add-ca').click(function(e){
+    e.preventDefault();
+
+    $('<textarea name="ca[]"></textarea><br>').insertBefore($('#add-ca'));
+
+});
+</script>
+
+
+<?= $this->partial('/common/footer.phtml', $this) ?>
