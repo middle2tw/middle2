@@ -5,6 +5,7 @@ var Memcache = require('memcache');
 var mysql = require('mysql');
 var SSH2 = require('ssh2');
 var fs = require('fs');
+var crypto = require('crypto');
 
 var loadConfig = function(){
     var content = fs.readFileSync('/srv/config/config.php');
@@ -249,12 +250,28 @@ lb_core.getBackendHost = function(host, port, callback){
     }).end();
 };
 
+var secureContext = {};
+
+var renewSSLkeys = function() {
+    mysql_connection.query("SELECT * FROM `ssl_keys`", function(err, rows, fields){
+        for (var i = 0; i < rows.length; i ++) {
+            var row = rows[i];
+            secureContext[row.domain] = crypto.createCredentials(JSON.parse(row.config)).context;
+        }
+    });
+}
+renewSSLkeys();
+
 var http_main_request = http.createServer();
 var https_options = {
     ca: [fs.readFileSync('/srv/config/middle2.ca.crt')],
     key: fs.readFileSync('/srv/config/middle2.key'),
-    cert: fs.readFileSync('/srv/config/middle2.crt')
+    cert: fs.readFileSync('/srv/config/middle2.crt'),
+    SNICallback: function(domain) {
+        return secureContext[domain];
+    }
 };
+
 var https_main_request = https.createServer(https_options);
 var request_count = 0;
 var request_serial = 0;
