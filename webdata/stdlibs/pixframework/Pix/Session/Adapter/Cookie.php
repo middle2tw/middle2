@@ -45,7 +45,7 @@ class Pix_Session_Adapter_Cookie extends Pix_Session_Adapter
 
     protected function _getCookieDomain()
     {
-        return $this->hasOption('cookie_domain') ? $this->getOption('cookie_domain') : $_SERVER['SERVER_NAME'];
+        return $this->hasOption('cookie_domain') ? $this->getOption('cookie_domain') : $_SERVER['HTTP_HOST'];
     }
 
     protected function _getTimeout()
