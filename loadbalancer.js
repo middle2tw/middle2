@@ -265,7 +265,11 @@ renewSSLkeys();
 
 var http_main_request = http.createServer();
 var https_options = {
-    ca: [fs.readFileSync('/srv/config/middle2.ca.crt')],
+    ca: [
+        fs.readFileSync('/srv/config/middle2.ca.crt'),
+        fs.readFileSync('/srv/config/middle2.ca.2.crt'),
+        fs.readFileSync('/srv/config/middle2.ca.3.crt')
+    ],
     key: fs.readFileSync('/srv/config/middle2.key'),
     cert: fs.readFileSync('/srv/config/middle2.crt'),
     secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
