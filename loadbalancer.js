@@ -6,6 +6,7 @@ var mysql = require('mysql');
 var SSH2 = require('ssh2');
 var fs = require('fs');
 var crypto = require('crypto');
+var constants = require('constants');
 
 var loadConfig = function(){
     var content = fs.readFileSync('/srv/config/config.php');
@@ -267,6 +268,7 @@ var https_options = {
     ca: [fs.readFileSync('/srv/config/middle2.ca.crt')],
     key: fs.readFileSync('/srv/config/middle2.key'),
     cert: fs.readFileSync('/srv/config/middle2.crt'),
+    secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
     SNICallback: function(domain) {
         return secureContext[domain];
     }
