@@ -258,6 +258,9 @@ class AdminController extends Pix_Controller
 
     public function sslkeyAction()
     {
+        if ($_GET['domain']) {
+            $this->view->sslkey = SSLKey::find($_GET['domain']);
+        }
     }
 
     public function addsslkeyAction()
@@ -277,6 +280,25 @@ class AdminController extends Pix_Controller
         return $this->alert('add key done!', '/admin/sslkey');
     }
 
+    public function editsslkeyAction()
+    {
+        if ($_POST['sToken'] != Hisoku::getStoken()) {
+            return $this->alert('wrong stoken', '/admin/sslkey');
+        }
+
+        if (!$sslkey = SSLKey::find($_GET['domain'])) {
+            return $this->alert('wrong stoken', '/admin/sslkey');
+        }
+
+        $config = new StdClass;
+        $config->ca = array_filter($_POST['ca'], function($a) { return $a; });
+        $config->key = $_POST['key'];
+        $config->cert = $_POST['cert'];
+        $sslkey->update(array(
+            'config' => json_encode($config),
+        ));
+        return $this->alert('update key done!', '/admin/sslkey');
+    }
     public function deletesslkeyAction()
     {
         if ($_POST['sToken'] != Hisoku::getStoken()) {

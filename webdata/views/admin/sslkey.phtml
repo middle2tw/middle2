@@ -2,18 +2,30 @@
 <?= $this->partial('/admin/header.phtml', $this) ?>
 <ul>
     <?php foreach (SSLKey::search(1) as $ssl_key) { ?>
-    <li><?= $this->escape($ssl_key->domain) ?>
+    <li>
+    <a href="?domain=<?= urlencode($ssl_key->domain) ?>">
+        <?= $this->escape($ssl_key->domain) ?>
+    </a>
     <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= $this->escape($ssl_key->domain) ?> 的 SSL" data-link="/admin/deletesslkey?domain=<?= urlencode($ssl_key->domain) ?>">Delete</button>
     </li>
     <?php } ?>
 </ul>
-新增 Key:
-<form method="post" action="/admin/addsslkey">
+<?= $this->sslkey ? '修改' : '新增' ?> Key:
+<form method="post" action="<?= $this->sslkey ? '/admin/editsslkey?domain=' . $this->sslkey->domain : '/admin/addsslkey' ?>">
     <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
-    domain: <input type="text" name="domain"><br>
-    Key : <textarea name="key"></textarea><br>
-    CERT: <textarea name="cert"></textarea><br>
-    CA: <textarea name="ca[]"></textarea><br>
+    domain:
+    <?php if ($this->sslkey) { ?>
+    <?= $this->escape($this->sslkey->domain) ?>
+    <?php } else { ?>
+    <input type="text" name="domain"><br>
+    <?php } ?>
+    Key : <textarea name="key"><?= $this->escape($this->sslkey ? $this->sslkey->get('key') : '') ?></textarea><br>
+    CERT: <textarea name="cert"><?= $this->escape($this->sslkey ? $this->sslkey->get('cert') : '') ?></textarea><br>
+    CA: 
+    <?php foreach ($this->sslkey ? $this->sslkey->get('ca') : array() as $ca) { ?>
+    <textarea name="ca[]"><?= $this->escape($ca) ?></textarea><br>
+    <?php } ?>
+    <textarea name="ca[]"></textarea><br>
     <button id="add-ca">More CA</button>
     <button type="submit">Add Key</button>
 </form>
