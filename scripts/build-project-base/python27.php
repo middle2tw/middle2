@@ -80,7 +80,7 @@ class Prebuilder
 
         error_log('find diff file...');
         // 把新解進去的檔案都改成 2001/1/1
-        system("find {$root} -printf '%TY%Tm%Td,,,%p\n' | grep -v '^20000101' | awk -F,,, '{print \"\\\"\"$2\"\\\"\"}' | xargs -n 100 touch --no-dereference --date=20000101");
+        system("find {$root} -printf '%TY%Tm%Td,,,%p\n' | grep -v ',,,/proc' | grep -v '^20000101' | awk -F,,, '{print \"\\\"\"$2\"\\\"\"}' | xargs -n 100 touch --no-dereference --date=20000101");
 
         error_log('pip installing ...');
         // 安裝 python package
@@ -117,9 +117,9 @@ class Prebuilder
         error_log('build tar.gz...');
         // TODO: 處理過程中會不會處理到一半的檔案被人拿走...
         // 處理檔案
-        system("find . -type f -printf \"%TY%Tm%Td %p\n\" | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
+        system("find . -type f -printf \"%TY%Tm%Td %p\n\" | grep -v ',,,/proc' | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
         // 處理 symbolic link
-        system("find . -type l -printf \"%TY%Tm%Td %p\n\" | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
+        system("find . -type l -printf \"%TY%Tm%Td %p\n\" | grep -v ',,,/proc' | grep -v '^20000101' | awk '{print $2}' | xargs -n 100 tar -uf " . escapeshellarg($project_file . '.tar'));
 
         system("gzip --force {$project_file}.tar");
 
