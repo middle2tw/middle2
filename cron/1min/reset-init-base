@@ -57,7 +57,7 @@ class Initer
         stream_get_contents($stream);
 
         // 把修改時間全改成 2000/1/1 以方便之後找出 diff
-        system("find /srv/chroot/{$id} -exec touch --no-dereference --date=20000101 {} \;");
+        system("find /srv/chroot/{$id} -not \( -path /srv/chroot/{$id}/proc -prune \) -exec touch --no-dereference --date=20000101 {} \;");
 
         // 完工，把 initing 拿掉進入 available 狀態
         unlink("/srv/chroot/{$id}.initing");
