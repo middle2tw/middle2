@@ -34,26 +34,26 @@ foreach (Machine::search(1) as $machine) {
         $messages[] = array($machine, "無法正確取得硬碟資訊", $machine_status);
     } else {
         foreach ($disk_infos as $disk_info) {
-            if ($disk_info->disk_capacity and trim($disk_info->disk_capacity, '%') > 80) {
-                $messages[] = array($machine, "硬碟 {$disk_info->mount_point} 使用空間超過 80%: " . $disk_info->disk_capacity, $machine_status);
-            } elseif ($disk_info->disk_capacity and trim($disk_info->disk_capacity, '%') > 70) {
+            if ($disk_info->disk_capacity and trim($disk_info->disk_capacity, '%') > 90) {
+                $messages[] = array($machine, "硬碟 {$disk_info->mount_point} 使用空間超過 90%: " . $disk_info->disk_capacity, $machine_status);
+            } elseif ($disk_info->disk_capacity and trim($disk_info->disk_capacity, '%') > 80) {
                 // 一小時只噴一次，以免被信件灌爆
-                $cache_key = "MachineStatus:{$machine->machine_id}:diskover70-sent";
+                $cache_key = "MachineStatus:{$machine->machine_id}:diskover80-sent";
                 $last_sent = $cache->get($cache_key);
                 if (!$last_sent or time() - $last_sent > 3600) {
-                    $messages[] = array($machine, "硬碟 {$disk_info->mount_point} 使用空間超過 70%: " . $disk_info->disk_capacity, $machine_status);
+                    $messages[] = array($machine, "硬碟 {$disk_info->mount_point} 使用空間超過 80%: " . $disk_info->disk_capacity, $machine_status);
                     $cache->set($cache_key, time());
                 }
             }
 
-            if ($disk_info->inode_capacity and trim($disk_info->inode_capacity, '%') > 80) {
-                $messages[] = array($machine, "iNode {$disk_info->mount_point} 使用空間超過 80%: " . $disk_info->inode_capacity, $machine_status);
-            } elseif ($disk_info->inode_capacity and trim($disk_info->inode_capacity, '%') > 70) {
+            if ($disk_info->inode_capacity and trim($disk_info->inode_capacity, '%') > 90) {
+                $messages[] = array($machine, "iNode {$disk_info->mount_point} 使用空間超過 90%: " . $disk_info->inode_capacity, $machine_status);
+            } elseif ($disk_info->inode_capacity and trim($disk_info->inode_capacity, '%') > 80) {
                 // 一小時只噴一次，以免被信件灌爆
-                $cache_key = "MachineStatus:{$machine->machine_id}:inodeover70-sent";
+                $cache_key = "MachineStatus:{$machine->machine_id}:inodeover80-sent";
                 $last_sent = $cache->get($cache_key);
                 if (!$last_sent or time() - $last_sent > 3600) {
-                    $messages[] = array($machine, "iNode {$disk_info->mount_point} 使用空間超過 70%: " . $disk_info->inode_capacity, $machine_status);
+                    $messages[] = array($machine, "iNode {$disk_info->mount_point} 使用空間超過 80%: " . $disk_info->inode_capacity, $machine_status);
                     $cache->set($cache_key, time());
                 }
             }
