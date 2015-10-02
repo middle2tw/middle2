@@ -105,8 +105,8 @@ class CronJob extends Pix_Table
                     continue;
                 }
 
-                if (function_exists('setproctitle')) {
-                    setproctitle("php-fpm: Cron {$cronjob->project->name}: {$cronjob->job}");
+                if (function_exists('setthreadtitle')) {
+                    setthreadtitle("php-fpm: Cron {$cronjob->project->name}: {$cronjob->job}");
                 }
                 $cronjob->runJob();
                 exit;
@@ -139,8 +139,8 @@ class CronJob extends Pix_Table
                         continue;
                     }
 
-                    if (function_exists('setproctitle')) {
-                        setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                    if (function_exists('setthreadtitle')) {
+                        setthreadtitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                         error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     }
                     Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job}, with commit change");
@@ -160,8 +160,8 @@ class CronJob extends Pix_Table
                         continue;
                     }
 
-                    if (function_exists('setproctitle')) {
-                        setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                    if (function_exists('setthreadtitle')) {
+                        setthreadtitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                         error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     }
                     Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job} with no process found on " . long2ip($node->ip) . ":{$node->port}");
@@ -177,8 +177,8 @@ class CronJob extends Pix_Table
                     continue;
                 }
 
-                if (function_exists('setproctitle')) {
-                    setproctitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
+                if (function_exists('setthreadtitle')) {
+                    setthreadtitle("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                 }
                 Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job}");
