@@ -95,7 +95,7 @@ class CronJob extends Pix_Table
             // 多給 5 秒的彈性..這樣才不會 10 分鐘 cron 跑到 11 分鐘
             foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (5 + time() - $time)) as $cronjob) {
                 if (WebNode::search(array('cron_id' => $cronjob))->count() >= 3) {
-                    Hisoku::alert("Middle2 Cron Error", "Project {$workerjob->project->name} run cron {$workerjob->job} exceed 3 in a time");
+                    Hisoku::alert("Middle2 Cron Error", "Project {$cronjob->project->name} run cron {$cronjob->job} exceed 3 in a time");
                     continue;
                 }
                 $pid = pcntl_fork();
