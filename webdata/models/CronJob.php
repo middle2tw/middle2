@@ -101,6 +101,7 @@ class CronJob extends Pix_Table
                 $pid = pcntl_fork();
 
                 if ($pid) {
+                    Logger::logOne(array('category' => 'cron', 'message' => 'fork from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
                     Pix_Table_Db_Adapter_MysqlConf::resetConnect();
                     continue;
                 }

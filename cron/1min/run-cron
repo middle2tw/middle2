@@ -18,6 +18,7 @@ file_put_contents(LOCK_FILE . '.pid', time() . ' ' . getmypid());
 fwrite($fp, getmypid());
 fflush($fp);            // flush output before releasing the lock
 
+Logger::logOne(array('category' => 'cron', 'message' => 'run-cron start PID=' . getmypid()));
 CronJob::runPendingJobs();
 
 flock($fp, LOCK_UN);    // release the lock
