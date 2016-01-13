@@ -16,6 +16,7 @@ include(__DIR__ . '/../../webdata/init.inc.php');
 foreach (Hisoku::getLoadBalancers() as $host) {
     $curl = curl_init('http://' . $host . '/');
     curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     $ret = curl_exec($curl);
     if (!preg_match("#OK#", $ret)) {
@@ -32,6 +33,7 @@ foreach (Hisoku::getLoadBalancers() as $host) {
 foreach (Hisoku::getSearchServers() as $search_server) {
     $curl = curl_init('http://' . $search_server . ':9200/_stats');
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
     $content = curl_exec($curl);
     $info = curl_getinfo($curl);
     if ($info['http_code'] != 200) {
