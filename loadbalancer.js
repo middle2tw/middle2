@@ -208,49 +208,6 @@ lb_core._initProjectOnNode = function(project, node, callback){
     });
 };
 
-lb_core.getBackendHost = function(host, port, callback){
-    if (config.MAINPAGE_DOMAIN == host) {
-        return callback({success: true, host: main_page_host, port: main_page_port});
-    }
-    // TODO: 要限內部網路才能做這件事
-    if ('healthcheck' == host) {
-        return callback({success: true, type: 'healthcheck'});
-    }
-
-    var selector_request = http.request({
-        host: main_page_host,
-        port: main_page_port,
-        path: '/api/getnodes?domain=' + encodeURIComponent(host) + '&port=' + parseInt(port)
-    }, function(selector_response) {
-        var data = '';
-        selector_response.on('data', function(chunk){
-            data += chunk;
-        });
-        selector_response.on('end', function(){
-            // { error: false, nodes: [ [ '10.146.23.10', '20006' ] ] }
-            var json;
-            try {
-                json = JSON.parse(data);
-            } catch (e) {
-                return callback({success: false});
-            }
-            if (json.error) {
-                return callback({success: false});
-            }
-            if (json.wait) {
-                setTimeout(function(){
-                    lb_core.getBackendHost(host, port, callback);
-                }, 500);
-                return;
-            }
-            return callback({success: true, host: json.nodes[0][0], port: json.nodes[0][1], project: json.project});
-        });
-        selector_response.on('close', function(){
-            scribe.send('lb-error', formatdate() + ' selector_response_close ' + JSON.stringify(JSON.parse(data)));
-        });
-    }).end();
-};
-
 var secureContext = {};
 
 var renewSSLkeys = function() {
