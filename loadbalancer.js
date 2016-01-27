@@ -244,6 +244,12 @@ var start_time = (new Date()).getTime();
 
 var http_request_callback = function(protocol){
     return function(main_request, main_response){
+    var le_matches = main_request.url.match("/\.well-known/acme-challenge/([0-9a-zA-Z-_]*)");
+    if (le_matches && fs.existsSync('/home/srwang/work/letsencrypt.sh/.acme-challenges/' + le_matches[1])) {
+        main_response.write(fs.readFileSync('/home/srwang/work/letsencrypt.sh/.acme-challenges/' + le_matches[1]));
+        main_response.end();
+        return;
+    }
     var host = main_request.headers['host'];
     var port = 80;
     if (!host) {
