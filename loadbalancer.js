@@ -211,6 +211,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
 var secureContext = {};
 
 var renewSSLkeys = function() {
+    console.log('renewSSLkeys');
     mysql_connection.query("SELECT * FROM `ssl_keys`", function(err, rows, fields){
         for (var i = 0; i < rows.length; i ++) {
             var row = rows[i];
@@ -219,6 +220,10 @@ var renewSSLkeys = function() {
     });
 }
 renewSSLkeys();
+
+process.on('SIGHUP', function() {
+        renewSSLkeys();
+});
 
 var http_main_request = http.createServer();
 var https_options = {
