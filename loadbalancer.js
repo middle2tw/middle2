@@ -21,6 +21,7 @@ var loadConfig = function(){
 };
 
 var config = loadConfig();
+fs.writeFile('/tmp/middle2.pid', process.pid);
 
 if (!config.MEMCACHE_PRIVATE_PORT) {
     throw "need MEMCACHE_PRIVATE_PORT";
