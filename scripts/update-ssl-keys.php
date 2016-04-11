@@ -22,7 +22,9 @@ while ($domain = fgets($fp)) {
     }
 
     $config = new StdClass;
-    $config->ca = array(trim(file_get_contents("certs/{$domain}/fullchain.pem")));
+    $config->ca = trim(file_get_contents("certs/{$domain}/fullchain.pem"));
+    $config->ca = str_replace("-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\n", "-----END CERTIFICATE-----\n----------\n----------\n-----BEGIN CERTIFICATE-----\n", $config->ca);
+    $config->ca = explode("----------\n----------\n", $config->ca);
     $config->key = trim(file_get_contents("certs/{$domain}/privkey.pem"));
     $config->cert = trim(file_get_contents("certs/{$domain}/cert.pem"));
     if ($k = SSLKey::find($domain)) {
