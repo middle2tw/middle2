@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /srv/logs/scribed/
+find -size 0 -mtime +10 -delete -print
+find -mtime +10 -not -name '*.gz' -type f -print -exec gzip {} \;
+find -mtime +90 -name '*-error-*.gz' -type f -print -delete
