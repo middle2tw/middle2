@@ -1,0 +1,19 @@
+Cron & Worker
+=============
+
+Cron: 定期會跑的 process
+Worker: 一次只會跑一隻的 process
+
+都是記錄在 CronJob model 中，透過 period 設定
+
+cron/1min/run-cron 跑一輪該跑的 cron
+cron/1min/run-worker 檢查一輪該跑的 worker 是否都還活著或該重新跑
+
+
+
+run-worker 相關需要測試
+1. 把原先的 worker node 取消掉，看看 run-worker 會不會重跑
+2. 把正在跑的 worker node 的 commit 改掉(或隨便修改並push)，看看 run-worker 會不會砍掉舊 node 並且開新的
+3. 把 worker node 的 process 在 OS 端 kill 掉，看看會不會重跑
+4. 把 worker 狀態切換成 disabled ，看看會不會消失
+5. 改掉 project variable ，看看會不會重跑
