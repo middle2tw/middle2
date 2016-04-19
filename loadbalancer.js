@@ -217,6 +217,7 @@ var renewSSLkeys = function() {
         for (var i = 0; i < rows.length; i ++) {
             var row = rows[i];
             secureContext[row.domain] = crypto.createCredentials(JSON.parse(row.config)).context;
+            https_main_request.addContext(row.domain, secureContext[row.domain]);
         }
     });
 }
