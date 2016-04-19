@@ -1,0 +1,16 @@
+curl -XDELETE http://search-1.hisoku.ronny.tw:9200/jobhelper
+curl -XPUT http://search-1.hisoku.ronny.tw:9200/jobhelper -d '@search.json'
+
+search.json
+{
+    "mappings": {
+        "packages" : {
+            "properties" : {
+                "package_id" : {"type" : "integer"},
+                "name" : {"type" : "string", "null_value" : "na", "index" : "analyzed", "analyzer" : "cjk", "index_name" : "list_name"},
+                "date" : {"type" : "date"}
+            }
+        }
+    }
+}
+
