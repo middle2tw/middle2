@@ -352,6 +352,7 @@ var http_request_callback = function(protocol){
             main_response.writeHead(200);
             main_response.write(JSON.stringify({
                 status: 'OK',
+                request_serial: request_serial,
                 request_count: request_count,
                 request_pools: request_pools,
                 start_time: start_time,
