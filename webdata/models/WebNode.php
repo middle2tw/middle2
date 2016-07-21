@@ -353,12 +353,8 @@ class WebNode extends Pix_Table
             // 如果 processing node 太久也要踢掉
             if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->getAccessAt()) > 600 and (time() - $node->start_at) > 600) {
                 $processes = $node->getNodeProcesses();
-                if (0 == count($processes)) {
-                    trigger_error("{$node->ip}:{$node->port}(status=processing) had no alive process, release it", E_USER_WARNING);
-                    $node->markAsUnused('process too long');
-                } else {
-                    trigger_error("{$node->ip}:{$node->port}(status=processing) is processing too long, start_at: " . date('c', $node->start_at), E_USER_WARNING);
-                }
+                // TODO: 寄信 
+                $node->markAsUnused('process too long');
             }
 
             // Wait node 保留兩小時
