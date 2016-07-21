@@ -260,7 +260,8 @@ var http_request_callback = function(protocol){
     var host = main_request.headers['host'];
     var port = 80;
     if (!host) {
-        main_response.writeHead(302, {Location: 'http://' + config.MAINPAGE_DOMAIN + '/error/notfound'});
+        main_response.writeHead(503);
+        main_response.write('503 Service Unavailable');
         main_response.end();
         return;
     }
@@ -341,7 +342,8 @@ var http_request_callback = function(protocol){
             recent_logs = recent_logs.slice(recent_logs.length - 10);
 
             scribe.send('lb-notfound', log);
-            main_response.writeHead(302, {Location: 'http://' + config.MAINPAGE_DOMAIN + '/error/notfound'});
+            main_response.writeHead(503);
+            main_response.write('503 Service Unavailable');
             main_response.end();
             request_count --;
             delete(request_pools[current_request]);
