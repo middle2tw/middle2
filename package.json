@@ -1,0 +1,29 @@
+{
+  "name": "hisoku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "loadbalancer.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronnywang/hisoku"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ronnywang/hisoku/issues"
+  },
+  "homepage": "https://github.com/ronnywang/hisoku",
+  "dependencies": {
+    "forever": "^0.15.2",
+    "memcache": "^0.3.0",
+    "mysql": "^2.11.1",
+    "scribe": "0.0.9",
+    "ssh2": "^0.5.0"
+  }
+}
