@@ -2,3 +2,4 @@
 webdata/config.php
 webdata/config
 firewall/outputs
+node_modules
