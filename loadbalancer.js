@@ -154,14 +154,52 @@ lb_core._getNodesByProject = function(project, callback){
     });
 };
 
-lb_core._initNewNodes = function(project, callback){
-    mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
-        if (rows.length == 0) {
-            return callback({success: false, message: 'No empty node'});
-        }
-        lb_core._initProjectOnNode(project, rows[Math.floor(Math.random() * rows.length)], callback);
-    });
+var init_pools = {};
+var init_running = false;
+
+var run_init = function(){
+    init_running = true;
+    for (var id in init_pools) {
+        var project = init_pools[id].project;
+        var callbacks = init_pools[id].callbacks;
+
+        var callback = (function(project, callbacks){
+            return function(ret){
+                callbacks.map(function(callback){
+                        callback(ret);
+                });
+                delete(init_pools[project.id]);
+                run_init();
+            };
+        })(project, callbacks);
+
+        mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
+            if (rows.length == 0) {
+                callbacks.map(function(callback){
+                        callback({success: false, message: 'No empty node'});
+                });
+                return;
+            }
+            lb_core._initProjectOnNode(project, rows[Math.floor(Math.random() * rows.length)], callback);
+        });
+        return;
+    }
+    init_running = false;
 };
+
+lb_core._initNewNodes = function(project, callback){
+    if ('undefined' !== typeof(init_pools[project.id])) {
+        init_pools[project.id].callbacks.push(callback);
+    } else {
+        init_pools[project.id] = { project: project, callbacks: [callback] };
+    }
+
+    if (!init_running) {
+        run_init();
+    }
+
+};
+
 
 lb_core._initProjectOnNode = function(project, node, callback){
     mysql_connection.query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
@@ -169,13 +207,13 @@ lb_core._initProjectOnNode = function(project, node, callback){
             return callback({success: false, message: 'Init new node failed'});
         }
 
-        var ssh2 = new SSH2();
+        var ssh2 = new SSH2.Client();
         var node_id = node.port - 20000;
         ssh2.on('ready', function(){
             ssh2.exec('clone ' + project.name + ' ' + node_id, function(err, stream){
-                stream.on('end', function(){
+                stream.on('exit', function(){
                     ssh2.exec('restart-web ' + project.name + ' ' + node_id, function(err, stream){
-                        stream.on('end', function(){
+                        stream.on('exit', function(){
                             mysql_connection.query("UPDATE `webnode` SET `status` = 10 WHERE `ip` = ? AND `port` = ?", [node.ip, node.port], function(err, rows, fields){
                                 if (rows.affectedRows != 1) {
                                     return callback({success: false, message: 'Init new node failed'});
@@ -198,8 +236,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
                     });
                 });
             });
-        });
-        ssh2.connect({
+        }).connect({
             host: long2ip(node.ip),
             port: 22,
             username: 'root',
