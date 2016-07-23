@@ -415,6 +415,8 @@ var http_request_callback = function(protocol){
             memcache.set('WebNode:access_at:' + options.host + ':' + options.port, now);
         }
 
+        main_request.headers['connection'] = 'close';
+
         var backend_request = http.request({
             hostname: backend_host,
             port: backend_port,
