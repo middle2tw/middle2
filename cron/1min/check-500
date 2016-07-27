@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../../webdata/init.inc.php');
+
+$log_file = '/srv/logs/scribed/500-log/500-log_current';
+$cursor_file = '/tmp/check-500.cursor';
+if (!file_exists($cursor_file)) {
+    file_put_contents($cursor_file, sprintf("%s %d", readlink($log_file), filesize($log_file)));
+    exit;
+} 
+list($real_file, $cursor) = explode(' ', trim(file_get_contents($cursor_file)));
+if ($real_file != readlink($log_file)) {
+    file_put_contents($cursor_file, sprintf("%s %d", readlink($log_file), filesize($log_file)));
+    exit;
+}
+
+$fp = fopen($log_file, 'r');
+fseek($fp, $cursor);
+
+$count = 0;
+$logs = '';
+
+error_log('checking');
+while (false !== ($log = fgets($fp))) {
+    $logs .= trim($log) . "\n";
+    $count ++;
+}
+fclose($fp);
+
+if ($count >= 10) {
+    Hisoku::alert("500 warning", "一分鐘內出現 {$count} 個 5xx requests\n" . $logs);
+}
+
+file_put_contents($cursor_file, sprintf("%s %d", readlink($log_file), filesize($log_file)));
