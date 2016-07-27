@@ -11,32 +11,32 @@ class Hisoku
         return $ips;
     }
 
-    public function getDevServers()
+    public static function getDevServers()
     {
         return self::getIPsByGroup('dev');
     }
 
-    public function getLoadBalancers()
+    public static function getLoadBalancers()
     {
         return self::getIPsByGroup('loadbalancer');
     }
 
-    public function getMySQLServers()
+    public static function getMySQLServers()
     {
         return self::getIPsByGroup('mysql');
     }
 
-    public function getNodeServers()
+    public static function getNodeServers()
     {
         return self::getIPsByGroup('nodes');
     }
 
-    public function getPgSQLServers()
+    public static function getPgSQLServers()
     {
         return self::getIPsByGroup('pgsql');
     }
 
-    public function getSearchServers()
+    public static function getSearchServers()
     {
         return self::getIPsByGroup('search');
     }
