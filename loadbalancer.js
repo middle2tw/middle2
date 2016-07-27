@@ -454,6 +454,11 @@ var http_request_callback = function(protocol){
                 } else if (options.is_main_page) {
                     scribe.send('mainpage', log);
                 }
+
+                if (backend_response.statusCode >= 500) {
+                    scribe.send('500-log', log);
+                }
+
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
                 main_response.end();
