@@ -99,6 +99,8 @@ var apachedate = function(){
 var lb_core = {};
 lb_core.cache = {};
 
+var project_connections = {};
+
 lb_core.getBackendHost2 = function(host, port, callback){
     if (config.MAINPAGE_DOMAIN == host) {
         return callback({success: true, host: main_page_host, port: main_page_port, is_main_page: true});
@@ -397,6 +399,7 @@ var http_request_callback = function(protocol){
                 request_pools: request_pools,
                 start_time: start_time,
                 recent_logs: recent_logs,
+                project_connections: project_connections,
             }));
             main_response.end();
             request_count --;
@@ -409,12 +412,46 @@ var http_request_callback = function(protocol){
         var return_length = 0;
 
         if (options.project) {
+            if (project_connections[options.project.name] > 20) {
+                var referer = main_request.headers['referer'];
+                if (typeof(referer) != 'string') {
+                    referer = '-';
+                }
+                var useragent = main_request.headers['user-agent'];
+                if (typeof(useragent) != 'string') {
+                    useragent = '-';
+                }
+                var log = (host
+                        + ' ' + main_request.headers['x-forwarded-for']
+                        + ' - - ' + apachedate()
+                        + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
+                        + ' 503 0'
+                        + ' "' + referer + '"'
+                        + ' "' + useragent + '"'
+                        ); 
+                recent_logs.push(log);
+                recent_logs = recent_logs.slice(recent_logs.length - 10);
+
+                main_response.writeHead(503);
+                main_response.write('503 Service Unavailable');
+                scribe.send('500-log', log);
+                main_response.end();
+                request_count --;
+                delete(request_pools[current_request]);
+                return;
+            }
+
             var now = Math.floor((new Date()).getTime() / 1000);
             memcache.increment('Project:access_count:' + options.project.id, 1);
             memcache.set('Project:access_at:' + options.project.id,  now);
             memcache.increment('WebNode:access_count:' + options.host + ':' + options.port);
             memcache.set('WebNode:access_at:' + options.host + ':' + options.port, now);
+            if (typeof(project_connections[options.project.name]) === 'undefined') {
+                project_connections[options.project.name] = 0;
+            }
+            project_connections[options.project.name] ++;
         }
+
 
         main_request.headers['connection'] = 'close';
 
@@ -451,6 +488,7 @@ var http_request_callback = function(protocol){
                     + ' "' + useragent + '"'); 
 
                 if ('object' == typeof(options.project)) {
+                    project_connections[options.project.name] --;
                     scribe.send('app-' + options.project.name, log);
                 } else if (options.is_main_page) {
                     scribe.send('mainpage', log);
