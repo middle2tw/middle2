@@ -297,8 +297,8 @@ var http_request_callback = function(protocol){
     var host = main_request.headers['host'];
     var port = 80;
     if (!host) {
-        main_response.writeHead(503);
-        main_response.write('503 Service Unavailable');
+        main_response.writeHead(400);
+        main_response.write('400 Bad Request');
         main_response.end();
         return;
     }
@@ -371,7 +371,7 @@ var http_request_callback = function(protocol){
                 + ' ' + main_request.headers['x-forwarded-for']
                 + ' - - ' + apachedate()
                 + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
-                + ' 404 0'
+                + ' 503 0'
                 + ' "' + referer + '"'
                 + ' "' + useragent + '"'
             ); 
@@ -381,6 +381,7 @@ var http_request_callback = function(protocol){
             scribe.send('lb-notfound', log);
             main_response.writeHead(503);
             main_response.write('503 Service Unavailable');
+            scribe.send('500-log', log);
             main_response.end();
             request_count --;
             delete(request_pools[current_request]);
