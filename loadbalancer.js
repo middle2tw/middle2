@@ -101,7 +101,7 @@ lb_core.cache = {};
 
 var project_connections = {};
 
-lb_core.getBackendHost2 = function(host, port, callback){
+lb_core.getBackendHost2 = function(host, port, current_request, callback){
     if (config.MAINPAGE_DOMAIN == host) {
         return callback({success: true, host: main_page_host, port: main_page_port, is_main_page: true});
     }
@@ -117,17 +117,21 @@ lb_core.getBackendHost2 = function(host, port, callback){
 
     if (host.indexOf(config.APP_SUFFIX) > 0) {
         var project_name = host.split(config.APP_SUFFIX)[0];
+        request_pools[current_request].state = 'get-project-from-domain';
         mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
+            request_pools[current_request].state = 'get-project-from-domain-done';
             if (rows.length == 1) {
-                lb_core._getNodesByProject(rows[0], callback);
+                lb_core._getNodesByProject(rows[0], current_request, callback);
                 return;
             }
             return callback({success: false, message: 'Project not found'});
         });
     } else {
+        request_pools[current_request].state = 'get-project-from-domain';
         mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
+            request_pools[current_request].state = 'get-project-from-domain-done';
             if (rows.length == 1) {
-                lb_core._getNodesByProject(rows[0], callback);
+                lb_core._getNodesByProject(rows[0], current_request, callback);
                 return;
             }
             return callback({success: false, message: 'Domain not found'});
@@ -135,9 +139,12 @@ lb_core.getBackendHost2 = function(host, port, callback){
     }
 };
 
-lb_core._getNodesByProject = function(project, callback){
+lb_core._getNodesByProject = function(project, current_request, callback){
+    request_pools[current_request].state = 'get-webnode-from-project';
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
+        request_pools[current_request].state = 'get-webnode-from-project-done';
         if (!rows.length) {
+            request_pools[current_request].state = 'init-new-node';
             return lb_core._initNewNodes(project, callback);
         }
         var working_nodes = [];
@@ -151,7 +158,7 @@ lb_core._getNodesByProject = function(project, callback){
             return callback({success: true, host: random_node.ip, port: random_node.port, project: project});
         }
         setTimeout(function(){
-            lb_core._getNodesByProject(project, callback);
+            lb_core._getNodesByProject(project, current_request, callback);
         }, 500);
     });
 };
@@ -313,6 +320,7 @@ var http_request_callback = function(protocol){
         start_at: (new Date()).getTime(),
         from: main_request.headers['x-forwarded-for'],
         url: main_request.url,
+        state: 'init',
     };
 
     if (host.match(/:/)) {
@@ -359,7 +367,8 @@ var http_request_callback = function(protocol){
     main_request.on('close', function(){
     });
 
-    lb_core.getBackendHost2(host, port, function(options){
+    lb_core.getBackendHost2(host, port, current_request, function(options){
+        request_pools[current_request].state = 'load-from-backend';
         if (!options.success) {
             var referer = main_request.headers['referer'];
             if (typeof(referer) != 'string') {
@@ -471,6 +480,7 @@ var http_request_callback = function(protocol){
             });
 
             backend_response.on('end', function(){
+                request_pools[current_request].state = 'load-from-backend-done';
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
                     referer = '-';
