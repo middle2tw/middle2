@@ -46,6 +46,7 @@ $get_info_from_ip = function($ip){
                         <td>no</td>
                         <td>host</td>
                         <td>time</td>
+                        <td>state</td>
                         <td>url</td>
                     </tr>
                     <?php foreach ($info->request_pools as $id => $data) { ?>
@@ -53,6 +54,7 @@ $get_info_from_ip = function($ip){
                         <td><?= $id ?></td>
                         <td><?= $this->escape($data->host) ?></td>
                         <td><?= $this->partial('helper/counttime.phtml', array('time' => floor($data->start_at / 1000))) ?></td>
+                        <td><?= $this->escape($data->state) ?></td>
                         <td><?= $this->escape(mb_strimwidth($data->url, 0, 64, '...', 'UTF-8')) ?></td>
                     </tr>
                     <?php } ?>
