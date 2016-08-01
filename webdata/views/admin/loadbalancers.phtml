@@ -40,7 +40,7 @@ $get_info_from_ip = function($ip){
             <div id="node-<?= $ip ?>">
                 <h3><?= $ip ?></h3>
                 Start time: <?= $this->partial('/helper/counttime.phtml', array('time' => floor($info->start_time / 1000))) ?><br>
-                <h4>Current request</h4>
+                <h4>Current request (<?= count((array)$info->request_pools) ?>)</h4>
                 <table class="table">
                     <tr>
                         <td>no</td>
