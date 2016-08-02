@@ -165,6 +165,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 
 lb_core._getNodesByProject = function(project, current_request, callback){
     request_pools[current_request].state = 'get-webnode-from-project';
+    // 1 - STATUS_WEBPROCESSING, 10 - STATUS_WEBNODE
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
         request_pools[current_request].state = 'get-webnode-from-project-done';
         if (!rows.length) {
