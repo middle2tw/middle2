@@ -50,6 +50,7 @@ class ProjectController extends Pix_Controller
         }
 
         $domain->delete();
+        WebNode::cleanLoadBalancerCache(); // 更改 domain 後要清空 lb cache
         return $this->redirect('/project/detail/' . $project->name);
     }
 
@@ -77,6 +78,7 @@ class ProjectController extends Pix_Controller
         $project->custom_domains->insert(array(
             'domain' => strval($_POST['domain']),
         ));
+        WebNode::cleanLoadBalancerCache(); // 更改 domain 後要清空 lb cache
 
         return $this->redirect('/project/detail/' . $project->name);
     }
