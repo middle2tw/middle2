@@ -100,6 +100,7 @@ var lb_core = {};
 lb_core.cache = {};
 
 var project_connections = {};
+var mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}};
 
 lb_core.getBackendHost2 = function(host, port, current_request, callback){
     if (config.MAINPAGE_DOMAIN == host) {
@@ -115,10 +116,25 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
         return callback({success: true, type: 'healthcheck'});
     }
 
+    // TODO: 要限內部網路才能做這件事
+    if ('cleancache' == host) {
+        mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}};
+        return callback({success: true, type: 'healthcheck'});
+    }
+
     if (host.indexOf(config.APP_SUFFIX) > 0) {
         var project_name = host.split(config.APP_SUFFIX)[0];
         request_pools[current_request].state = 'get-project-from-domain';
+        var project = mapping_cache['project-name-to-id'][project_name];
+        if ('undefined' !== typeof(project)) {
+            if (project) {
+                return lb_core._getNodesByProject(project, current_request, callback);
+            }
+            return callback({success: false, message: 'Project not found'});
+        }
+
         mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
+            mapping_cache['project-name-to-id'][project_name] = rows[0];
             request_pools[current_request].state = 'get-project-from-domain-done';
             if (rows.length == 1) {
                 lb_core._getNodesByProject(rows[0], current_request, callback);
@@ -128,8 +144,16 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
         });
     } else {
         request_pools[current_request].state = 'get-project-from-domain';
+        var project = mapping_cache['project-domain-to-id'][host];
+        if ('undefined' !== typeof(project)) {
+            if (project) {
+                return lb_core._getNodesByProject(project, current_request, callback);
+            }
+            return callback({success: false, message: 'Project not found'});
+        }
         mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
             request_pools[current_request].state = 'get-project-from-domain-done';
+            mapping_cache['project-domain-to-id'][host] = rows[0];
             if (rows.length == 1) {
                 lb_core._getNodesByProject(rows[0], current_request, callback);
                 return;
