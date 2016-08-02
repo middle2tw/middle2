@@ -425,7 +425,7 @@ var http_request_callback = function(protocol){
 
         if (options.type == 'healthcheck') {
             main_response.writeHead(200);
-            main_response.write(JSON.stringify({
+            var ret = {
                 status: 'OK',
                 request_serial: request_serial,
                 request_count: request_count,
@@ -433,7 +433,11 @@ var http_request_callback = function(protocol){
                 start_time: start_time,
                 recent_logs: recent_logs,
                 project_connections: project_connections,
-            }));
+            };
+            if (main_request.url.indexOf('mapping_cache') >= 0) {
+                ret['mapping_cache'] = mapping_cache;
+            }
+            main_response.write(JSON.stringify(ret));
             main_response.end();
             request_count --;
             delete(request_pools[current_request]);
