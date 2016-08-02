@@ -1,0 +1,76 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../../webdata/init.inc.php');
+
+$date = date('Y-m-d', time() - 86400);
+// 找出有 log 的 project
+$cmd = sprintf('find /srv/logs/scribed/ -size +0 -name "*-%s_*"', $date);
+$logs = explode("\n", trim(`$cmd`));
+$logs = array_values(array_filter($logs, function($log) { return (strpos($log, '-error/') or strpos($log, '-node/')) ? false : true; }));
+
+// 找出有哪些 group
+$groups = array_values(array_unique(array_map(function($log) { return explode('/', $log)[4]; }, $logs)));
+
+$project_stats = array();
+foreach ($groups as $group) {
+    if (strpos($group, 'app-') === 0) {
+        $project = substr($group, 4);
+        $project_stats[$project] = array(
+            'count' => 0,
+            'ips' => 0,
+            'top' => '',
+        );
+
+        $cmd = sprintf('cat /srv/logs/scribed/app-%s/app-%s-%s_* | wc -l', $project, $project, $date);
+        $project_stats[$project]['count'] = intval(`$cmd`);
+
+        $cmd = sprintf("cat /srv/logs/scribed/app-%s/app-%s-%s_* | awk '{print $2}' | sort | uniq | wc -l", $project, $project, $date);
+        $project_stats[$project]['ips'] = intval(`$cmd`);
+
+        if ($project_stats[$project]['count'] > 10000) {
+            $cmd = sprintf("cat /srv/logs/scribed/app-%s/app-%s-%s_* | awk '{print $2}' | sort | uniq -c | sort -n -r | head -n 5", $project, $project, $date);
+            $project_stats[$project]['top'] = (`$cmd`);
+
+        }
+    }
+}
+
+uasort($project_stats, function($a, $b) { return $b['count'] - $a['count']; });
+$project_ids = array();
+foreach (Project::search(1)->searchIn('name', array_keys($project_stats)) as $project) {
+    $project_ids[$project->name] = $project->id;
+}
+
+$domains = array();
+
+foreach (CustomDomain::search(1)->searchIn('project_id', array_values($project_ids)) as $domain) {
+    if (array_key_exists($domain->project_id, $domains)) {
+        continue;
+    }
+    $domains[$domain->project_id] = $domain->domain;
+}
+
+ob_start();
+echo "======各專案瀏覽數======\n";
+printf("%-24s %-32s %-8s %-8s\n", 'project-id', 'desc', 'count', 'ips');
+foreach ($project_stats as $project => $stats) {
+    $project_id = $project_ids[$project];
+    if (array_key_exists($project_id, $domains)) {
+        $desc = $domains[$project_id];
+    } else {
+        $desc = '';
+    }
+    echo sprintf("%-24s %-32s %-8d %-8d", $project, $desc, $stats['count'], $stats['ips']) . "\n";
+}
+
+echo "======過萬專案最大使用者======\n";
+foreach ($project_stats as $project => $stats) {
+    if ($stats['count'] > 10000) {
+        echo "----{$project}----\n";
+        echo ($stats['top']) . "\n";
+    }
+}
+
+$content = ob_get_contents();
+Hisoku::alert("Middle2 每日報表: {$date}", $content);
