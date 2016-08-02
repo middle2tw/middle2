@@ -21,6 +21,10 @@ class WebNodeRow extends Pix_Table_Row
             'reason' => $reason,
         ))));
 
+        if (in_array($this->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WEBPROCESSING))) {
+            WebNode::cleanLoadBalancerCache();
+        }
+
         $this->update(array(
             'project_id' => 0,
             'commit' => '',
