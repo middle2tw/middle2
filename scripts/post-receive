@@ -75,6 +75,7 @@ if (!is_null($package_filename) and !is_null($info)) {
 
 // TODO: deploy to webnode
 $project->update(array('commit' => $newrev));
+WebNode::cleanLoadBalancerCache(); // 修改 commit 後就清空 cache
 
 error_log('deploy finished. visit http://' . $project->getFirstDomain() . '/');
 foreach ($project->custom_domains as $domain) {
