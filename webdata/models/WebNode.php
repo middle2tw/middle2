@@ -381,4 +381,15 @@ class WebNode extends Pix_Table
         );
         return array_key_exists($status, $type_map) ? $type_map[$status] : ("other-{$status}");
     }
+
+    public static function cleanLoadBalancerCache()
+    {
+        foreach (Hisoku::getLoadBalancers() as $ip) {
+            $curl = curl_init('http://' . $ip);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: cleancache'));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $ret = curl_exec($curl);
+            curl_close($curl);
+        }
+    }
 }
