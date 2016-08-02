@@ -100,7 +100,7 @@ var lb_core = {};
 lb_core.cache = {};
 
 var project_connections = {};
-var mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}};
+var mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}, 'project-to-webnode': {}};
 
 lb_core.getBackendHost2 = function(host, port, current_request, callback){
     if (config.MAINPAGE_DOMAIN == host) {
@@ -118,7 +118,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 
     // TODO: 要限內部網路才能做這件事
     if ('cleancache' == host) {
-        mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}};
+        mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}, 'project-to-webnode': {}};
         return callback({success: true, type: 'healthcheck'});
     }
 
@@ -165,6 +165,12 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 
 lb_core._getNodesByProject = function(project, current_request, callback){
     request_pools[current_request].state = 'get-webnode-from-project';
+    var working_nodes = mapping_cache['project-to-webnode'][project.id + '-' + project.commit];
+    if ('undefined' !== typeof(working_nodes)) {
+        var random_node = working_nodes[Math.floor(Math.random() * working_nodes.length)];
+        return callback({success: true, host: random_node.ip, port: random_node.port, project: project});
+    }
+
     // 1 - STATUS_WEBPROCESSING, 10 - STATUS_WEBNODE
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
         request_pools[current_request].state = 'get-webnode-from-project-done';
@@ -173,11 +179,20 @@ lb_core._getNodesByProject = function(project, current_request, callback){
             return lb_core._initNewNodes(project, callback);
         }
         var working_nodes = [];
+        var no_processing_nodes = true;
         for (var i = 0; i < rows.length; i ++) {
             if (rows[i].status == 10) {
                 working_nodes.push(rows[i]);
+            } else {
+                no_processing_nodes = false;
             }
         }
+
+        // 沒有 processing node 的情況下再 cache
+        if (working_nodes.length && no_processing_nodes) {
+            mapping_cache['project-to-webnode'][project.id + '-' + project.commit] = working_nodes;
+        }
+
         if (working_nodes.length) {
             random_node = working_nodes[Math.floor(Math.random() * working_nodes.length)];
             return callback({success: true, host: random_node.ip, port: random_node.port, project: project});
