@@ -1,5 +1,25 @@
 <?php
 $grouped_nodes = WebNode::getGroupedNodes();
+$projects = array();
+$project_members = array();
+foreach ($grouped_nodes as $ip => $nodes) {
+    foreach ($nodes as $node) {
+        if ($project = $node->project) {
+            $projects[$project->id] = $project->id;
+            $project_members[$project->id] = array();
+        }
+    }
+}
+$users = array();
+foreach (ProjectMember::search(array('is_admin' => 1))->searchIn('project_id', array_keys($projects)) as $member) {
+    $project_members[$member->project_id][] = $member->user_id;
+    $users[$member->user_id] = $member->user_id;
+}
+
+User::search(1)->searchIn('id', array_keys($users))->toArray();
+EAV::search(array('table' => 'Project', 'key' => 'note'))->searchIn('id', array_keys($projects))->toArray(); // prefetch
+WebNodeEAV::search(array('key' => 'job'))->toArray();
+
 $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
 $this->title = 'NodeServers Info :: ';
 ?>
@@ -67,7 +87,7 @@ $this->title = 'NodeServers Info :: ';
                         </td>
                         <td><!-- admins -->
                             <?php if ($node->project) { ?>
-                            <?= $this->escape(implode(',', User::search(1)->searchIn('id', $node->project->members->search(array('is_admin' => 1))->toArray('user_id'))->toArray('name'))) ?>
+                            <?= $this->escape(implode(',', array_map(function($user_id) { return User::find($user_id)->name; }, $project_members[$node->project->id]))) ?>
                             <?php } ?>
                         </td>
                         <td><?= $this->escape($node->getStatusWord()) ?></td>
