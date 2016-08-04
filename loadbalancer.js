@@ -130,7 +130,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             if (project) {
                 return lb_core._getNodesByProject(project, current_request, callback);
             }
-            return callback({success: false, message: 'Project not found'});
+            return callback({success: false, message: 'Project not found', code: 404});
         }
 
         mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
@@ -140,7 +140,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
                 lb_core._getNodesByProject(rows[0], current_request, callback);
                 return;
             }
-            return callback({success: false, message: 'Project not found'});
+            return callback({success: false, message: 'Project not found', code: 404});
         });
     } else {
         request_pools[current_request].state = 'get-project-from-domain';
@@ -149,7 +149,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             if (project) {
                 return lb_core._getNodesByProject(project, current_request, callback);
             }
-            return callback({success: false, message: 'Project not found'});
+            return callback({success: false, message: 'Project not found', code: 404});
         }
         mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
             request_pools[current_request].state = 'get-project-from-domain-done';
@@ -158,7 +158,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
                 lb_core._getNodesByProject(rows[0], current_request, callback);
                 return;
             }
-            return callback({success: false, message: 'Domain not found'});
+            return callback({success: false, message: 'Domain not found', code: 404});
         });
     }
 };
@@ -225,7 +225,7 @@ var run_init = function(){
         mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
             if (rows.length == 0) {
                 callbacks.map(function(callback){
-                        callback({success: false, message: 'No empty node'});
+                        callback({success: false, message: 'No empty node', code: 503});
                 });
                 return;
             }
@@ -253,7 +253,7 @@ lb_core._initNewNodes = function(project, callback){
 lb_core._initProjectOnNode = function(project, node, callback){
     mysql_connection.query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
         if (rows.affectedRows != 1) {
-            return callback({success: false, message: 'Init new node failed'});
+            return callback({success: false, message: 'Init new node failed', code: 503});
         }
 
         var ssh2 = new SSH2.Client();
@@ -265,7 +265,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
                         stream.on('exit', function(){
                             mysql_connection.query("UPDATE `webnode` SET `status` = 10 WHERE `ip` = ? AND `port` = ?", [node.ip, node.port], function(err, rows, fields){
                                 if (rows.affectedRows != 1) {
-                                    return callback({success: false, message: 'Init new node failed'});
+                                    return callback({success: false, message: 'Init new node failed', code: 503});
                                 }
 
                                 // log node start
@@ -422,7 +422,7 @@ var http_request_callback = function(protocol){
                 + ' ' + main_request.headers['x-forwarded-for']
                 + ' - - ' + apachedate()
                 + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
-                + ' 503 0'
+                + ' ' + options.code + ' 0'
                 + ' "' + referer + '"'
                 + ' "' + useragent + '"'
             ); 
@@ -430,9 +430,11 @@ var http_request_callback = function(protocol){
             recent_logs = recent_logs.slice(recent_logs.length - 10);
 
             scribe.send('lb-notfound', log);
-            main_response.writeHead(503);
-            main_response.write('503 Service Unavailable');
-            scribe.send('500-log', log);
+            main_response.writeHead(options.code);
+            main_response.write(options.message);
+            if (options.code >= 500) {
+                scribe.send('500-log', log);
+            }
             main_response.end();
             request_count --;
             delete(request_pools[current_request]);
@@ -486,7 +488,7 @@ var http_request_callback = function(protocol){
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
                 main_response.writeHead(503);
-                main_response.write('503 Service Unavailable');
+                main_response.write('503 Too many connections');
                 scribe.send('500-log', log);
                 main_response.end();
                 request_count --;
