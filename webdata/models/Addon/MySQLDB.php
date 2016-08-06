@@ -90,7 +90,7 @@ class Addon_MySQLDB extends Pix_Table
         $host = array_pop($ips);
         $database = 'user_' . $project->name;
 
-        $link = new mysqli($ips[0], getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
+        $link = new mysqli($host, getenv('MYSQL_USERDB_USER'), getenv('MYSQL_USERDB_PASS'));
         $db = new Pix_Table_Db_Adapter_Mysqli($link);
         $db->query("CREATE DATABASE IF NOT EXISTS`{$database}` CHARACTER SET utf8");
 
