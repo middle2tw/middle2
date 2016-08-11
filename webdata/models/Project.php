@@ -97,7 +97,7 @@ class ProjectRow extends Pix_Table_Row
      *
      * @return array WebNode
      */
-    public function getWebNodes($ip = null)
+    public function getWebNodes($ip = null, $new = false)
     {
         $c = new Pix_Cache;
         if (is_null($ip)) {
@@ -108,7 +108,7 @@ class ProjectRow extends Pix_Table_Row
                 'commit' => $this->commit,
             ));
 
-            if (count($nodes)) {
+            if (!$new and count($nodes)) {
                 return $nodes;
             }
 
@@ -116,7 +116,7 @@ class ProjectRow extends Pix_Table_Row
             if ($c->get("Project:processing:{$this->id}")) {
                 // sleep 0.1s
                 usleep(100000);
-                return $this->getWebNodes();
+                return $this->getWebNodes($ip, $new);
             }
         }
 
