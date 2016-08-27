@@ -26,8 +26,16 @@ foreach ($public_keys as $public_key) {
     $content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $public_key . "\n";
 }
 $content .= "# user keys\n";
+
+// 可以對 mysql 和 pgsql 的 IP 開 ssh tunnel
+$forward_ports = array_merge(
+    array_map(function($ip){ return "{$ip}:3306"; }, Hisoku::getIPsByGroup('mysql')),
+    array_map(function($ip){ return "{$ip}:5432"; }, Hisoku::getIPsByGroup('pgsql'))
+);
+$permitopen = implode(',', array_map(function($ip_port) { return "permitopen=\"{$ip_port}\""; }, $forward_ports));
+
 foreach (UserKey::search(1) as $user_key) {
-    $content .= "command=\"/srv/code/hisoku/scripts/ssh-serve {$user_key->user->name} {$user_key->id}\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding {$user_key->key_body}\n";
+    $content .= "command=\"/srv/code/hisoku/scripts/ssh-serve {$user_key->user->name} {$user_key->id}\",no-X11-forwarding,no-agent-forwarding,{$permitopen} {$user_key->key_body}\n";
 }
 
 file_put_contents(getenv('HOME') . '/.ssh/authorized_keys', $content);
