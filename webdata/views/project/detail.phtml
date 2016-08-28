@@ -95,6 +95,9 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
             <button type="submit">Add Variable</button>
         </form>
         </li>
+        <li>
+        Tunnel: ssh -L3306:<?= $addon_member->addon->host ?>:3306 git@git.middle2.com tunnel <?= $this->project->name ?>
+        </li>
     </ul>
     </li>
     <?php } ?>
@@ -112,6 +115,9 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
             <input type="text" name="key" value="DATABASE_URL">
             <button type="submit">Add Variable</button>
         </form>
+        </li>
+        <li>
+        Tunnel: ssh -L5432:<?= $addon_member->addon->host ?>:5432 git@git.middle2.com tunnel <?= $this->project->name ?>
         </li>
     </ul>
     </li>
