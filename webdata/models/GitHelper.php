@@ -69,16 +69,22 @@ class GitHelper
                 $tmp_name = tempnam('', '');
                 exec("git cat-file -p " . escapeshellarg($info->object_id) . " > " . $tmp_name);
 
-                if ($action['file'] == 'requirements.txt') {
-                    exec("docker cp {$tmp_name} container-{$image_id}:/requirements.txt");
-                    self::system_without_error("docker exec --tty container-{$image_id} pip install --requirement /requirements.txt");
-                } elseif ($action['file'] == 'Gemfile') {
-                    exec("docker cp {$tmp_name} container-{$image_id}:/Gemfile");
-                    self::system_without_error("docker exec --tty container-{$image_id} gem install bundler");
-                    self::system_without_error("docker exec --tty container-{$image_id} bundle install --without development test");
-                } elseif ($action['file'] == 'package.json') {
-                    exec("docker cp {$tmp_name} container-{$image_id}:/srv/package.json");
-                    self::system_without_error("docker exec --tty container-{$image_id} sh -c \"cd /srv; npm install\"");
+                try {
+                    if ($action['file'] == 'requirements.txt') {
+                        exec("docker cp {$tmp_name} container-{$image_id}:/requirements.txt");
+                        self::system_without_error("docker exec --tty container-{$image_id} pip install --requirement /requirements.txt");
+                    } elseif ($action['file'] == 'Gemfile') {
+                        exec("docker cp {$tmp_name} container-{$image_id}:/Gemfile");
+                        self::system_without_error("docker exec --tty container-{$image_id} gem install bundler");
+                        self::system_without_error("docker exec --tty container-{$image_id} bundle install --without development test");
+                    } elseif ($action['file'] == 'package.json') {
+                        exec("docker cp {$tmp_name} container-{$image_id}:/srv/package.json");
+                        self::system_without_error("docker exec --tty container-{$image_id} sh -c \"cd /srv; npm install\"");
+                    }
+                } catch (Exception $e) {
+                    exec("docker stop container-{$image_id}");
+                    exec("docker rm container-{$image_id}");
+                    throw $e;
                 }
                 unlink($tmp_name);
             }
