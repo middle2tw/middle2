@@ -6,6 +6,25 @@ class ApiController extends Pix_Controller
     {
     }
 
+    public function checkelasticAction()
+    {
+        $index = strval($_GET['index']);
+        $secret = $_GET['secret'];
+        $sig = crc32($index . $secret . getenv('ELASTIC_SECRET'));
+        if ($_GET['sig'] != $sig) {
+            return $this->json(array('error' => true, 'message' => 'wrong sig'));
+        }
+        if (!$addon = Addon_Elastic::search(array('index' => $index))->first()) {
+            return $this->json(array('error' => true, 'message' => 'wrong index'));
+        }
+
+        if ($addon->secret != $secret) {
+            return $this->json(array('error' => true, 'message' => 'wrong secret'));
+        }
+
+        return $this->json(array('error' => false));
+    }
+
     public function weblogAction()
     {
         // TODO: 要限內網並且加上 secret key
