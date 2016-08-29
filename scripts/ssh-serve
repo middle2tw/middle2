@@ -215,7 +215,7 @@ class SSHServe
         if (!file_exists($absolute_path)) {
             exec('git init --bare ' . escapeshellarg($absolute_path));
             // add hooks
-            symlink('/srv/code/hisoku/scripts/post-receive', $absolute_path . '/hooks/post-receive');
+            symlink('/srv/code/hisoku/scripts/pre-receive', $absolute_path . '/hooks/pre-receive');
         }
 
         passthru('git shell -c ' . escapeshellarg($command . ' ' . escapeshellarg($absolute_path)));

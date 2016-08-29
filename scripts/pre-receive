@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+
+// 當使用者 git push 時，會在 git server 以 git 使用者的身份執行這個 script 
+include(__DIR__ . '/../webdata/init.inc.php');
+
+$fp = fopen('php://stdin', 'r');
+$content = '';
+while (false !== ($line = fgets($fp))) {
+    $content .= $line;
+}
+list($oldrev, $newrev, $refname) = explode(' ', trim($content));
+
+// {id}.git
+$path = basename(getcwd());
+if (!preg_match('#^(\d+)\.git$#', $path, $matches)) {
+    // FIXME
+    error_log('invalid path name: ' . $path);
+    exit -1;
+}
+if (!$project = Project::find(intval($matches[1]))) {
+    // FIXME
+    error_log('invalid project id: ' . $matches[1]);
+    exit -1;
+}
+
+// 處理先下載好各 repository 需要的內容
+try {
+    GitHelper::buildDockerProjectBase($project, $newrev);
+} catch (Exception $e) {
+    error_log($e->getMessage());
+    exit -1;
+}
+
+// TODO: deploy to webnode
+$project->update(array('commit' => $newrev));
+WebNode::cleanLoadBalancerCache(); // 修改 commit 後就清空 cache
+
+error_log('deploy finished. visit http://' . $project->getFirstDomain() . '/');
+foreach ($project->custom_domains as $domain) {
+    error_log(' or http://' . $domain->domain);
+}
