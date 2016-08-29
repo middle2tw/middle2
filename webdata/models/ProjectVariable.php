@@ -28,6 +28,8 @@ class ProjectVariableRow extends Pix_Table_Row
                 return Addon_MySQLDBMember::find(array(intval($id), $this->project_id))->getDatabaseURL();
             case 'Addon_PgSQLDB-DatabaseURL':
                 return Addon_PgSQLDBMember::find(array(intval($id), $this->project_id))->getDatabaseURL();
+            case 'Addon_Elastic-SearchURL':
+                return Addon_Elastic::find(array(intval($id)))->getSearchURL();
             }
             // TODO
         } else {

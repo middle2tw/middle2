@@ -101,6 +101,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </ul>
     </li>
     <?php } ?>
+
     <?php foreach (Addon_PgSQLDBMember::search(array('project_id' => $this->project->id)) as $addon_member) { ?>
     <li>
     [PgSQLDB] Project: <?= $addon_member->addon->project->name ?><?= ($note = $addon_member->addon->getEAV('note')) ? "(" . $this->escape($note) . ")" : '' ?>
@@ -122,9 +123,27 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </ul>
     </li>
     <?php } ?>
+
+    <?php if ($addon = Addon_Elastic::search(array('project_id' => $this->project->id))->first()) { ?>
+    <li>
+    [ElasticSearch] <?= $addon->getSearchURL() ?>
+    <ul>
+        <li>注意，此網址請勿外流，這網址可直接修改刪除 elasticsearch 內容</li>
+        <li>
+        <form method="post" action="/project/addelasticaddon/<?= $this->project->name ?>/<?= $addon->id ?>">
+            <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+            Add to Variables, Key: 
+            <input type="text" name="key" value="SEARCH_URL">
+            <button type="submit">Add Variable</button>
+        </form>
+        </li>
+    </ul>
+    </li>
+    <?php } ?>
     <li>
     Add: <button class="post-link" href="/project/addmysqladdon/<?= $this->project->name ?>">MySQL</button>
     <button class="post-link" href="/project/addpgsqladdon/<?= $this->project->name ?>">PgSQL</button>
+    <button class="post-link" href="/project/addelasticaddon/<?= $this->project->name ?>">ElasticSearch</button>
     </li>
 </ol>
 <hr>

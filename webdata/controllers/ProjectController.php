@@ -178,6 +178,36 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function addelasticaddonAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            // TODO: log it
+            return $this->alert('error', '/');
+        }
+
+        list(, /*project*/, /*addelasticaddon*/, $name, $addon_id) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        $key = is_scalar($_POST['key']) ? $_POST['key'] : 'SEARCH_URL';
+
+        if ($addon_id) {
+            if (!$addon = Addon_Elastic::find(intval($addon_id))) {
+                return $this->alert('Addon not found', '/');
+            }
+            $addon->saveProjectVariable($key);
+        } else {
+            Addon_Elastic::addDB($project, $key);
+        }
+
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
     public function addpgsqladdonAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {
