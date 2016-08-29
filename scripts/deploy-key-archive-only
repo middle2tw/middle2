@@ -25,6 +25,45 @@ function getGitFileInfo($file_name)
     return $ret;
 }
 
+function buildDockerProjectBase($args)
+{
+    $project_name = trim($args, "' ");
+    if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
+        $project_name = $matches[1];
+    }
+
+    if (FALSE !== strpos($project_name, '.')) {
+        return error('invalid project name: ' . $project_name);
+    }
+
+    if (!$project = Project::find_by_name(strval($project_name))) {
+        return error('project not found: ' . $project_name);
+    }
+
+    $ret = GitHelper::buildDockerProjectBase($project);
+    echo "success:{$ret}";
+    exit;
+}
+
+function getProjectDockerImage($args)
+{
+    list($project_name, $image_id) = explode(' ', $args);
+    if (FALSE !== strpos($project_name, '.')) {
+        return error('invalid project name: ' . $project_name);
+    }
+
+    if (!$project = Project::find_by_name(strval($project_name))) {
+        return error('project not found: ' . $project_name);
+    }
+
+    $file = "/tmp/project-{$project_name}-{$image_id}.tgz";
+    if (!file_exists($file)) {
+        return error("project base not found: " . $image_id);
+    }
+
+    readfile($file);
+}
+
 function getProjectBaseByRepository($args)
 {
     $project_name = trim($args, "' ");
@@ -91,6 +130,12 @@ function main()
 
     if ('get-project-base' == $command) {
         getProjectBaseByRepository($args);
+        return;
+    } elseif ('get-project-docker-image' == $command) {
+        getProjectDockerImage($args);
+        return;
+    } elseif ('build-docker-project-image' == $command) {
+        buildDockerProjectBase($args);
         return;
     } elseif (!in_array($command, array('git-upload-archive'))) {
         return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
