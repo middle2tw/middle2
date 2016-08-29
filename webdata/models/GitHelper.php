@@ -11,9 +11,9 @@ class GitHelper
         }
     }
 
-    public static function getGitFileInfo($file_name)
+    public static function getGitFileInfo($file_name, $branch = 'HEAD')
     {
-        $ls_tree_cmd = 'git ls-tree HEAD ' . $file_name;
+        $ls_tree_cmd = "git ls-tree {$branch} " . $file_name;
         $ls_result = trim(`$ls_tree_cmd`);
         // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
         if (!trim($ls_result)) {
@@ -35,7 +35,7 @@ class GitHelper
      * @access public
      * @return void
      */
-    public static function buildDockerProjectBase($project)
+    public static function buildDockerProjectBase($project, $branch = 'HEAD')
     {
         $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
         if (!file_exists($absolute_path)) {
@@ -46,7 +46,7 @@ class GitHelper
 
         $actions = array();
         foreach (array('requirements.txt', 'Gemfile', 'package.json') as $file) {
-            if ($info = self::getGitFileInfo($file)) {
+            if ($info = self::getGitFileInfo($file, $branch)) {
                 $actions[] = array(
                     'file' => $file,
                     'info' => $info,
