@@ -17,6 +17,7 @@ function main()
 
     $command = getenv('SSH_ORIGINAL_COMMAND');
     list($method) = explode(' ', $command, 2);
+
     switch ($method) {
     case 'init':
         list(, $id, $option) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
@@ -24,84 +25,18 @@ function main()
             echo json_encode(array('error' => true, 'message' => 'id is not found'));
             break;
         }
+        $port = 20000 + $id;
         $start = microtime(true);
         $log_file = "/srv/chroot/{$id}.log";
+        touch("/srv/chroot/{$id}.docker");
         file_put_contents($log_file, date('c') . " [init] start\n", FILE_APPEND);
-        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
-        }
 
-        if (file_exists("/srv/chroot/{$id}.mounting")) {
-            file_put_contents($log_file, date('c') . " [init] umounting\n", FILE_APPEND);
-            system("umount /srv/chroot/{$id}/srv/data");
-            // TODO: 要確保真的有被 umount
-            unlink("/srv/chroot/{$id}.mounting");
-        }
+        // init 在 docker 下甚麼都不用做
 
-        exec("nice -n 19 rm -rf /srv/chroot/{$id}");
-        mkdir("/srv/chroot/{$id}");
-        exec("nice -n 19 tar zxf /srv/code/images/template.tgz -C /srv/chroot/{$id}");
-        if (file_exists("/srv/chroot/{$id}/dev/null")) {
-            unlink("/srv/chroot/{$id}/dev/null");
-        }
-        exec("mknod /srv/chroot/{$id}/dev/null c 1 3");
-        exec("mknod /srv/chroot/{$id}/dev/random c 1 8");
-        exec("mknod /srv/chroot/{$id}/dev/urandom c 1 9");
-        exec("mknod /srv/chroot/{$id}/dev/stdin c 5 0");
-        exec("mknod /srv/chroot/{$id}/dev/stdout c 5 1");
-        exec("mknod /srv/chroot/{$id}/dev/stderr c 5 2");
-        exec("chmod 666 /srv/chroot/{$id}/dev/*");
-        exec("chown -R deploy:nogroup /srv/chroot/{$id}");
-        exec("mount -o hidepid=2,gid=sudo proc /srv/chroot/{$id}/proc -t proc");
-        exec("chmod 755 /srv/chroot/{$id}");
-        if (!file_exists("/srv/chroot/{$id}/tmp")) {
-            exec("mkdir /srv/chroot/{$id}/tmp");
-        }
-        exec("chmod 1777 /srv/chroot/{$id}/tmp");
-        $port = $uid = 20000 + $id;
-        exec("echo 'www-user:x:{$uid}:99::/srv/deploy:/sbin/nologin' >> /srv/chroot/{$id}/etc/passwd");
-        mkdir("/srv/chroot/{$id}/srv/logs");
-        exec("chown {$uid} /srv/chroot/{$id}/srv/logs");
-        $spent = microtime(true) - $start;
-
-        if ($option != 'without-lang-base') {
-            file_put_contents($log_file, date('c') . " [init] install mixed lang base\n", FILE_APPEND);
-            $lang_base_file = "/srv/code/images/lang-mixed.tar.gz";
-            if (file_exists($lang_base_file)) {
-                exec("nice -n 19 tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
-            } else {
-                exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/mixed/*.deb");
-            }
-        }
-
+        $aaspent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [init] done(spent: {$spent})\n", FILE_APPEND);
 
         echo json_encode(array('error' => false, 'port' => $port));
-        break;
-
-    case 'service':
-        list(, $id, $template, $option) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        if (!$id = intval($id)) {
-            die("invalid $id");
-        }
-        if (!file_exists('/srv/code/images/' . $template)) {
-            die("template {$template} not found");
-        }
-        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
-        }
-        exec("rpm --root /srv/chroot/{$id} -ivh --nodeps /srv/code/images/{$template}/*");
-        if (file_exists("/srv/code/hisoku/config/rpmsource/{$template}-config")) {
-            exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
-        }
-        $uid = $port = 20000 + $id;
-        $option = urldecode($option);
-
-        if (file_exists("/srv/chroot/{$id}/init.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /init.sh {$port} {$option}");
-        }
-
-        exec("chroot --userspec={$uid}:99 --groups=nogroup /srv/chroot/{$id}/ /start.sh {$port} {$option}");
         break;
 
     case 'clone':
@@ -114,55 +49,39 @@ function main()
         if (!$project = Project::find_by_name(strval($project_name))) {
             return error('project not found: ' . $project_name);
         }
-        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
-        }
-        $template = $project->getTemplate();
-        file_put_contents($log_file, date('c') . " [clone] project: {$project_name}, template: {$template}\n", FILE_APPEND);
+        file_put_contents($log_file, date('c') . " [clone] project: {$project_name}\n", FILE_APPEND);
         file_put_contents($log_file, date('c') . " [clone] init lang base\n", FILE_APPEND);
         file_put_contents("/srv/chroot/{$id}.project", $project_name);
 
-        if ($template != 'mixed') {
-            $lang_base_file = "/srv/code/images/lang-{$template}.tar.gz";
-            if (file_exists($lang_base_file)) {
-                exec("tar zxf $lang_base_file --directory /srv/chroot/{$id}/");
-            } else {
-                exec("dpkg --root=/srv/chroot/{$id} -i /srv/code/images/{$template}/*.deb");
-            }
+        $cmd = "ssh git@" . GIT_PRIVATE_SERVER . " build-docker-project-image " . $project_name;
+        $build_image_result = `$cmd`;
+        if (!preg_match('#success:(.*)#', $build_image_result, $matches)) {
+            return error('build project base failed: ' . $project_name);
         }
+        $project_base_version = $matches[1];
+
+        $port = 20000 + $id;
+        exec("docker create --publish {$port}:80 --name {$id} middle2 init");
+        exec("docker start {$id}");
+        exec("docker exec {$id} mkdir /srv/web /srv/logs/");
 
         if (file_exists('/srv/project_data/' . $project_name)) {
-            file_put_contents($log_file, date('c') . " [clone] mounting nfs project directory\n", FILE_APPEND);
-            $uid = $id + 20000;
-            mkdir("/srv/chroot/{$id}/srv/data");
-            system("mount --bind /srv/project_data/{$project_name} /srv/chroot/{$id}/srv/data");
-            touch("/srv/chroot/{$id}.mounting");
+            // TODO: nfs
         }
 
-        file_put_contents($log_file, date('c') . " [clone] init lang config\n", FILE_APPEND);
-        exec("cp -r /srv/code/hisoku/config/rpmsource/{$template}-config/* /srv/chroot/{$id}/");
-        $port = 20000 + $id;
-
-        file_put_contents($log_file, date('c') . " [clone] init.sh\n", FILE_APPEND);
-        exec("chroot /srv/chroot/{$id}/ /init.sh {$port}");
-        mkdir("/srv/chroot/{$id}/srv/web");
-
         file_put_contents($log_file, date('c') . " [clone] pull source code\n", FILE_APPEND);
-        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | tar -xf - -C /srv/chroot/{$id}/srv/web");
+        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | docker exec -i {$id} tar -xvf - -C /srv/web/");
 
-        if ('no-project-base' != $flag) {
+        if ('no-project-base' != $flag and $project_base_version != 'default') {
             file_put_contents($log_file, date('c') . " [clone] init project base\n", FILE_APPEND);
-            $tmp_name = tempnam('/tmp', '');
-            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-base " . $project_name . " > {$tmp_name}.tar.gz");
-            exec("tar zxf {$tmp_name}.tar.gz -C /srv/chroot/{$id}");
-            @unlink($tmp_name);
-            @unlink("{$tmp_name}.tar.gz");
+            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-docker-image {$project_name} {$project_base_version} | docker exec -i {$id} tar --no-same-owner -zxvf - -C /");
         }
 
         file_put_contents($log_file, date('c') . " [clone] post-clone.sh\n", FILE_APPEND);
-        if ('no-post-clone' != $flag and file_exists("/srv/chroot/{$id}/post-clone.sh")) {
-            exec("chroot /srv/chroot/{$id}/ /post-clone.sh {$port}");
+        if ('no-post-clone' != $flag) {
+            exec("docker exec {$id} /post-clone.sh {$port}");
         }
+
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [clone] done(spent: $spent)\n", FILE_APPEND);
@@ -188,7 +107,7 @@ function main()
         }
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
-        exec("chroot --userspec={$uid}:99 --groups=nogroup /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " /start-web.sh");
+        system("docker exec {$id} env -i " . implode(" ", $params) . " /start-web.sh");
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [restart-web] done(spent: $spent)\n", FILE_APPEND);
@@ -219,7 +138,7 @@ function main()
 
         file_put_contents($log_file, date('c') . " [run] start\n", FILE_APPEND);
         $uid = 20000 + $id;
-	$cmd = "chroot --userspec={$uid}:99 --groups=nogroup /srv/chroot/{$id}/ env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
+        $cmd = "docker exec -i -t {$id} env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         passthru($cmd);
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [run] done(spent: {$spent})\n", FILE_APPEND);
@@ -231,22 +150,27 @@ function main()
             error('invalid id: ' . $id);
         }
         $uid = 20000 + $id;
-        $output = trim(`ps -u {$uid} -opid | grep -v PID`);
-        if ('' == $output) {
-            echo json_encode(array());
-            return;
-        }
-        $pids = explode("\n", $output);
         $jobs = array();
-        foreach ($pids as $pid) {
-            $pid = trim($pid);
-            $job = new StdClass;
-            $job->pid = $pid;
-            $job->start_time = filectime("/proc/{$pid}");
-            $job->comm = trim(file_get_contents("/proc/{$pid}/comm"));
-            $job->cmdline = trim(file_get_contents("/proc/{$pid}/cmdline"));
-            $jobs[] = $job;
+        $output = trim(`docker top {$id} -o pid,start`);
+        foreach (array_slice(explode("\n", $output), 1) as $line) {
+            list($pid, $start) = preg_split("/\s+/", $line, 2);
+            $jobs[$pid] = new StdClass;
+            $jobs[$pid]->pid = $pid;
+            $jobs[$pid]->start_time = strtotime($start);
         }
+        $output = trim(`docker top {$id} -o pid,comm`);
+        foreach (array_slice(explode("\n", $output), 1) as $line) {
+            list($pid, $comm) = preg_split("/\s+/", $line, 2);
+            $jobs[$pid]->comm = trim($comm);
+        }
+        $output = trim(`docker top {$id} -o pid,cmd`);
+        foreach (array_slice(explode("\n", $output), 1) as $line) {
+            list($pid, $cmd) = preg_split("/\s+/", $line, 2);
+            $jobs[$pid]->cmdline = trim($cmd);
+        }
+
+        $jobs = array_filter($jobs, function($job){ return $job->comm != 'systemd'; });
+        $jobs = array_values($jobs);
         echo json_encode($jobs);
         break;
 
@@ -259,31 +183,9 @@ function main()
         $start = microtime(true);
         file_put_contents($log_file, date('c') . " [shutdown] start\n", FILE_APPEND);
 
-        if (file_exists("/srv/chroot/{$id}/shutdown.sh")) {
-            file_put_contents($log_file, date('c') . " [shutdown] /shutdown.sh\n", FILE_APPEND);
-            exec("chroot /srv/chroot/{$id}/ /shutdown.sh");
-        }
-        $uid = 20000 + $id;
-        $output = trim(`ps -u {$uid} -opid | grep -v PID`);
-        if ('' !== trim($output)) {
-            $pids = explode("\n", $output);
-            file_put_contents($log_file, date('c') . " [shutdown] kill " . implode(' ' , $pids) . "\n", FILE_APPEND);
-            exec("kill " . implode(' ', $pids));
-        }
-
-        if (file_exists("/srv/chroot/{$id}.mounting")) {
-            file_put_contents($log_file, date('c') . " [shutdown] sudo umounting\n", FILE_APPEND);
-            system("umount /srv/chroot/{$id}/srv/data");
-            // TODO: 要確保真的有被 umount
-            unlink("/srv/chroot/{$id}.mounting");
-        }
-
-        if (file_exists("/srv/chroot/{$id}/proc")) {
-            system("umount /srv/chroot/{$id}/proc");
-        }
-
-        file_put_contents($log_file, date('c') . " [shutdown] delete /srv/chroot/{$id}\n", FILE_APPEND);
-        exec("rm -rf /srv/chroot/{$id}");
+        file_put_contents($log_file, date('c') . " [shutdown] /shutdown.sh\n", FILE_APPEND);
+        exec("docker stop {$id}");
+        exec("docker rm {$id}");
 
         echo json_encode(array('error' => false, 'port' => $port));
         $spent = microtime(true) - $start;
@@ -291,11 +193,6 @@ function main()
         if (file_exists("/srv/chroot/{$id}.project")) {
             unlink("/srv/chroot/{$id}.project");
         }
-        break;
-
-    case 'local-build-project-base':
-        list(, $template, $local_req_path) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'));
-        system("/srv/code/hisoku/scripts/build-project-base/{$template}.php " . escapeshellarg($local_req_path));
         break;
 
     default:
