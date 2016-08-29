@@ -61,25 +61,25 @@ function main()
         $project_base_version = $matches[1];
 
         $port = 20000 + $id;
-        exec("docker create --publish {$port}:80 --name {$id} middle2 init");
-        exec("docker start {$id}");
-        exec("docker exec {$id} mkdir /srv/web /srv/logs/");
+        exec("docker create --publish {$port}:80 --name c-{$id} middle2 init");
+        exec("docker start c-{$id}");
+        exec("docker exec c-{$id} mkdir /srv/web /srv/logs/");
 
         if (file_exists('/srv/project_data/' . $project_name)) {
             // TODO: nfs
         }
 
         file_put_contents($log_file, date('c') . " [clone] pull source code\n", FILE_APPEND);
-        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | docker exec -i {$id} tar -xvf - -C /srv/web/");
+        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | docker exec -i c-{$id} tar -xvf - -C /srv/web/");
 
         if ('no-project-base' != $flag and $project_base_version != 'default') {
             file_put_contents($log_file, date('c') . " [clone] init project base\n", FILE_APPEND);
-            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-docker-image {$project_name} {$project_base_version} | docker exec -i {$id} tar --no-same-owner -zxvf - -C /");
+            exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-docker-image {$project_name} {$project_base_version} | docker exec -i c-{$id} tar --no-same-owner -zxvf - -C /");
         }
 
         file_put_contents($log_file, date('c') . " [clone] post-clone.sh\n", FILE_APPEND);
         if ('no-post-clone' != $flag) {
-            exec("docker exec {$id} /post-clone.sh {$port}");
+            exec("docker exec c-{$id} /post-clone.sh {$port}");
         }
 
 
@@ -107,7 +107,7 @@ function main()
         }
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
-        system("docker exec {$id} env -i " . implode(" ", $params) . " /start-web.sh");
+        system("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh");
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [restart-web] done(spent: $spent)\n", FILE_APPEND);
@@ -138,7 +138,7 @@ function main()
 
         file_put_contents($log_file, date('c') . " [run] start\n", FILE_APPEND);
         $uid = 20000 + $id;
-        $cmd = "docker exec -i -t {$id} env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
+        $cmd = "docker exec -i -t c-{$id} env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         passthru($cmd);
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [run] done(spent: {$spent})\n", FILE_APPEND);
@@ -151,19 +151,24 @@ function main()
         }
         $uid = 20000 + $id;
         $jobs = array();
-        $output = trim(`docker top {$id} -o pid,start`);
+        $output = trim(`docker top c-{$id} -o pid,start`);
+        if (!$output) {
+            echo json_encode(array());
+            exit;
+        }
+
         foreach (array_slice(explode("\n", $output), 1) as $line) {
             list($pid, $start) = preg_split("/\s+/", $line, 2);
             $jobs[$pid] = new StdClass;
             $jobs[$pid]->pid = $pid;
             $jobs[$pid]->start_time = strtotime($start);
         }
-        $output = trim(`docker top {$id} -o pid,comm`);
+        $output = trim(`docker top c-{$id} -o pid,comm`);
         foreach (array_slice(explode("\n", $output), 1) as $line) {
             list($pid, $comm) = preg_split("/\s+/", $line, 2);
             $jobs[$pid]->comm = trim($comm);
         }
-        $output = trim(`docker top {$id} -o pid,cmd`);
+        $output = trim(`docker top c-{$id} -o pid,cmd`);
         foreach (array_slice(explode("\n", $output), 1) as $line) {
             list($pid, $cmd) = preg_split("/\s+/", $line, 2);
             $jobs[$pid]->cmdline = trim($cmd);
@@ -184,8 +189,8 @@ function main()
         file_put_contents($log_file, date('c') . " [shutdown] start\n", FILE_APPEND);
 
         file_put_contents($log_file, date('c') . " [shutdown] /shutdown.sh\n", FILE_APPEND);
-        exec("docker stop {$id}");
-        exec("docker rm {$id}");
+        exec("docker stop c-{$id}");
+        exec("docker rm c-{$id}");
 
         echo json_encode(array('error' => false, 'port' => $port));
         $spent = microtime(true) - $start;
