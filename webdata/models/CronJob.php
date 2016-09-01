@@ -20,15 +20,31 @@ class CronJobRow extends Pix_Table_Row
         $node->update(array('cron_id' => $this->id));
         $ret = $node->runJob($this->job);
 
-        stream_set_blocking($ret->stdout, true);
         stream_set_blocking($ret->stderr, true);
         stream_set_blocking($ret->stdio, true);
 
-        $output = (stream_get_contents($ret->stdout));
-        $output = (stream_get_contents($ret->stderr));
-        $output = (stream_get_contents($ret->stdio));
+        $output = new StdClass;
+        $output->stderr = (stream_get_contents($ret->stderr));
+        $lines = explode("\n", trim(stream_get_contents($ret->stdio)));
+        $return_code = array_pop($lines);
+        $output->stdout  = implode("\n", $lines);
+        $output->status = json_decode($return_code);
+
+        $recent_logs = json_decode($this->getEAV('recent_logs')) ?: array();
+        array_push($recent_logs, $output);
+        $recent_logs = array_slice($recent_logs, 0, 10);
+        $this->setEAV('recent_logs', json_encode($recent_logs));
+
+        if ($output->status->code != 0) {
+            $recent_logs = json_decode($this->getEAV('recent_error_logs')) ?: array();
+            array_push($recent_logs, $output);
+            $recent_logs = array_slice($recent_logs, 0, 10);
+            $this->setEAV('recent_error_logs', json_encode($recent_logs));
+        }
+
         $node->markAsWait();
         $node->update(array('cron_id' => 0));
+        return $output;
     }
 
     public function getNextRunAt()
