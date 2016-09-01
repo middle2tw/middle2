@@ -8,15 +8,17 @@ require_once THRIFT_ROOT.'/packages/Types.php';
 class Logger
 {
     protected static $_scribe_client = null;
+    protected static $_scribe_socket = null;
 
     public static function getScribeClient()
     {
         if (is_null(self::$_scribe_client)) {
-            $socket = new Thrift\Transport\TSocket(getenv('SCRIBE_HOST'), getenv('SCRIBE_PORT'), true);
+            $socket = new Thrift\Transport\TSocket(getenv('SCRIBE_HOST'), getenv('SCRIBE_PORT'), false);
             $transport = new Thrift\Transport\TFramedTransport($socket);
             $protocol = new Thrift\Protocol\TBinaryProtocol($transport, false, false);
             $scribeClient = new Scribe\Thrift\scribeClient($protocol, $protocol);
             $transport->open();
+            self::$_scribe_socket = $socket;
             self::$_scribe_client = $scribeClient;
         }
         return self::$_scribe_client;
@@ -24,6 +26,10 @@ class Logger
 
     public static function reconnectScribe()
     {
+        if (!is_null(self::$_scribe_socket)) {
+            self::$_scribe_socket->close();
+            self::$_scribe_socket = null;
+        }
         self::$_scribe_client = null;
     }
 
