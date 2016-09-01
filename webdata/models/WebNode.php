@@ -218,11 +218,10 @@ class WebNodeRow extends Pix_Table_Row
         if ($session === false) {
             throw new Exception("ssh2_exec failed");
         }
-        $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
         $ret = new StdClass;
         $ret->stdout = $stream;
         $ret->stdio = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-        $ret->stderr = $errorStream;
+        $ret->stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
         return $ret;
     }
 }
