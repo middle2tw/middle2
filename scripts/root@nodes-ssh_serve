@@ -137,12 +137,13 @@ function main()
         $uid = 20000 + $id;
         if (getenv('TERM')) {
             $term_opt = ' -i -t';
+            $params[] = 'TERM=' . escapeshellarg(getenv('TERM'));
         } else {
             $term_opt = '';
         }
         $cmd = "docker exec {$term_opt} c-{$id} env -i " . implode(" ", $params) . " sh -c " . escapeshellarg($run_cmd);
         $ret = 0;
-        system($cmd, $ret);
+        passthru($cmd, $ret);
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [run] done(spent: {$spent})\n", FILE_APPEND);
         if (!$without_status) {
