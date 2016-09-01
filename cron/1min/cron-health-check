@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../../webdata/init.inc.php');
+
+if (!file_exists('/tmp/hisoku-cron-worker')) {
+    Hisoku::alert("Cron error", "/tmp/hisoku-cron-worker not found");
+    exit;
+}
+
+if (!$obj = json_decode(file_get_contents("/tmp/hisoku-cron-worker"))) {
+    Hisoku::alert("Cron error", "/tmp/hisoku-cron-worker is not valid JSON");
+    exit;
+}
+
+if (!$last_action_time = strtotime($obj->last_action_time)) {
+    Hisoku::alert("Cron error", "/tmp/hisoku-cron-worker has no last_action_time");
+    exit;
+}
+
+if (time() - $last_action_time > 60) {
+    Hisoku::alert("Cron error", "cron is not action from " . $obj->last_action_time);
+    exit;
+}
