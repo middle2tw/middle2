@@ -22,6 +22,11 @@ class Logger
         return self::$_scribe_client;
     }
 
+    public static function reconnectScribe()
+    {
+        self::$_scribe_client = null;
+    }
+
     /**
      * 記錄進 scirbe
      * 
