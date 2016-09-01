@@ -30,7 +30,7 @@ class CronJobRow extends Pix_Table_Row
         $output->status = json_decode($return_code);
 
         $recent_logs = json_decode($this->getEAV('recent_logs')) ?: array();
-        array_push($recent_logs, $output);
+        array_unshift($recent_logs, $output);
         $recent_logs = array_slice($recent_logs, 0, 10);
         $this->setEAV('recent_logs', json_encode($recent_logs));
 
