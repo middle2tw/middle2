@@ -336,12 +336,22 @@ class WebNode extends Pix_Table
                 }
             }
 
-            // 如果是 cronnode or webnode 卻沒有任何 process 就 end
-            if (time() - $node->start_at > 60 and in_array($node->status, array(WebNode::STATUS_CRONNODE, WebNode::STATUS_WEBNODE))) {
+            // 如果是 webnode 卻沒有任何 process 就 end
+            if (time() - $node->start_at > 60 and in_array($node->status, array(WebNode::STATUS_WEBNODE))) {
                 $processes = $node->getNodeProcesses();
                 if (0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
                     $node->markAsUnused('no alive process');
+                }
+            }
+
+            // 如果是 cronnode ，在 access 過後超過 60 秒沒有任何 process ，把他切回 wait mode
+            if (time() - $node->getAccessAt() > 60 and in_array($node->status, array(WebNode::STATUS_CRONNODE))) {
+                $processes = $node->getNodeProcesses();
+                if (0 == count($processes)) {
+                    trigger_error("{$node->ip}:{$node->port} had no alive process, change to wait mode", E_USER_WARNING);
+                    $node->markAsWait();
+                    $node->update(array('cron_id' => 0));
                 }
             }
 
