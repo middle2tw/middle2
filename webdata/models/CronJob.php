@@ -14,7 +14,6 @@ class CronJobRow extends Pix_Table_Row
 
         $node->update(array(
             'status' => WebNode::STATUS_CRONNODE,
-            'start_at' => time(),
         ));
         $node->updateAccessAt();
         $node->update(array('cron_id' => $this->id));
