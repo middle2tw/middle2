@@ -137,11 +137,14 @@ class Logger
                 $cursor = $options['cursor-before']['cursor'];
                 unset($options['cursor-before']);
             }
-            //error_log("opening {$log_file}...");
             if (0 == filesize($log_file)) {
                 continue;
             }
-            $fp = fopen($log_file, 'r');
+            if (strpos($log_file, '.gz')) {
+                $fp = gzopen($log_file, 'r');
+            } else {
+                $fp = fopen($log_file, 'r');
+            }
 
             if (is_null($cursor)) {
                 $cursor = filesize($log_file);
