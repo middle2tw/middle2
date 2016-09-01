@@ -143,6 +143,7 @@ function main()
         echo "\n" . json_encode(array(
             'id' => $id,
             'code' => $ret,
+            'start' => date('c', $start),
             'spent' => $spent,
         ));
         break;
