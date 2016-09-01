@@ -369,6 +369,19 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function cronlogAction()
+    {
+        list(, /*project*/, /*cronlog*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+        $this->view->project = $project;
+
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+    }
+
     public function editcronjobAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {

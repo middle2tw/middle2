@@ -11,6 +11,10 @@ $period_map = array(
 ?>
 <h3>CronJob: </h3>
 <ol>
+    <?php if (count($this->project->cronjobs)) { ?>
+    <li><a href="/project/cronlog/<?= $this->project->name ?>">Recent Cron Log</a></li>
+    <?php } ?>
+
     <?php foreach ($this->project->cronjobs as $cronjob) { ?>
     <li>
     <form method="post" action="/project/editcronjob/<?= $this->project->name ?>/<?= $cronjob->id ?>">

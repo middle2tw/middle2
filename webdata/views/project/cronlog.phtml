@@ -1,0 +1,32 @@
+<?php
+$logs = array();
+foreach ($this->project->cronjobs as $cronjob) {
+    foreach (json_decode($cronjob->getEAV('recent_logs')) ?: array() as $log) {
+        $log->cronjob = $cronjob;
+        $logs[] = $log;
+    }
+}
+usort($logs, function($a, $b){ return strtotime($b->status->start) - strtotime($a->status->start); });
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<h2><?= $this->escape($this->project->name) ?></h2>
+<ol>
+    <?php foreach ($logs as $log) { ?>
+    <li><a href="#log-<?= $log->status->start ?>-<?= $log->cronjob->id ?>">[<?= $log->status->start ?>] <?= $this->escape($log->cronjob->job) ?></a></li>
+    <?php } ?>
+</ol>
+<hr>
+<?php foreach ($logs as $log) { ?>
+<h2 id="log-<?= $log->status->start ?>-<?= $log->cronjob->id ?>"><?= $this->escape($log->cronjob->job) ?></h2>
+Command: <?= $this->escape($log->cronjob->job) ?><br>
+Start time:<?= $log->status->start ?><br>
+Spent time:<?= $log->status->spent ?> second</br>
+Return status: <?= $log->status->code ?><br>
+Stdout: <br>
+<pre><?= $this->escape($log->stdout) ?></pre>
+Stderr: <br>
+<pre><?= $this->escape($log->stderr) ?></pre>
+
+<hr>
+<?php } ?>
+<?= $this->partial('/common/footer.phtml', $this) ?>
