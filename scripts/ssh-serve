@@ -124,20 +124,22 @@ class SSHServe
         ));
         $node->updateAccessAt();
 
-        error_log('start...');
 
-        $term = $_ENV['TERM'];
+        $term = getenv('TERM');
         if ($term) {
             ncurses_init();
             ncurses_getmaxyx(STDSCR, $y, $x);
-            ncurses_clear();
+            system('clear');
+            error_log("start with term: {$term} (width: {$x}, height: {$y})\r" );
             $ret = $node->runJob($run_command, array(
                 'term' => $term,
                 'width' => $x,
                 'height' => $y,
+                'without_status' => 1,
             ));
         } else {
-            $ret = $node->runJob($run_command);
+            error_log('start without term');
+            $ret = $node->runJob($run_command, array('without_status' => 1));
         }
 
         $user_input = fopen('php://stdin', 'r');
