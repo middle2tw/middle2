@@ -210,10 +210,11 @@ class WebNodeRow extends Pix_Table_Row
         ))));
 
         $node_id = $this->port - 20000;
+        $options['without_status'] = array_key_exists('without_status', $options) ? intval($options['without_status']) : 0;
         if ($options['term']) {
-            $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command), $options['term'], array(), $options['width'], $options['height']);
+            $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command) . " {$options['without_status']}", $options['term'], array(), $options['width'], $options['height']);
         } else {
-            $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command));
+            $stream = ssh2_exec($session, "run {$this->project->name} {$node_id} " . urlencode($command) . " {$options['without_status']}");
         }
         if ($session === false) {
             throw new Exception("ssh2_exec failed");
