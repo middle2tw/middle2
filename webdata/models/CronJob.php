@@ -101,6 +101,78 @@ class CronJob extends Pix_Table
         return self::$_period_map[$period_id];
     }
 
+    public static function loopCronWorker()
+    {
+        $stats = array(
+            'last_action_time' => date('c', time()), // 最近反應時間，隨時更新，會有另一隻 cron 檢查超過 60 秒沒反應就該警告
+            'start_time' => date('c', time()), // 開始執行時間
+            'pid' => getmypid(),               // 自己的 PID
+            'crons' => array(),                // 執行中的 cron
+        );
+
+        file_put_contents('/tmp/hisoku-cron-worker', json_encode($stats));
+
+        while (true) {
+            $stats['last_action_time'] = date('c', time());
+            foreach (self::$_period_map as $period_id => $time) {
+                if (!$time) {
+                    continue;
+                }
+                foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (time() - $time)) as $cronjob) {
+                    Logger::reconnectScribe(); // fork 之前就 reconnect, 因為 fork 之後好像 child, parent 都有可能出問題
+                    $pid = pcntl_fork();
+
+                    if ($pid) {
+                        Logger::logOne(array('category' => 'cron', 'message' => 'fork from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
+                        $stats['crons'][$pid] = array(
+                            'pid' => $pid,
+                            'project' => $cronjob->project->name,
+                            'cron_id' => $cronjob->id,
+                            'start_at' => date('c', time()),
+                            'command' => $cronjob->job,
+                        );
+                        Pix_Table_Db_Adapter_MysqlConf::resetConnect();
+                        continue;
+                    }
+
+                    if (function_exists('setthreadtitle')) {
+                        setthreadtitle("php-fpm: Cron {$cronjob->project->name}: {$cronjob->job}");
+                    }
+                    $output = $cronjob->runJob();
+                    if ($output->status->code) {
+                        $error_logs = json_decode(file_get_contents('/tmp/hisoku-cron-error')) ?: array();
+                        if ($filtered = array_filter($error_logs, function($log) use ($cronjob) { return $log[1] == $cronjob->id; })) {
+                            foreach (array_keys($filtered) as $k) {
+                                unset($error_logs[$k]);
+                            }
+                            $error_logs = array_values($error_logs);
+                        }
+                        array_unshift($error_logs, array($cronjob->project->name, $cronjob->id, $output->status->start));
+                        $error_logs = array_slice($error_logs, 0, 10);
+                        file_put_contents("/tmp/hisoku-cron-error", json_encode($error_logs));
+                    }
+                    //echo "{$cronjob->project->name} {$cronjob->job}:";
+                    $output->stderr = mb_substr($output->stderr, mb_strlen($output->stderr) - 128);
+                    $output->stdout = mb_substr($output->stdout, mb_strlen($output->stderr) - 128);
+                    //print_r($output);
+                    //echo "\n";
+                    Logger::logOne(array('category' => 'cron', 'message' => 'fork cron finish from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
+                    exit;
+                }
+            }
+            $status = 0;
+            while ($pid = pcntl_wait($status, WNOHANG)) {
+                if ($pid == -1) {
+                    break;
+                }
+                unset($stats['crons'][$pid]);
+            }
+            Logger::logOne(array('category' => 'test', 'message' => 'test'));
+            file_put_contents('/tmp/hisoku-cron-worker', json_encode($stats));
+            sleep(1);
+        }
+    }
+
     public static function runPendingJobs()
     {
         foreach (self::$_period_map as $period_id => $time) {
