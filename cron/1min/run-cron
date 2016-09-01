@@ -4,7 +4,11 @@
 include(__DIR__ . '/../../webdata/init.inc.php');
 define('LOCK_FILE', '/tmp/hisoku-run-cron');
 $fp = fopen(LOCK_FILE, 'w+');
+
+Logger::logOne(array('category' => 'cron', 'message' => 'run-cron start PID=' . getmypid()));
+
 if (!flock($fp, LOCK_EX | LOCK_NB)) {
+    Logger::logOne(array('category' => 'cron', 'message' => 'run-cron failed is locking PID=' . getmypid()));
     list($time, $pid) = explode(' ', file_get_contents(LOCK_FILE . '.pid'));
     if ($time < time() - 3600) {
         file_put_contents(LOCK_FILE . '.pid', time() . ' ' . $pid);
@@ -18,8 +22,8 @@ file_put_contents(LOCK_FILE . '.pid', time() . ' ' . getmypid());
 fwrite($fp, getmypid());
 fflush($fp);            // flush output before releasing the lock
 
-Logger::logOne(array('category' => 'cron', 'message' => 'run-cron start PID=' . getmypid()));
 CronJob::runPendingJobs();
+    Logger::logOne(array('category' => 'cron', 'message' => 'run-cron is finish PID=' . getmypid()));
 
 flock($fp, LOCK_UN);    // release the lock
 fclose($fp);
