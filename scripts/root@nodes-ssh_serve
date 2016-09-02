@@ -166,7 +166,7 @@ function main()
         $jobs = array();
         $output = trim(`docker top c-{$id} -o pid,start`);
         if (!$output) {
-            echo json_encode(array());
+            echo json_encode(array('error' => true));
             exit;
         }
 
