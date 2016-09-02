@@ -8,23 +8,6 @@ function error($message)
     error_log($message);
 }
 
-function getGitFileInfo($file_name)
-{
-    $ls_tree_cmd = 'git ls-tree HEAD ' . $file_name;
-    $ls_result = trim(`$ls_tree_cmd`);
-    // Got '100644 blob 433ee4e878d82d375ea2311dcd4f0046a8eb12b6    requirements.txt'
-    if (!trim($ls_result)) {
-        return null;
-    }
-    list($perm, $type, $object_id, $file) = preg_split('/\s+/', trim($ls_result));
-    $ret = new stdClass;
-    $ret->perm = $perm;
-    $ret->type = $type;
-    $ret->object_id = $object_id;
-    $ret->file = $file;
-    return $ret;
-}
-
 function buildDockerProjectBase($args)
 {
     $project_name = trim($args, "' ");
@@ -64,61 +47,6 @@ function getProjectDockerImage($args)
     readfile($file);
 }
 
-function getProjectBaseByRepository($args)
-{
-    $project_name = trim($args, "' ");
-    if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
-        $project_name = $matches[1];
-    }
-    if (FALSE !== strpos($project_name, '.')) {
-        return error('invalid project name: ' . $project_name);
-    }
-
-    if (!$project = Project::find_by_name(strval($project_name))) {
-        return error('project not found: ' . $project_name);
-    }
-
-    $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
-    if (!file_exists($absolute_path)) {
-        return error('project not found: ' . $project_name);
-    }
-
-    chdir($absolute_path);
-
-    $template = $project->getTemplate();
-    if ($info = getGitFileInfo('requirements.txt')) {
-        $template = in_array($template, array('python26', 'python27')) ? $template : 'python27';
-        $package_filename = 'requirements.txt';
-    } elseif ($info = getGitFileInfo('Gemfile')) {
-        $template = in_array($template, array('ruby20')) ? $template : 'ruby20';
-        $package_filename = 'Gemfile';
-    } elseif ($info = getGitFileInfo('package.json')) {
-        $template = 'nodejs';
-        $package_filename = 'package.json';
-    } else {
-        return error('template ' . $template . ' package filename unknown');
-    }
-
-    if ($info->type != 'blob' or $info->file != $package_filename) {
-        error($package_filename . " not found");
-    }
-
-    $cat_file_cmd = 'git cat-file -p ' . escapeshellarg($info->object_id);
-    $file_content = trim(`$cat_file_cmd`);
-
-    $fp = tmpfile();
-    fputs($fp, $file_content);
-    $meta_data = stream_get_meta_data($fp);
-
-
-    $session = ssh2_connect('localhost', 22);
-    $ret = ssh2_auth_pubkey_file($session, 'root', WEB_PUBLIC_KEYFILE, WEB_KEYFILE);
-    $stream = ssh2_exec($session, "local-build-project-base {$template} {$meta_data['uri']}");
-    stream_set_blocking($stream, true);
-    stream_get_contents($stream);
-
-    readfile('/tmp/project-' . $template . '-' . md5($file_content) . '.tar.gz');
-}
 
 function main()
 {
@@ -128,10 +56,7 @@ function main()
 
     list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
 
-    if ('get-project-base' == $command) {
-        getProjectBaseByRepository($args);
-        return;
-    } elseif ('get-project-docker-image' == $command) {
+    if ('get-project-docker-image' == $command) {
         getProjectDockerImage($args);
         return;
     } elseif ('build-docker-project-image' == $command) {
