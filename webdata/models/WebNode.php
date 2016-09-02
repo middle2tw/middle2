@@ -177,12 +177,6 @@ class WebNodeRow extends Pix_Table_Row
         stream_set_blocking($stream, true);
         $ret = stream_get_contents($stream);
         $ret = json_decode($ret);
-        if (!is_array($ret)) {
-            return false;
-        }
-        if ($ret->error) {
-            return false;
-        }
         return $ret;
     }
 
@@ -337,10 +331,15 @@ class WebNode extends Pix_Table
                 }
             }
 
+            $processes = $node->getNodeProcesses();
+            if (is_object($processes) and property_exists($processes, 'error') and !in_array($node->status, array(WebNode::STATUS_OVER, WebNode::STATUS_UNUSED))) {
+                trigger_error("{$node->ip}:{$node->port} error, release it", E_USER_WARNING);
+                $node->markAsUnused('node error');
+            }
+
             // 如果是 webnode 卻沒有任何 process 就 end
             if (time() - $node->start_at > 60 and in_array($node->status, array(WebNode::STATUS_WEBNODE))) {
-                $processes = $node->getNodeProcesses();
-                if (0 == count($processes)) {
+                if (is_array($processes) and 0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
                     $node->markAsUnused('no alive process');
                 }
@@ -348,8 +347,7 @@ class WebNode extends Pix_Table
 
             // 如果是 cronnode ，在 access 過後超過 60 秒沒有任何 process ，把他切回 wait mode
             if (time() - $node->getAccessAt() > 60 and in_array($node->status, array(WebNode::STATUS_CRONNODE))) {
-                $processes = $node->getNodeProcesses();
-                if (0 == count($processes)) {
+                if (is_array($processes) and 0 == count($processes)) {
                     trigger_error("{$node->ip}:{$node->port} had no alive process, change to wait mode", E_USER_WARNING);
                     $node->markAsWait();
                     $node->update(array('cron_id' => 0));
@@ -366,7 +364,6 @@ class WebNode extends Pix_Table
 
             // 如果 processing node 太久也要踢掉
             if (in_array($node->status, array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)) and (time() - $node->getAccessAt()) > 600 and (time() - $node->start_at) > 600) {
-                $processes = $node->getNodeProcesses();
                 // TODO: 寄信 
                 $node->markAsUnused('process too long');
             }
