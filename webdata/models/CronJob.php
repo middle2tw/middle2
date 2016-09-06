@@ -173,37 +173,6 @@ class CronJob extends Pix_Table
         }
     }
 
-    public static function runPendingJobs()
-    {
-        foreach (self::$_period_map as $period_id => $time) {
-            if (!$time) {
-                continue;
-            }
-            // 多給 5 秒的彈性..這樣才不會 10 分鐘 cron 跑到 11 分鐘
-            foreach (self::search(array('period' => $period_id))->search("last_run_at < " . (5 + time() - $time)) as $cronjob) {
-                if (WebNode::search(array('cron_id' => $cronjob))->count() >= 3) {
-                    Hisoku::alert("Middle2 Cron Error", "Project {$cronjob->project->name} run cron {$cronjob->job} exceed 3 in a time");
-                    continue;
-                }
-                $pid = pcntl_fork();
-
-                if ($pid) {
-                    Logger::logOne(array('category' => 'cron', 'message' => 'fork from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
-                    Pix_Table_Db_Adapter_MysqlConf::resetConnect();
-                    continue;
-                }
-
-                if (function_exists('setthreadtitle')) {
-                    setthreadtitle("php-fpm: Cron {$cronjob->project->name}: {$cronjob->job}");
-                }
-                $cronjob->runJob();
-                exit;
-            }
-        }
-        $status = 0;
-        pcntl_wait($status);
-    }
-
     public function runWorker()
     {
         // 檢查所有 Worker 是否活著或是版本有更新
