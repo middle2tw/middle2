@@ -376,9 +376,7 @@ class WebNode extends Pix_Table
             // 如果是 over 要放出來
             if (in_array($node->status, array(WebNode::STATUS_OVER))) {
                 // 該主機沒有任何 cron/web processing 才做 reset, 以免 cpu/io loading 過高
-                if (!count(WebNode::search(array('ip' => $node->ip))->searchIn('status', array(WebNode::STATUS_CRONPROCESSING, WebNode::STATUS_WEBPROCESSING)))) {
-                    $node->resetNode();
-                }
+                $node->resetNode();
             }
         }
     }
