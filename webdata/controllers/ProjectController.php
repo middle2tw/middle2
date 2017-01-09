@@ -75,6 +75,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('Invalid domain', '/');
         }
 
+        if (stripos($_POST['domain'], getenv('APP_SUFFIX'))) {
+            return $this->alert('Invalid domain', '/');
+        }
+
         $project->custom_domains->insert(array(
             'domain' => strval($_POST['domain']),
         ));
