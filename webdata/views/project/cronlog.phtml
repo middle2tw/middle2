@@ -21,6 +21,9 @@ usort($logs, function($a, $b){ return strtotime($b->status->start) - strtotime($
 Command: <?= $this->escape($log->cronjob->job) ?><br>
 Start time:<?= $log->status->start ?><br>
 Spent time:<?= $log->status->spent ?> second</br>
+<?php if (property_exists($log, 'node')) { ?>
+node: <?= long2ip($log->node[0]) ?> <?= $log->node[1] ?><br>
+<?php } ?>
 Return status: <?= $log->status->code ?><br>
 Stdout: <br>
 <pre><?= $this->escape($log->stdout) ?></pre>
