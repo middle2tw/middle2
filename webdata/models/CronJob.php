@@ -23,6 +23,7 @@ class CronJobRow extends Pix_Table_Row
         stream_set_blocking($ret->stdio, true);
 
         $output = new StdClass;
+        $output->node = array($node->ip, $node->port);
         $output->stderr = (stream_get_contents($ret->stderr));
         $lines = explode("\n", trim(stream_get_contents($ret->stdio)));
         $return_code = array_pop($lines);
