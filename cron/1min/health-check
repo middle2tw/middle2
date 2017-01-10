@@ -37,17 +37,17 @@ foreach (Hisoku::getSearchServers() as $search_server) {
     $content = curl_exec($curl);
     $info = curl_getinfo($curl);
     if ($info['http_code'] != 200) {
-        Hisoku::alert("Search error", "Search IP: {$host}\n Return: {$info['http_code']}\n");
+        Hisoku::alert("Search error", "Search IP: {$search_server}\n Return: {$info['http_code']}\n");
         continue;
     }
 
     if (!$json = json_decode($content)) {
-        Hisoku::alert("Search error", "Search IP: {$host}\n return is not valid json\n{$content}");
+        Hisoku::alert("Search error", "Search IP: {$search_server}\n return is not valid json\n{$content}");
         continue;
     }
 
     if (!$json->ok) {
-        Hisoku::alert("Search error", "Search IP: {$host}\n json is not ok\n" . print_r($json, true));
+        Hisoku::alert("Search error", "Search IP: {$search_server}\n json is not ok\n" . print_r($json, true));
         continue;
     }
 }
