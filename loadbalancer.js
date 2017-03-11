@@ -392,9 +392,12 @@ var http_request_callback = function(protocol){
 
     if (!main_request.headers['x-forwarded-for']) {
         main_request.headers['x-forwarded-for'] = main_request.socket.remoteAddress;
+        main_request.headers['x-real-ip'] = main_request.socket.remoteAddress;
         main_request.headers['x-forwarded-port'] = main_request.socket.address().port;
         if ('https' == protocol) {
             main_request.headers['x-forwarded-https'] = 'On';
+            main_request.headers['x-forwarded-proto'] = 'https';
+            main_request.headers['x-scheme'] = 'https';
         }
     }
 
