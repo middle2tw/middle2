@@ -89,7 +89,7 @@ function main()
         }
 
         $port = 20000 + $id;
-        exec("docker create --publish {$port}:80 --name c-{$id} {$image} init");
+        exec("docker create --oom-kill-disable --publish {$port}:80 --name c-{$id} {$image} init");
         exec("docker start c-{$id}");
         exec("docker exec c-{$id} mkdir /srv/web /srv/logs/");
 
