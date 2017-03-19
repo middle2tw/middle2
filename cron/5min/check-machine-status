@@ -64,7 +64,7 @@ foreach (Machine::search(1) as $machine) {
 if ($messages) {
     $content = '';
     foreach ($messages as $message) {
-        $content .= long2ip($message[0]->ip) . ' ' . $message[1] . "\n";
+        $content .= sprintf("%s (%s) %s\n", long2ip($message[0]->ip), $message[0]->group, $message[1]);
         if ($status = $message[2]) {
             $content .= "https://middle2.com/admin/machinelog/{$status->machine_id}/{$status->updated_at}\n";
         }
