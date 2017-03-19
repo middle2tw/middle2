@@ -165,6 +165,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 
 lb_core._getNodesByProject = function(project, current_request, callback){
     request_pools[current_request].state = 'get-webnode-from-project';
+    request_pools[current_request].project = project.name;
     var working_nodes = mapping_cache['project-to-webnode'][project.id + '-' + project.commit];
     if ('undefined' !== typeof(working_nodes)) {
         var random_node = working_nodes[Math.floor(Math.random() * working_nodes.length)];
