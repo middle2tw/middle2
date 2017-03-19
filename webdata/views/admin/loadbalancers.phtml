@@ -45,6 +45,7 @@ $get_info_from_ip = function($ip){
                     <tr>
                         <td>no</td>
                         <td>host</td>
+                        <td>project</td>
                         <td>time</td>
                         <td>state</td>
                         <td>url</td>
@@ -53,12 +54,20 @@ $get_info_from_ip = function($ip){
                     <tr>
                         <td><?= $id ?></td>
                         <td><?= $this->escape($data->host) ?></td>
+                        <td><?= $this->escape($data->project) ?></td>
                         <td><?= $this->partial('helper/counttime.phtml', array('time' => floor($data->start_at / 1000))) ?></td>
                         <td><?= $this->escape($data->state) ?></td>
                         <td><?= $this->escape(mb_strimwidth($data->url, 0, 64, '...', 'UTF-8')) ?></td>
                     </tr>
                     <?php } ?>
                 </table>
+                <h4>Project connections</h4>
+                <ul>
+                    <?php foreach ($info->project_connections as $project => $count) { ?>
+                    <?php if (!$count) { continue; } ?>
+                    <li><?= $this->escape($project) ?> : <?= $count ?></li>
+                    <?php } ?>
+                </ul>
                 <h4>Recent requests</h4>
                 <ol>
                     <?php foreach ($info->recent_logs as $log) { ?>
