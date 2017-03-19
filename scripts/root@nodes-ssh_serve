@@ -3,8 +3,16 @@
 
 include(__DIR__ . '/../webdata/init.inc.php');
 
-function error($message)
+function error($message, $log_file = null)
 {
+    echo json_encode(array(
+        'error' => true,
+        'message' => $message,
+    ));
+    if (!is_null($log_file)) {
+        file_put_contents($log_file, date('c') . " [error] $message\n", FILE_APPEND);
+    }
+
     error_log($message);
     die();
 }
@@ -223,10 +231,19 @@ function main()
         $log_file = "/srv/chroot/{$id}.log";
         $start = microtime(true);
         file_put_contents($log_file, date('c') . " [shutdown] start\n", FILE_APPEND);
-
         file_put_contents($log_file, date('c') . " [shutdown] /shutdown.sh\n", FILE_APPEND);
-        exec("docker stop c-{$id}");
-        exec("docker rm c-{$id}");
+
+        $ret = 0;
+        exec("docker stop c-{$id}", $output, $ret);
+        if ($ret) {
+            error("docker stop c-{$id} failed, code={$ret}", $log_file);
+            break;
+        }
+        exec("docker rm -f c-{$id}", $output, $ret);
+        if ($ret) {
+            error("docker rm c-{$id} failed, code={$ret}", $log_file);
+            break;
+        }
 
         echo json_encode(array('error' => false, 'port' => $port));
         $spent = microtime(true) - $start;
