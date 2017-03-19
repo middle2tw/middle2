@@ -447,6 +447,20 @@ var http_request_callback = function(protocol){
 
         if (options.type == 'healthcheck') {
             main_response.writeHead(200);
+
+            // recount project_connections
+            new_project_connections = {};
+            for (var id in request_pools) {
+                if ('undefined' !== typeof(request_pools[id].project)) {
+                    n = request_pools[id].project;
+                    if ('undefined' === typeof(new_project_connections[n])) {
+                        new_project_connections[n] = 0;
+                    }
+                    new_project_connections[n] ++;
+                }
+            }
+            project_connections = new_project_connections;
+
             var ret = {
                 status: 'OK',
                 request_serial: request_serial,
