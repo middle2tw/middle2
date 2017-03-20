@@ -138,10 +138,10 @@ function main()
         }
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
-        system("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh");
+        system("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh", $ret);
 
         $spent = microtime(true) - $start;
-        file_put_contents($log_file, date('c') . " [restart-web] done(spent: $spent)\n", FILE_APPEND);
+        file_put_contents($log_file, date('c') . " [restart-web] code={$ret} done(spent: $spent)\n", FILE_APPEND);
         break;
 
     case 'run':
