@@ -9,12 +9,34 @@ function error($message, $log_file = null)
         'error' => true,
         'message' => $message,
     ));
+
     if (!is_null($log_file)) {
         file_put_contents($log_file, date('c') . " [error] $message\n", FILE_APPEND);
     }
 
-    error_log($message);
     die();
+}
+
+function exec_m2($cmd)
+{
+    $descriptorspec = array(
+        0 => array("pipe", "r"),
+        1 => array("pipe", "w"),
+        2 => array("pipe", "w"),
+    );
+    $cwd = __DIR__;
+    $env = array(); //'some_option' => 'aeiou');
+
+    $proc = proc_open($cmd, $descriptorspec, $pipes, $cwd, $env);
+    $stdout = stream_get_contents($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    $ret = proc_close($proc);
+
+    return array(
+        'stdout' => $stdout,
+        'stderr' => $stderr,
+        'code' => $ret,
+    );
 }
 
 function main()
@@ -116,6 +138,7 @@ function main()
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [clone] done(spent: $spent)\n", FILE_APPEND);
+        echo json_encode(array('error' => false, 'port' => $port));
         break;
 
     case 'restart-web':
@@ -142,6 +165,7 @@ function main()
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [restart-web] code={$ret} done(spent: $spent)\n", FILE_APPEND);
+        echo json_encode(array('error' => false, 'port' => $port));
         break;
 
     case 'run':
@@ -233,19 +257,25 @@ function main()
         file_put_contents($log_file, date('c') . " [shutdown] start\n", FILE_APPEND);
         file_put_contents($log_file, date('c') . " [shutdown] /shutdown.sh\n", FILE_APPEND);
 
-        $ret = 0;
-        exec("docker stop c-{$id}", $output, $ret);
-        if ($ret) {
-            error("docker stop c-{$id} failed, code={$ret}", $log_file);
+        $ret = exec_m2("docker stop c-{$id}");
+        if ($ret['code']) {
+            $ret['error'] = true;
+            $ret['message'] = "docker stop c-{$id} failed";
+
+            echo json_encode($ret);
             break;
         }
-        exec("docker rm -f c-{$id}", $output, $ret);
-        if ($ret) {
-            error("docker rm c-{$id} failed, code={$ret}", $log_file);
+        $ret = exec_m2("docker rm -f c-{$id}");
+        if ($ret['code']) {
+            $ret['error'] = true;
+            $ret['message'] = "docker rm c-{$id} failed";
+
+            echo json_encode($ret);
             break;
         }
 
         echo json_encode(array('error' => false, 'port' => $port));
+
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [shutdown] done(spent: {$spent})\n", FILE_APPEND);
         if (file_exists("/srv/chroot/{$id}.project")) {
