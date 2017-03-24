@@ -1,0 +1,59 @@
+#!/usr/bin/env php
+<?php
+
+$host = $_SERVER['argv'][1];
+$test_id = 5566;
+
+foreach (glob("test-*") as $test_path) {
+    // skip shutdown error
+    `ssh root@{$host} shutdown {$test_id}`;
+
+    // init
+    $ret = json_decode(`ssh root@{$host} init {$test_id}`);
+    if (!$ret) {
+        throw new Exception("init {$host} failed, return invalid json");
+    }
+    if ($ret->error) {
+        throw new Exception("init {$host} failed, message: " . $ret->message);
+    }
+
+    // clone
+    $ret = json_decode(`ssh root@{$host} clone {$test_path} {$test_id}`);
+    if (!$ret) {
+        throw new Exception("clone {$host} failed, return invalid json");
+    }
+    if ($ret->error) {
+        throw new Exception("clone {$host} failed, message: " . $ret->message);
+    }
+
+    // start-web
+    $ret = json_decode(`ssh root@{$host} restart-web {$test_path} {$test_id}`);
+    if (!$ret) {
+        throw new Exception("restart-web {$host} failed, return invalid json");
+    }
+    if ($ret->error) {
+        throw new Exception("restart-web {$host} failed, message: " . $ret->message);
+    }
+
+    // check web
+    $cases = json_decode(file_get_contents("{$test_path}/test-case.json"));
+    foreach ($cases as $case) {
+        $curl = curl_init("http://{$host}:" . (20000 + $test_id) . $case->path);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $ret = curl_exec($curl);
+        if (trim($ret) != $case->result) {
+            throw new Exception("testing {$test_path} {$case->path} failed");
+        }
+    }
+
+    // shutdown
+    $ret = json_decode(`ssh root@{$host} shutdown {$test_id}`);
+    if (!$ret) {
+        throw new Exception("init {$host} failed, return invalid json");
+    }
+    if ($ret->error) {
+        throw new Exception("init {$host} failed, message: " . $ret->message);
+    }
+}
+
+echo "All tests pass\n";
