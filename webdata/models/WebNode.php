@@ -33,6 +33,15 @@ class WebNodeRow extends Pix_Table_Row
         ));
     }
 
+    public function deletePort()
+    {
+        if (in_array($this->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WEBPROCESSING))) {
+            WebNode::cleanLoadBalancerCache();
+        }
+
+        $this->delete();
+    }
+
     public function getStatusWord()
     {
         $node_status = WebNode::getTable()->_columns['status']['note'];
