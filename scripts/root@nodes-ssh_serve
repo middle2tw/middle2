@@ -161,7 +161,15 @@ function main()
         }
         $uid = 20000 + $id;
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
-        system("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh", $ret);
+        $ret = exec_m2("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh", $ret);
+        if ($ret['code']) {
+            $ret['error'] = true;
+            $ret['message'] = "docker exec start-web failed";
+            file_put_contents($log_file, date('c') . " [restart-web] code={$ret} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
+
+            echo json_encode($ret);
+            break;
+        }
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [restart-web] code={$ret} done(spent: $spent)\n", FILE_APPEND);
