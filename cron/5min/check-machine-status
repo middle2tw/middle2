@@ -24,8 +24,8 @@ foreach (Machine::search(1) as $machine) {
     if (!$loads = $machine_status->getLoads()) {
         $messages[] = array($machine, "無法正確取得 cpu load", $machine_status);
     } else {
-        if ($loads[0] > 4) {
-            $messages[] = array($machine, "CPU Loading 過高: " . $loads[0], $machine_status);
+        if ($loads[1] > 4) {
+            $messages[] = array($machine, "CPU Loading 過高: " . implode(',', $loads), $machine_status);
         }
     }
 
