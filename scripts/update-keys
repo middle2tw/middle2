@@ -6,10 +6,12 @@ if ('git' !== getenv('USER')) {
     die('git user only' . PHP_EOL);
 }
 
-$public_keys = array(
+# call by UserKey::updateKey() from mainpage for updating ~git/.ssh/authorized_keys 
+$update_git_config_keys = array(
     'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDH32ZXsqqw/t4w0YHJhsfdSaNQNmUBQj/aEzBKbqW4mNRY3CsEshtg95HZk2Lyo9KDP1g0ZRftilsXwHgFla80NJbIzP3UpSaNKembGPJmirXjyQNzar6ho3GpQP84ZGrYQW6sPUtHYY3XPEs6H7SOTTWSNZ757IEiIUaRglfZzwxe8lOxc5YxAQ6HL4XJNRd0mbdogdr3zIIY++WNylRQ0M+omHmsA+soD5AJBiCEy3BsS5IOc/k4nxCuDeLu15LcxC3SG5EFi1OTZ+eA2y0h/WmSoKF2ybwxgGTX5VLbwlqiStaqJqLMavE0bi+TzkUBzr8tEbgeo6v+DqWrg1cF www@m2',
 );
 
+# call by scripts/root@nodes-ssh_serve from node servers for git clone repository
 $deploy_keys = array(
     'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAMZhu7K5LIT1ncCgCy1cU5MHfMb1Jfi6PnSruhLyjHMUy4GMWc4pFlHHftzeMMIIHU3CgTB462ELDCze93OW33TxTjEXZ8lIzIU+ZIwDufyer+/7vRd9lqtRozTNZq+v9BvJJsjChdxkiG8OLITNXMXqtbKynPEbE7QDEdWFGAHWCqUZabGrw4rd4jzTX0jxGh0wREUl9S+dctoIZAFGcQmpLEIjsxQnWuGh88KbhCNHwkzgVepbwn1i8AeXEjpKHepcVprEdd3BSZu53RMvOjzPppVgSfvaVauZvJPUSyAwSbMrZ67tJ98yfGsINDu048VtlXG8i2FRyJv20b2PX root@m2-lb',
     'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcYlQRK1LcHWlHyewnb4fC6eu2146d6a8FTDQe17QBP/KuBm7GAqYAY/dDieIhOFN9vwljArAJiefHjZG86F9tne/AX4e9VzxcQmfRSE7GNzNLT6EcVpkXOEG2tt9FA6H4luOm3VqUvu/rpya9tCV07sXYom12ER9l91oBbopKQc5FQHLjqZsIkb2HCnB3+cCOLZUJYV86RO8Vtkcg7N6O+qUzrY3h1CpSUpPr8ikhpPvPUIY0i0+68aPGuy1IXQLiZcBpVQoBSB2n4EMBLREJm8gha2wjrjq5y2ZfcxYgS5hCz730yQPWpUz8OUG/RTA2vtYHeMfkQJa7xjEIpor/ root@m2-nodes-2',
@@ -22,8 +24,8 @@ foreach ($deploy_keys as $deploy_key) {
     $content .= 'command="/srv/code/hisoku/scripts/deploy-key-archive-only",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $deploy_key . "\n";
 }
 $content .= "# update-keys\n";
-foreach ($public_keys as $public_key) {
-    $content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $public_key . "\n";
+foreach ($update_git_config_keys as $key) {
+    $content .= 'command="/srv/code/hisoku/scripts/update-keys",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $key . "\n";
 }
 $content .= "# user keys\n";
 
