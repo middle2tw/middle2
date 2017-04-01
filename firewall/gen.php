@@ -144,7 +144,7 @@ class FirewallGenerator
                 array('5432', array('loadbalancer', 'mainpage', 'node')),
             ),
             'scribe' => array(
-                array('1426', array('loadbalancer', 'node')),
+                array('1463', array('loadbalancer', 'node')),
             ),
             'dev' => array(
                 array('22', array('PUBLIC')), // 以後要用 VPN 把這個 rule 拿掉
