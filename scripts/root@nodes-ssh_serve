@@ -160,6 +160,11 @@ function main()
             $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
         }
         $uid = 20000 + $id;
+
+        if (file_exists('/srv/code/hisoku/dockers/generated-config/')) {
+            $ret = exec_m2("docker cp /srv/code/hisoku/dockers/generated-config/* c-{$id}:/");
+        }
+
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
         $ret = exec_m2("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh", $ret);
         if ($ret['code']) {

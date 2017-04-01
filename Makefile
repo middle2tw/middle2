@@ -8,6 +8,7 @@ npm: package.json
 
 deploy: npm
 	php firewall/gen.php
+	php dockers/gen.php
 	@for HOST in ${HOSTS} ; do \
 	rsync -avz --exclude .git --exclude .gitignore --exclude '.*.swp' --exclude 'webdata/config.php' --delete --delete-excluded -e ssh . code@$${HOST}:~/hisoku ; \
 	done
