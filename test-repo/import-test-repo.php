@@ -47,7 +47,7 @@ foreach (glob("test-*") as $test_path) {
         }
     }
     error_log("cloning {$test_path} to tmp_repo/");
-    system("ssh-agent bash -c 'ssh-add git-key; git clone git@" . getenv('GIT_PUBLIC_SERVER') . ':' . $test_path . ' tmp_repo\'');
+    system("ssh-agent bash -c 'ssh-add git-key; git clone git@" . getenv('GIT_SERVER') . ':' . $test_path . ' tmp_repo\'');
 
     system("cp -r {$test_path}/* tmp_repo");
     system("git -C tmp_repo/ add .");

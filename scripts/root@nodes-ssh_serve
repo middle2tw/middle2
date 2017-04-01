@@ -83,7 +83,7 @@ function main()
         file_put_contents($log_file, date('c') . " [clone] init lang base\n", FILE_APPEND);
         file_put_contents("/srv/chroot/{$id}.project", $project_name);
 
-        $cmd = "ssh git@" . GIT_PRIVATE_SERVER . " build-docker-project-image " . $project_name;
+        $cmd = "ssh git@" . GIT_SERVER . " build-docker-project-image " . $project_name;
         $build_image_result = `$cmd`;
         if (!preg_match('#success:(.*)#', $build_image_result, $matches)) {
             return error('build project base failed: ' . $project_name);
@@ -108,7 +108,7 @@ function main()
                 $tmp_container_name = "c-tmp-{$project_name}-{$project_base_version}";
                 exec("docker create --publish {$port}:80 --name {$tmp_container_name} middle2 init");
                 exec("docker start {$tmp_container_name}");
-                exec("ssh git@" . GIT_PRIVATE_SERVER . " get-project-docker-image {$project_name} {$project_base_version} | docker exec -i {$tmp_container_name} tar --no-same-owner -zxvf - -C /");
+                exec("ssh git@" . GIT_SERVER . " get-project-docker-image {$project_name} {$project_base_version} | docker exec -i {$tmp_container_name} tar --no-same-owner -zxvf - -C /");
                 exec("docker commit {$tmp_container_name} {$image}");
                 exec("docker stop {$tmp_container_name}");
                 exec("docker rm {$tmp_container_name}");
@@ -128,7 +128,7 @@ function main()
         }
 
         file_put_contents($log_file, date('c') . " [clone] pull source code\n", FILE_APPEND);
-        exec("git archive --format=tar --remote=git@" . GIT_PRIVATE_SERVER . ":{$project_name}.git master | docker exec -i c-{$id} tar -xvf - -C /srv/web/");
+        exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project_name}.git master | docker exec -i c-{$id} tar -xvf - -C /srv/web/");
 
         file_put_contents($log_file, date('c') . " [clone] post-clone.sh\n", FILE_APPEND);
         if ('no-post-clone' != $flag) {

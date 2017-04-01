@@ -14,8 +14,7 @@ if (file_exists(__DIR__ . '/config.php')) {
 } elseif (file_exists('/srv/config/config.php')) {
     include('/srv/config/config.php');
 }
-define('GIT_SERVER', getenv('GIT_PUBLIC_SERVER') ?: 'git.hisoku.ronny.tw');
-define('GIT_PRIVATE_SERVER', getenv('GIT_PRIVATE_SERVER') ?: 'git-p.hisoku.ronny.tw');
+define('GIT_SERVER', getenv('GIT_SERVER') ?: 'git.middle2.com');
 define('USER_DOMAIN', getenv('APP_SUFFIX') ?: '.hisokuapp.ronny.tw');
 define('WEB_KEYFILE', '/srv/config/web-key');
 define('WEB_PUBLIC_KEYFILE', '/srv/config/web-key.pub');
