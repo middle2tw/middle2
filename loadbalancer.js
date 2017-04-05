@@ -485,6 +485,62 @@ var http_request_callback = function(protocol){
         var return_length = 0;
 
         if (options.project) {
+            if (options.project.status == 2) { // project is disabled
+                var referer = main_request.headers['referer'];
+                if (typeof(referer) != 'string') {
+                    referer = '-';
+                }
+                var useragent = main_request.headers['user-agent'];
+                if (typeof(useragent) != 'string') {
+                    useragent = '-';
+                }
+                var log = (host
+                        + ' ' + main_request.headers['x-forwarded-for']
+                        + ' - - ' + apachedate()
+                        + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
+                        + ' 503 0'
+                        + ' "' + referer + '"'
+                        + ' "' + useragent + '"'
+                        ); 
+                recent_logs.push(log);
+                recent_logs = recent_logs.slice(recent_logs.length - 10);
+
+                main_response.writeHead(503);
+                main_response.write('This site is currently unavailable');
+                main_response.end();
+                request_count --;
+                delete(request_pools[current_request]);
+                return;
+            }
+
+            if (options.project.status == 1 && main_request.url == '/robots.txt') { // project is disallow robots
+                var referer = main_request.headers['referer'];
+                if (typeof(referer) != 'string') {
+                    referer = '-';
+                }
+                var useragent = main_request.headers['user-agent'];
+                if (typeof(useragent) != 'string') {
+                    useragent = '-';
+                }
+                var log = (host
+                        + ' ' + main_request.headers['x-forwarded-for']
+                        + ' - - ' + apachedate()
+                        + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
+                        + ' 200 0'
+                        + ' "' + referer + '"'
+                        + ' "' + useragent + '"'
+                        ); 
+                recent_logs.push(log);
+                recent_logs = recent_logs.slice(recent_logs.length - 10);
+
+                main_response.writeHead(200);
+                main_response.write("User-agent: *\nDisallow: /");
+                main_response.end();
+                request_count --;
+                delete(request_pools[current_request]);
+                return;
+            }
+
             if (project_connections[options.project.name] > 20) {
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
