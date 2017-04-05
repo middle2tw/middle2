@@ -188,6 +188,8 @@ class Project extends Pix_Table
         $this->_columns['id'] = array('type' => 'int', 'auto_increment' => true);
         $this->_columns['name'] = array('type' => 'varchar', 'size' => 64);
         $this->_columns['commit'] = array('type' => 'char', 'size' => 32);
+        // 0 - actived, 1 - dev (robots.txt disallow all), 2 - 503 service unaviable
+        $this->_columns['status'] = array('type' => 'int', 'default' => 0);
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['created_by'] = array('type' => 'int');
 
