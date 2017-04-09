@@ -32,6 +32,13 @@ if ($ret->process = trim(`top -w 200 -b -n 1 -c`)) {
 }
 $ret->dmesg = trim(`dmesg | tail -n 100`);
 
+// memory info
+$ret->memory = new StdClass;
+foreach (explode("\n", trim(file_get_contents('/proc/meminfo'))) as $line) {
+    list($key, $value) = array_map('trim', explode(':', $line));
+    $ret->memory->{$key} = $value;
+}
+
 // TODO: 增加 firewall 是否有正常跑起來的資訊
 $curl = curl_init('http://middle2.com/api/updatemachinestatus');
 curl_setopt($curl, CURLOPT_POSTFIELDS, 'status=' . urlencode(json_encode($ret, JSON_UNESCAPED_UNICODE)));
