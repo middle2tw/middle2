@@ -15,6 +15,10 @@ class MachineStatusRow extends Pix_Table_Row
     public function getDiskInfos()
     {
         $obj = $this->getObject();
+        usort($obj->disk, function($a, $b) {
+            return $b->disk_total - $a->disk_total;
+        });
+
         return $obj->disk;
     }
 

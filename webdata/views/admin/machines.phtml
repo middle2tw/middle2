@@ -6,7 +6,16 @@
             <tr>
                 <td>IP</td>
                 <td>Groups</td>
-                <td>LastStatus</td>
+                <td>Last Status</td>
+                <td>load 1m</td>
+                <td>5m</td>
+                <td>15m</td>
+                <td>Disk Size</td>
+                <td>Used</td>
+                <td>Mem Size</td>
+                <td>Used</td>
+                <td>Swap Size</td>
+                <td>Used</td>
                 <td>Action</td>
             </tr>
         </thead>
@@ -19,10 +28,34 @@
                 [<?= $this->escape($group) ?>]
                 <?php } ?>
             </td>
+            <?php if ($status = $machine->statuses->order('updated_at DESC')->first()) { ?>
             <td>
-                <?php if ($status = $machine->statuses->order('updated_at DESC')->first()) { ?>
                 <a href="/admin/machinelog/<?= $machine->machine_id ?>/<?= $status->updated_at ?>"><?= $this->partial('/helper/counttime.phtml', array('time' => $status->updated_at)) ?></a>
-                <?php } ?>
+            </td><!-- LastStatus -->
+            <td><?= $status->getLoads()[0] ?></td><!-- load 1m -->
+            <td><?= $status->getLoads()[1] ?></td><!-- load 5m -->
+            <td><?= $status->getLoads()[2] ?></td><!-- load 10m -->
+            <?php $biggest_disk = $status->getDiskInfos()[0]; ?>
+            <td><?= sprintf("%.2fGB", $biggest_disk->disk_total / 1024 / 1024) ?></td><!-- Disk size -->
+            <td><?= $biggest_disk->disk_capacity ?></td><!-- Disk used-->
+            <?php $memory = $status->getObject()->memory ?>
+            <td><?= sprintf("%.2fGB", $memory->MemTotal / 1024 / 1024) ?></td><!-- Mem Size -->
+            <td><?= sprintf("%.2f%%", 100 * (floatval($memory->MemTotal) - floatval($memory->MemFree)) / floatval($memory->MemTotal)) ?></td><!-- Mem Used -->
+            <td><?= sprintf("%.2fGB", $memory->SwapTotal / 1024 / 1024) ?></td><!-- Swap Size -->
+            <td><?= sprintf("%.2f%%", 100 * (floatval($memory->SwapTotal) - floatval($memory->SwapFree)) / floatval($memory->SwapTotal)) ?></td><!-- Swap Used -->
+            <?php } else { ?>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <?php } ?>
             <td>
                 <a href="/admin/machines?machine_id=<?= $machine->machine_id ?>">Edit</a>
             </td>
