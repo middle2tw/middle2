@@ -2,7 +2,14 @@
 <?= $this->partial('/admin/header.phtml', $this) ?>
 <div class="container-fluid">
     <h1>Machine: <?= long2ip($this->status->machine->ip) ?></h1>
-    Time: <?= date('c', $this->status->updated_at) ?><br>
+    Time: <?= date('c', $this->status->updated_at) ?>
+    <?php if ($s = $this->status->machine->statuses->order('updated_at')->after($this->status)->first()) { ?>
+    <a href="/admin/machinelog/<?= $s->machine->machine_id ?>/<?= $s->updated_at ?>"><?= date('H:i:s', $s->updated_at) ?></a>
+    <?php } ?>
+    <?php if ($s = $this->status->machine->statuses->order('updated_at')->before($this->status)->first()) { ?>
+    <a href="/admin/machinelog/<?= $s->machine->machine_id ?>/<?= $s->updated_at ?>"><?= date('H:i:s', $s->updated_at) ?></a>
+    <?php } ?>
+    <br>
     Loads: <?= implode(' ', $this->status->getLoads()) ?><br>
     <pre>
 <?php print_r(json_decode($this->status->status)) ?>
