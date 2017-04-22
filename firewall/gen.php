@@ -8,9 +8,8 @@ class FirewallGenerator
     {
         return array(
             '#!/bin/sh',
-            'iptables --flush',
-            'iptables --delete-chain',
-            'iptables --zero',
+            'iptables --flush INPUT',
+            'iptables --zero INPUT',
             'iptables --policy INPUT DROP',
             'iptables --policy OUTPUT ACCEPT',
             'iptables --policy FORWARD ACCEPT',
@@ -25,9 +24,8 @@ class FirewallGenerator
     {
         return array(
             'sleep 30',
-            'iptables --flush',
-            'iptables --delete-chain',
-            'iptables --zero',
+            'iptables --flush INPUT',
+            'iptables --zero INPUT',
             'iptables --policy INPUT ACCEPT',
             'iptables --policy OUTPUT ACCEPT',
             'iptables --policy FORWARD ACCEPT',
