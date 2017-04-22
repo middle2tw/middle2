@@ -102,6 +102,11 @@ class FirewallGenerator
             $this->_addServer($ip, 'git');
         }
 
+        // docker registry
+        foreach (Hisoku::getIPsByGroup('docker-registry') as $ip) {
+            $this->_addServer($ip, 'docker-registry');
+        }
+
         // private memcache server
         foreach ($private_memcache_servers as $ip) {
             $this->_addServer($ip, 'private_memcache');
@@ -128,6 +133,9 @@ class FirewallGenerator
             'loadbalancer' => array(
                 array('80', array('PUBLIC')),
                 array('443', array('PUBLIC')),
+            ),
+            'docker-registry' => array(
+                array('5000', array('node')),
             ),
             'git' => array(
                 array('22', array('PUBLIC')),
