@@ -8,16 +8,16 @@ class FirewallGenerator
     {
         return array(
             '#!/bin/sh',
-            'iptables -F',
-            'iptables -X',
-            'iptables -Z',
-            'iptables -P INPUT DROP',
-            'iptables -P OUTPUT ACCEPT',
-            'iptables -P FORWARD ACCEPT',
-            'iptables -A INPUT -i lo -j ACCEPT',
-            'iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT',
-            'iptables -A INPUT -p icmp --icmp-type 8 -s 0/0 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT',
-            'iptables -A OUTPUT -p icmp --icmp-type 0 -d 0/0 -m state --state ESTABLISHED,RELATED -j ACCEPT',
+            'iptables --flush',
+            'iptables --delete-chain',
+            'iptables --zero',
+            'iptables --policy INPUT DROP',
+            'iptables --policy OUTPUT ACCEPT',
+            'iptables --policy FORWARD ACCEPT',
+            'iptables --append INPUT --in-interface lo --jump ACCEPT',
+            'iptables --append INPUT --match state --state RELATED,ESTABLISHED --jump ACCEPT',
+            'iptables --append INPUT --protocol icmp --icmp-type 8 --source 0/0 --match state --state NEW,ESTABLISHED,RELATED --jump ACCEPT',
+            'iptables --append OUTPUT --protocol icmp --icmp-type 0 --destination 0/0 --match state --state ESTABLISHED,RELATED --jump ACCEPT',
         );
     }
 
@@ -25,12 +25,12 @@ class FirewallGenerator
     {
         return array(
             'sleep 30',
-            'iptables -F',
-            'iptables -X',
-            'iptables -Z',
-            'iptables -P INPUT ACCEPT',
-            'iptables -P OUTPUT ACCEPT',
-            'iptables -P FORWARD ACCEPT',
+            'iptables --flush',
+            'iptables --delete-chain',
+            'iptables --zero',
+            'iptables --policy INPUT ACCEPT',
+            'iptables --policy OUTPUT ACCEPT',
+            'iptables --policy FORWARD ACCEPT',
         );
     }
 
@@ -212,14 +212,14 @@ class FirewallGenerator
                 }
                 if (in_array('PUBLIC', $categories)) {
                     $rules[] = '# allow all from categories ' . implode(', ', $match_rule_categories[$port]);
-                    $rules[] = 'iptables -A INPUT -p ' . $protocol . ' --dport ' . $port . ' -j ACCEPT';
+                    $rules[] = 'iptables --append INPUT --protocol ' . $protocol . ' --dport ' . $port . ' --jump ACCEPT';
                 } else {
                     $rules[] = '# allow ' . implode(', ', $categories) . ' from categories ' . implode(', ', $match_rule_categories[$port]);
                     foreach ($this->getIPsFromCategories($categories) as $src_ip) {
                         if ($ip == $src_ip) {
                             continue;
                         }
-                        $rules[] = 'iptables -A INPUT -p ' . $protocol . ' -s ' . $src_ip . ' --dport ' . $port . ' -j ACCEPT';
+                        $rules[] = 'iptables --append INPUT --protocol ' . $protocol . ' --source ' . $src_ip . ' --dport ' . $port . ' --jump ACCEPT';
                     }
                 }
             }
