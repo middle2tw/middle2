@@ -28,26 +28,6 @@ function buildDockerProjectBase($args)
     exit;
 }
 
-function getProjectDockerImage($args)
-{
-    list($project_name, $image_id) = explode(' ', $args);
-    if (FALSE !== strpos($project_name, '.')) {
-        return error('invalid project name: ' . $project_name);
-    }
-
-    if (!$project = Project::find_by_name(strval($project_name))) {
-        return error('project not found: ' . $project_name);
-    }
-
-    $file = "/tmp/project-{$project_name}-{$image_id}.tgz";
-    if (!file_exists($file)) {
-        return error("project base not found: " . $image_id);
-    }
-
-    readfile($file);
-}
-
-
 function main()
 {
     if (!getenv('SSH_ORIGINAL_COMMAND')) {
@@ -56,10 +36,7 @@ function main()
 
     list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
 
-    if ('get-project-docker-image' == $command) {
-        getProjectDockerImage($args);
-        return;
-    } elseif ('build-docker-project-image' == $command) {
+    if ('build-docker-project-image' == $command) {
         buildDockerProjectBase($args);
         return;
     } elseif (!in_array($command, array('git-upload-archive'))) {

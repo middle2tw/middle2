@@ -44,6 +44,9 @@ class GitHelper
 
         chdir($absolute_path);
 
+        $rev_parse_cmd = "git rev-parse {$branch}";
+        $commit_id = trim(`$rev_parse_cmd`);
+
         $actions = array();
         foreach (array('requirements.txt', 'Gemfile', 'package.json') as $file) {
             if ($info = self::getGitFileInfo($file, $branch)) {
@@ -54,45 +57,60 @@ class GitHelper
             }
         }
 
-        if (!$actions) { // 沒這些檔案的話什麼都不用動
-            return 'default';
+        // pull from remote image
+        $docker_registry = getenv('DOCKER_REGISTRY');
+
+        // check container is exists
+        $cmd = "docker inspect container-{$project->name}";
+        $obj = json_decode(`$cmd`)[0];
+        if ($obj) {
+            self::system_without_error("docker rm -f container-{$project->name}");
         }
 
-        $version = crc32(json_encode($actions));
-        $image_id = "{$project->name}-{$version}";
-
-        if (!file_exists("/tmp/project-{$image_id}.tgz")) {
-            exec("docker create --name container-{$image_id} middle2 init");
-            exec("docker start container-{$image_id}");
-            foreach ($actions as $action) {
-                $info = $action['info'];
-                $tmp_name = tempnam('', '');
-                exec("git cat-file -p " . escapeshellarg($info->object_id) . " > " . $tmp_name);
-
-                try {
-                    if ($action['file'] == 'requirements.txt') {
-                        exec("docker cp {$tmp_name} container-{$image_id}:/requirements.txt");
-                        self::system_without_error("docker exec --tty container-{$image_id} pip install --requirement /requirements.txt");
-                    } elseif ($action['file'] == 'Gemfile') {
-                        exec("docker cp {$tmp_name} container-{$image_id}:/Gemfile");
-                        self::system_without_error("docker exec --tty container-{$image_id} gem install bundler");
-                        self::system_without_error("docker exec --tty container-{$image_id} bundle install --without development test");
-                    } elseif ($action['file'] == 'package.json') {
-                        exec("docker cp {$tmp_name} container-{$image_id}:/srv/package.json");
-                        self::system_without_error("docker exec --tty container-{$image_id} sh -c \"cd /srv; npm install\"");
-                    }
-                } catch (Exception $e) {
-                    exec("docker stop container-{$image_id}");
-                    exec("docker rm container-{$image_id}");
-                    throw $e;
-                }
-                unlink($tmp_name);
+        try {
+            self::system_without_error("docker --config /srv/config/docker pull {$docker_registry}/image-{$project->name}");
+            $cmd = "docker inspect {$docker_registry}/image-{$project->name}";
+            $obj = json_decode(`$cmd`)[0];
+            if ($obj->Comment == $commit_id) {
+                return $commit_id;
             }
-            system("php " . __DIR__ . "/../../scripts/docker-export-diff.php container-{$image_id} /tmp/project-{$image_id}.tgz");
-            exec("docker stop container-{$image_id}");
-            exec("docker rm container-{$image_id}");
+
+            self::system_without_error("docker create --name container-{$project->name} {$docker_registry}/image-{$project->name} init");
+
+        } catch (Exception $e) {
+            // image is not on remote
+            self::system_without_error("docker create --name container-{$project->name} middle2 init");
         }
 
-        return $version;
+        self::system_without_error("docker start container-{$project->name}");
+        self::system_without_error("docker exec container-{$project->name} mkdir -p /srv/web");
+        self::system_without_error("docker exec container-{$project->name} find /srv/web/ -not -path  '/srv/web/node_modules/*' -not -path '/srv/web/node_modules' -not -path '/srv/web/' -delete");
+        self::system_without_error("git archive --format=tar {$branch}| docker exec -i container-{$project->name} tar -xf - -C /srv/web/");
+
+        foreach ($actions as $action) {
+            $info = $action['info'];
+
+            try {
+                if ($action['file'] == 'requirements.txt') {
+                    self::system_without_error("docker exec --tty container-{$project->name} pip install --requirement /srv/web/requirements.txt");
+                } elseif ($action['file'] == 'Gemfile') {
+                    self::system_without_error("docker exec --tty container-{$project->name} sh -c 'cd /srv/web; gem install bundler'");
+                    self::system_without_error("docker exec --tty container-{$project->name} sh -c 'cd /srv/web; bundle install --without development test'");
+                } elseif ($action['file'] == 'package.json') {
+                    self::system_without_error("docker exec --tty container-{$project->name} env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin sh -c 'cd /srv/web; npm install --unsafe-perm'");
+                }
+            } catch (Exception $e) {
+                self::system_without_error("docker stop container-{$project->name}");
+                //self::system_without_error("docker rm container-{$project->name}");
+                throw $e;
+            }
+        }
+
+        self::system_without_error("docker stop container-{$project->name}");
+        self::system_without_error("docker commit --message {$commit_id} container-{$project->name} {$docker_registry}/image-{$project->name}");
+        self::system_without_error("docker --config /srv/config/docker push {$docker_registry}/image-{$project->name}");
+        self::system_without_error("docker rm container-{$project->name}");
+
+        return $commit_id;
     }
 }

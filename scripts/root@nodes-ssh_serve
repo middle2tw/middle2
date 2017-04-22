@@ -88,53 +88,43 @@ function main()
         if (!preg_match('#success:(.*)#', $build_image_result, $matches)) {
             return error('build project base failed: ' . $project_name);
         }
-        $project_base_version = $matches[1];
 
-        if ($project_base_version != 'default') {
-            $version_file = "/srv/chroot/image-{$project_name}-{$project_base_version}";
-            $image = "image-{$project_name}-{$project_base_version}";
+        $docker_registry = getenv('DOCKER_REGISTRY');
+        $image = "{$docker_registry}/image-{$project_name}";
+        $ret = exec_m2("docker --config /srv/config/docker pull $image");
+        if ($ret['code']) {
+            $ret['error'] = true;
+            $ret['message'] = "docker pull $image failed";
+            file_put_contents($log_file, date('c') . " [clone] code={$ret} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
 
-            if (file_exists($version_file)) {
-                if ('wait' == file_get_contents($version_file)) {
-                    while (true) {
-                        if ('done' == file_get_contents($version_file)) {
-                            break;
-                        }
-                        usleep(100);
-                    }
-                }
-            } else {
-                file_put_contents($version_file, 'wait');
-                $tmp_container_name = "c-tmp-{$project_name}-{$project_base_version}";
-                exec("docker create --publish {$port}:80 --name {$tmp_container_name} middle2 init");
-                exec("docker start {$tmp_container_name}");
-                exec("ssh git@" . GIT_SERVER . " get-project-docker-image {$project_name} {$project_base_version} | docker exec -i {$tmp_container_name} tar --no-same-owner -zxvf - -C /");
-                exec("docker commit {$tmp_container_name} {$image}");
-                exec("docker stop {$tmp_container_name}");
-                exec("docker rm {$tmp_container_name}");
-                file_put_contents($version_file, 'done');
-            }
-        } else {
-            $image = 'middle2';
+            echo json_encode($ret);
+            break;
         }
 
         $port = 20000 + $id;
-        exec("docker create --oom-kill-disable --publish {$port}:80 --name c-{$id} {$image} init");
-        exec("docker start c-{$id}");
-        exec("docker exec c-{$id} mkdir /srv/web /srv/logs/");
+        $ret = exec_m2("docker create --oom-kill-disable --publish {$port}:80 --name c-{$id} {$image} init");
+        if ($ret['code']) {
+            $ret['error'] = true;
+            $ret['message'] = "docker create $image to c-{$id} failed";
+            file_put_contents($log_file, date('c') . " [clone] code={$ret} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
 
-        if (file_exists('/srv/project_data/' . $project_name)) {
-            // TODO: nfs
+            echo json_encode($ret);
+            break;
         }
+        $ret = exec_m2("docker start c-{$id}");
+        if ($ret['code']) {
+            $ret['error'] = true;
+            $ret['message'] = "docker start c-{$id} failed";
+            file_put_contents($log_file, date('c') . " [clone] code={$ret} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
 
-        file_put_contents($log_file, date('c') . " [clone] pull source code\n", FILE_APPEND);
-        exec("git archive --format=tar --remote=git@" . GIT_SERVER . ":{$project_name}.git master | docker exec -i c-{$id} tar -xvf - -C /srv/web/");
+            echo json_encode($ret);
+            break;
+        }
 
         file_put_contents($log_file, date('c') . " [clone] post-clone.sh\n", FILE_APPEND);
         if ('no-post-clone' != $flag) {
             exec("docker exec c-{$id} /post-clone.sh {$port}");
         }
-
 
         $spent = microtime(true) - $start;
         file_put_contents($log_file, date('c') . " [clone] done(spent: $spent)\n", FILE_APPEND);
@@ -165,6 +155,7 @@ function main()
             $ret = exec_m2("docker cp /srv/code/hisoku/dockers/generated-config/* c-{$id}:/");
         }
 
+        $ret = exec_m2("docker exec c-{$id} mkdir /srv/logs");
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
         $ret = exec_m2("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh", $ret);
         if ($ret['code']) {
