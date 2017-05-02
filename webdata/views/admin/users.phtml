@@ -1,0 +1,26 @@
+<?php
+$admin_ids = Admin::search(1)->toArray('id');
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Group</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach (User::search(1) as $user) { ?>
+    <tr>
+        <td><?= $user->id ?></td>
+        <td><?= $this->escape($user->name) ?></td>
+        <td><?= in_array($user->id, $admin_ids) ? 'admin' : 'user' ?></td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    </tbody>
+</table>
+<?= $this->partial('/common/footer.phtml', $this) ?>

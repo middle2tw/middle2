@@ -311,4 +311,8 @@ class AdminController extends Pix_Controller
         return $this->alert('delete done', '/admin/sslkey');
 
     }
+
+    public function usersAction()
+    {
+    }
 }
