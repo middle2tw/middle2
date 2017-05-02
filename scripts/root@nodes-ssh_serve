@@ -266,6 +266,8 @@ function main()
             $ret['error'] = true;
             $ret['message'] = "docker stop c-{$id} failed";
 
+            file_put_contents($log_file, date('c') . " [shutdown] code={$ret['code']} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
+
             echo json_encode($ret);
             break;
         }
@@ -273,6 +275,8 @@ function main()
         if ($ret['code']) {
             $ret['error'] = true;
             $ret['message'] = "docker rm c-{$id} failed";
+
+            file_put_contents($log_file, date('c') . " [shutdown] code={$ret['code']} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
 
             echo json_encode($ret);
             break;
