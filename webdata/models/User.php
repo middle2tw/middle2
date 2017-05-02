@@ -132,6 +132,10 @@ class User extends Pix_Table
         // password_type: 1-hmac_sha256
         $this->_columns['password_type'] = array('type' => 'tinyint');
         $this->_columns['password'] = array('type' => 'char', 'size' => 64);
+        // 0 - created (wait confirm)
+        // 1 - actived
+        // 2 - disasbled
+        $this->_columns['status'] = array('type' => 'int');
 
         $this->_indexes['name'] = array('type' => 'unique', 'columns' => array('name'));
 
