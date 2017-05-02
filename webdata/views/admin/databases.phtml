@@ -25,6 +25,10 @@ $databases = array();
 while ($row = $res->fetch_row()) {
     $databases[] = $row[0];
 }
+usort($databases, function($db1, $db2) use ($db_sizes) {
+    return $db_sizes[$db2] - $db_sizes[$db1];
+});
+
 $res->free_result();
 ?>
 <table class="table">
