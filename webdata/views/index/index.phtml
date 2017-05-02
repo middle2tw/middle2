@@ -1,2 +1,33 @@
 <?= $this->partial('/common/header.phtml', $this) ?>
+<h1>關於 middle2</h1>
+<p>Middle2 是我從 2012 年 7 月開始開發的 PaaS (Platform As A Service) 專案，會開發 Middle2 是因為覺得像 Heroku 這樣的 PaaS 平台對於開發網路服務相當方便，但是覺得 Heroku 的收費方案較昂貴，因此決定自己做一個 PaaS 出來，也因為有了 middle2 這樣的 PaaS 平台，讓我可以更容易的開發各種想做的網站服務。自 2012 年底第零次零時政府黑客松開始到現在，我做了像是<a href="https://company.g0v.ronny.tw">臺灣公司資料</a>、<a href="https://newshelper.g0v.ronny.tw">新聞小幫手</a>、<a href="https://jobhelper.g0v.ronny.tw">求職小幫手</a>...等等 <a href="https://ronny.tw/data">數十個專案</a>。</p>
+<p>middle2 是幫助我可以開發這麼多專案的很重要的基礎建設。參與了 g0v 活動好幾年，也常看到很多熱心的公民黑客在黑客松現場為了做出服務而刷卡租雲端主機使用，除了出腦力開發服務還出錢維護主機，一直期許 middle2 能夠成為屬於 g0v 的基礎建設，讓熱心的公民黑客能夠省下更多錢，並且更輕鬆能做出更多服務。感謝 2017 年 g0v 的<a href="https://grants.g0v.tw/">公民科技創新獎助金</a> 提供我<a href="https://grants.g0v.tw/projects/586a35518891f3001ea69b03">一筆資金</a>，讓我能夠把 middle2 變成不只是我個人的基礎建設，我希望也可以是屬於台灣或是全世界做公民科技相關服務的基礎建設！</p>
+<a href="https://ronny.tw/">Ronny Wang 王向榮</a>
+<a href="https://grants.g0v.tw"><img src="https://grants.g0v.tw/images/power/poweredby-square.png" alt="Power by g0v grants"></a>
+
+<h1>middle2 特點</h1>
+<ul>
+    <li><a href="https://github.com/middle2tw/middle2">Open Source</a></li>
+    <li>透過 git 界面部屬程式碼</li>
+    <li>支援 PHP、nodejs、Python、Ruby 等語言... (後續目標是可以支援 Debian apt 能安裝的任何語言或環境、包含 Go、Scala、Java...)</li>
+    <li>支援 nodejs package.json、Python requirements.txt、Ruby Gemfile 等相依套件設定檔</li>
+    <li>可建立 MySQL 、PostgreSQL、ElasticSearch 等資料庫使用</li>
+    <li>可透過 env 環境變數指定系統設定，如資料庫帳號密碼，API Key 等，方便程式碼與設定檔分離</li>
+    <li>支援 Custom domain ，可自訂網址</li>
+    <li>支援 Let's Encrypt，可幫服務加上 SSL 更安全</li>
+    <li>支援 Cron ，可以跑需要排程的動作</li>
+</ul>
+
+<h1>如何使用 middle2</h1>
+<p>由於 middle2.com 主網站希望能保持基本的穩定性，因此目前暫時不開放自由開設專案，僅允許符合以下條件的專案加入：</p>
+<ul>
+    <li>非營利服務</li>
+    <li>服務本身需與公民科技或是開放資料相關</li>
+    <li>程式碼必需開放原始碼</li>
+</ul>
+<p>但為了讓大家更容易試用 middle2 ，並確定 middle2 符合您的需求，以及在專案從發想階段就可以直接開始使用並展示， middle2 會在近期提供可自由註冊的試用平台，敬請期待...</p>
+
+<h1>贊助 middle2</h1>
+<p>middle2 在 2017 年有得到 g0v grants 30 萬元的贊助，但是這筆錢預計只能夠使用一年，主要花費會在雲端主機的租用費用上，若是願意提供現金贊助或是提供雲端主機贊助，歡迎與 <a href="mailto:admin@middle2.com">我們</a> 連絡</p>
+
 <?= $this->partial('/common/footer.phtml', $this) ?>
