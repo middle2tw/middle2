@@ -1,0 +1,12 @@
+[Unit]
+Description=Middle2 Cron Worker Loop
+After=m2-lb.service
+
+[Service]
+WorkingDirectory=/srv/code/hisoku/scripts
+ExecStart=/srv/code/hisoku/scripts/cron-worker-loop
+ExecStop=/bin/kill -s KILL $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
