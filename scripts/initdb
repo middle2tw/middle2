@@ -19,6 +19,7 @@ Project::createTable();
 ProjectMember::createTable();
 ProjectVariable::createTable();
 SSLKey::createTable();
+SignupConfirm::createTable();
 User::createTable();
 UserKey::createTable();
 WebNode::createTable();
