@@ -1,0 +1,13 @@
+<?= $this->partial('/common/header.phtml', $this) ?>
+<h1>註冊帳號</h1>
+<p>您的信箱認證成功，請繼續輸入以下資訊完成註冊</p>
+<form method="post" action="/index/signupfinal?mail=<?= urlencode($this->mail) ?>&sig=<?= intval($this->sig) ?>&expired_at=<?= intval($this->expired_at) ?>">
+    信箱： <?= $this->escape($this->mail) ?>
+    <br>
+    密碼：<input type="password" name="password"><br>
+    確認密碼：<input type="password" name="repassword"><br>
+    自由填寫關於您的身份、您為什麼想使用 middle2 ，哪裡知道 middle2 的，以及你希望 middle2 能幫妳做到甚麼?<br>
+    <textarea name="message"></textarea><br>
+    <button type="submit">註冊</button>
+</form>
+<?= $this->partial('/common/footer.phtml', $this) ?>

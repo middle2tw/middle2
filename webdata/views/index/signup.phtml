@@ -1,0 +1,8 @@
+<?= $this->partial('/common/header.phtml', $this) ?>
+<h1>註冊帳號</h1>
+<p>請輸入您的信箱，我們將會寄一封註冊驗證信至您的信箱</p>
+<form method="post" action="/index/sendsignup">
+    信箱: <input type="text" name="email">
+    <button type="submit">寄出</button>
+</form>
+<?= $this->partial('/common/footer.phtml', $this) ?>
