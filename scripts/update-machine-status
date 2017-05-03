@@ -1,6 +1,8 @@
 #!/usr/bin/php
 <?php
 
+include(__DIR__ . '/../webdata/init.inc.php');
+
 // 回傳這台機器的 uptime, cpu load, disk, maximum process 等資訊
 $ret = new StdClass;
 $ret->hostname = gethostname();
