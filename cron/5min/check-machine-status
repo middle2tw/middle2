@@ -66,7 +66,7 @@ if ($messages) {
     foreach ($messages as $message) {
         $content .= sprintf("%s (%s) %s\n", long2ip($message[0]->ip), $message[0]->groups, $message[1]);
         if ($status = $message[2]) {
-            $content .= "https://middle2.com/admin/machinelog/{$status->machine_id}/{$status->updated_at}\n";
+            $content .= "https://" . getenv("MAINPAGE_DOMAIN") . "/admin/machinelog/{$status->machine_id}/{$status->updated_at}\n";
         }
     }
     Hisoku::alert("Middle2 警告: " . date('Y/m/d H:i:s'), $content);

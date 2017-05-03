@@ -3,7 +3,7 @@
 $log_file = '/tmp/hisoku-query-counter';
 
 $now = time();
-$curl = curl_init('https://middle2.com');
+$curl = curl_init('http://localhost/');
 curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 $content = curl_exec($curl);

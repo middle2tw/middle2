@@ -85,7 +85,7 @@ class Crawler
         error_log('commit ' . count($this->_logs) . ' log');
         $curl = curl_init();
         // TODO: 需要加上 secret key 檢查
-        curl_setopt($curl, CURLOPT_URL, 'http://middle2.com/api/weblog');
+        curl_setopt($curl, CURLOPT_URL, 'https://' . getenv('MAINPAGE_DOMAIN') . '/api/weblog');
         curl_setopt($curl, CURLOPT_POST, true);
         $params = array(
             'data' => json_encode($this->_logs),

@@ -40,7 +40,7 @@ foreach (explode("\n", trim(file_get_contents('/proc/meminfo'))) as $line) {
 }
 
 // TODO: 增加 firewall 是否有正常跑起來的資訊
-$curl = curl_init('http://middle2.com/api/updatemachinestatus');
+$curl = curl_init('https://' . getenv('MAINPAGE_DOMAIN') . '/api/updatemachinestatus');
 curl_setopt($curl, CURLOPT_POSTFIELDS, 'status=' . urlencode(json_encode($ret, JSON_UNESCAPED_UNICODE)));
 curl_exec($curl);
 curl_close($curl);
