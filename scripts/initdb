@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+Addon_Elastic::createTable();
+Addon_Memcached::createTable();
+Addon_MySQLDB::createTable();
+Addon_MySQLDBMember::createTable();
+Addon_PgSQLDB::createTable();
+Addon_PgSQLDBMember::createTable();
+Admin::createTable();
+CronJob::createTable();
+CustomDomain::createTable();
+EAV::createTable();
+Machine::createTable();
+MachineStatus::createTable();
+Project::createTable();
+ProjectMember::createTable();
+ProjectVariable::createTable();
+SSLKey::createTable();
+User::createTable();
+UserKey::createTable();
+WebNode::createTable();
+WebNodeEAV::createTable();
