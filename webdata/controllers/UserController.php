@@ -8,10 +8,18 @@ class UserController extends Pix_Controller
             return $this->rediect('/');
         }
         $this->view->user = $this->user;
+
+        if (getenv('TRY_MODE')) {
+            $this->try_mode = getenv('TRY_MODE');
+            $this->view->try_mode = $this->try_mode;
+            $this->project_limit = 3;
+            $this->view->project_limit = $this->project_limit;
+        }
     }
 
     public function indexAction()
     {
+        $this->view->project_count = Project::search(array('created_by' => $this->user->id))->count();
     }
 
     public function deletekeyAction()
@@ -53,6 +61,13 @@ class UserController extends Pix_Controller
         if (Hisoku::getStoken() != $_POST['sToken']) {
             // TODO: error
             return $this->redirect('/');
+        }
+
+        if ($this->try_mode) {
+            $project_count = Project::search(array('created_by' => $this->user->id))->count();
+            if (intval($project_count) >= $this->project_limit) {
+                return $this->alert('目前為試用模式，project 數量上限為 ' . $this->project_limit, '/');
+            }
         }
 
         try {

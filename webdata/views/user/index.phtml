@@ -1,5 +1,9 @@
 <?= $this->partial('/common/header.phtml', $this) ?>
 <h2>Projects</h2>
+<?php if ($this->try_mode) { ?>
+<div style="color:lightcoral;margin-bottom:15px;">目前為試用模式，project 數量上限為 <?= $this->project_limit ?></div>
+<?php $disabled = $this->project_count >= $this->project_limit ? ' disabled="disabled"' : '' ?>
+<?php } ?>
 <ul>
     <?php foreach ($this->user->project_members as $project_member) { ?>
     <?php if (!$project = $project_member->project) { continue; } ?>
@@ -12,8 +16,8 @@
     <li>
     <form method="post" action="/user/addproject">
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
-        Add project: <input type="text" name="name" placeholder="Project note(optioanl)">
-        <input type="submit">
+        Add project: <input type="text" name="name" placeholder="Project note(optioanl)"<?= $disabled ?>>
+        <input type="submit"<?= $disabled ?>>
     </form>
     </li>
 </ul>
