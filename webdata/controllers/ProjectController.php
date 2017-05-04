@@ -8,6 +8,11 @@ class ProjectController extends Pix_Controller
             return $this->rediect('/');
         }
         $this->view->user = $this->user;
+
+        if (getenv('TRY_MODE')) {
+            $this->try_mode = getenv('TRY_MODE');
+            $this->view->try_mode = $this->try_mode;
+        }
     }
 
     public function detailAction()
@@ -65,6 +70,10 @@ class ProjectController extends Pix_Controller
         if (Hisoku::getStoken() != $_POST['sToken']) {
             // TODO: log it
             return $this->alert('error', '/');
+        }
+
+        if ($this->try_mode) {
+            return $this->alert('目前為試用模式，此功能暫不開放', '/');
         }
 
         list(, /*project*/, /*adddomain*/, $name) = explode('/', $this->getURI());
@@ -348,6 +357,10 @@ class ProjectController extends Pix_Controller
         if (Hisoku::getStoken() != $_POST['sToken']) {
             // TODO: log it
             return $this->alert('error', '/');
+        }
+
+        if ($this->try_mode) {
+            return $this->alert('目前為試用模式，此功能暫不開放', '/');
         }
 
         list(, /*project*/, /*addcronjob*/, $name) = explode('/', $this->getURI());

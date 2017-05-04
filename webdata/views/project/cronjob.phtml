@@ -10,6 +10,10 @@ $period_map = array(
 
 ?>
 <h3>CronJob: </h3>
+<?php if ($this->try_mode) { ?>
+<div style="color:lightcoral;margin-bottom:15px;">目前為試用模式，此功能暫不開放</div>
+<?php $disabled = ' disabled="disabled"' ?>
+<?php } ?>
 <ol>
     <?php if (count($this->project->cronjobs)) { ?>
     <li><a href="/project/cronlog/<?= $this->project->name ?>">Recent Cron Log</a></li>
@@ -42,15 +46,15 @@ $period_map = array(
     <form method="post" action="/project/addcronjob/<?= $this->project->name ?>">
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
         <ul>
-            <li>Command: <input type="text" name="job"></li>
+            <li>Command: <input type="text" name="job"<?= $disabled ?>></li>
             <li>Period: 
-                <select name="period">
+                <select name="period"<?= $disabled ?>>
                     <?php foreach ($period_map as $id => $name) { ?>
                     <option value="<?= $id ?>"><?= $this->escape($name) ?></option>
                     <?php } ?>
                 </select>
             </li>
-            <li><button type="submit">ADD</button></li>
+            <li><button type="submit"<?= $disabled ?>>ADD</button></li>
         </ul>
     </form>
     </li>

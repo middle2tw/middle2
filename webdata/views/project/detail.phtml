@@ -27,6 +27,10 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
 </ul>
 <hr>
 <h3>Custom domains: </h3>
+<?php if ($this->try_mode) { ?>
+<div style="color:lightcoral;margin-bottom:15px;">目前為試用模式，此功能暫不開放</div>
+<?php $disabled = ' disabled="disabled"' ?>
+<?php } ?>
 CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 <ul>
     <?php foreach ($this->project->custom_domains as $custom_domain) { ?>
@@ -38,13 +42,13 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
     <li>
     <form method="post" action="/project/adddomain/<?= $this->project->name ?>">
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
-        Add domain: <input type="text" name="domain">
-        <input type="submit">
+        Add domain: <input type="text" name="domain"<?= $disabled ?>>
+        <input type="submit"<?= $disabled ?>>
     </form>
     </li>
 </ul>
 <hr>
-<?= $this->partial('/project/cronjob.phtml', array('project' => $this->project)) ?>
+<?= $this->partial('/project/cronjob.phtml', array('project' => $this->project, 'try_mode' => $this->try_mode)) ?>
 <hr>
 <h3>Variable: </h3>
 <ul>
