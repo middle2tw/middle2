@@ -26,7 +26,13 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        $enable_addons = array(
+            'mysql' => Machine::getMachinesByGroup('mysql')->count(),
+            'pgsql' => Machine::getMachinesByGroup('pgsql')->count(),
+            'search' => Machine::getMachinesByGroup('search')->count(),
+        );
         $this->view->project = $project;
+        $this->view->enable_addons = $enable_addons;
     }
 
     public function deletedomainAction()
@@ -189,6 +195,10 @@ class ProjectController extends Pix_Controller
             return $this->alert('error', '/');
         }
 
+        if (!Machine::getMachinesByGroup('search')->count()) {
+            return $this->alert('目前未支援 ElasticSearch', '/');
+        }
+
         list(, /*project*/, /*addelasticaddon*/, $name, $addon_id) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
@@ -217,6 +227,10 @@ class ProjectController extends Pix_Controller
         if (Hisoku::getStoken() != $_POST['sToken']) {
             // TODO: log it
             return $this->alert('error', '/');
+        }
+
+        if (!Machine::getMachinesByGroup('pgsql')->count()) {
+            return $this->alert('目前未支援 PgSQL', '/');
         }
 
         list(, /*project*/, /*addpgsqladdon*/, $name, $addon_id) = explode('/', $this->getURI());
@@ -250,6 +264,10 @@ class ProjectController extends Pix_Controller
         if (Hisoku::getStoken() != $_POST['sToken']) {
             // TODO: log it
             return $this->alert('error', '/');
+        }
+
+        if (!Machine::getMachinesByGroup('mysql')->count()) {
+            return $this->alert('目前未支援 MySQL', '/');
         }
 
         list(, /*project*/, /*addmysqladdon*/, $name, $addon_id) = explode('/', $this->getURI());

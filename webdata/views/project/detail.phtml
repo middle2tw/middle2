@@ -141,9 +141,13 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </li>
     <?php } ?>
     <li>
-    Add: <button class="post-link" href="/project/addmysqladdon/<?= $this->project->name ?>">MySQL</button>
-    <button class="post-link" href="/project/addpgsqladdon/<?= $this->project->name ?>">PgSQL</button>
-    <button class="post-link" href="/project/addelasticaddon/<?= $this->project->name ?>">ElasticSearch</button>
+    Add:
+    <?php $addon_mysql_attrs = $this->enable_addons['mysql'] ? '' : 'disabled="disabled" title="目前未支援 MySQL"' ?>
+    <?php $addon_pgsql_attrs = $this->enable_addons['pgsql'] ? '' : 'disabled="disabled" title="目前未支援 PgSQL"' ?>
+    <?php $addon_search_attrs = $this->enable_addons['search'] ? '' : 'disabled="disabled" title="目前未支援 ElasticSearch"' ?>
+    <button class="post-link" href="/project/addmysqladdon/<?= $this->project->name ?>"<?= $addon_mysql_attrs ?>>MySQL</button>
+    <button class="post-link" href="/project/addpgsqladdon/<?= $this->project->name ?>"<?= $addon_pgsql_attrs ?>>PgSQL</button>
+    <button class="post-link" href="/project/addelasticaddon/<?= $this->project->name ?>"<?= $addon_search_attrs ?>>ElasticSearch</button>
     </li>
 </ol>
 <hr>
