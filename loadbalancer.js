@@ -353,6 +353,16 @@ var http_request_callback = function(protocol){
         return;
     }
 
+    if (host == config.MAINPAGE_DOMAIN && protocol == 'http') {
+        main_response.writeHead(301, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Content-Length': 0,
+            'Location': 'https://' + host + main_request.url
+        });
+        main_response.end();
+        return;
+    }
+
     var current_request = request_serial;
     request_count ++;
     request_serial ++;
