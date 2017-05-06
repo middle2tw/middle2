@@ -100,7 +100,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
         </form>
         </li>
         <li>
-        Tunnel: ssh -L3306:<?= $addon_member->addon->host ?>:3306 git@<?= GIT_SERVER ?> tunnel <?= $this->project->name ?>
+        Tunnel: <code>ssh -L3306:<?= $addon_member->addon->host ?>:3306 git@<?= GIT_SERVER ?> tunnel <?= $this->project->name ?></code>
         </li>
     </ul>
     </li>
@@ -122,7 +122,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
         </form>
         </li>
         <li>
-        Tunnel: ssh -L5432:<?= $addon_member->addon->host ?>:5432 git@<?= GIT_SERVER ?> tunnel <?= $this->project->name ?>
+        Tunnel: <code>ssh -L5432:<?= $addon_member->addon->host ?>:5432 git@<?= GIT_SERVER ?> tunnel <?= $this->project->name ?></code>
         </li>
     </ul>
     </li>
