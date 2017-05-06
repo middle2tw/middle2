@@ -4,7 +4,13 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 if (!class_exists('Pix_Session')) {
     include(__DIR__ . '/../../../webdata/init.inc.php');
 
-    Pix_Session::setAdapter('cookie', array('secret' => getenv('SESSION_SECRET'), 'cookie_key' => 'HISOKU_SESSION'));
+    if (!getenv('SESSION_KEY')) {
+        putenv('SESSION_KEY=MIDDLE2_SESSION');
+    }
+    Pix_Session::setAdapter('cookie', array(
+        'secret' => getenv('SESSION_SECRET'),
+        'cookie_key' => getenv('SESSION_KEY'),
+    ));
 
     session_save_path('/tmp');
 
