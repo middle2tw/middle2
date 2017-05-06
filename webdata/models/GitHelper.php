@@ -28,6 +28,12 @@ class GitHelper
         return $ret;
     }
 
+    public static function getGitFileContent($file_name, $branch = 'HEAD') {
+        $show_cmd = "git show {$branch}:{$file_name}";
+        $show_result = `$show_cmd`;
+        return $show_result;
+    }
+
     /**
      * buildDockerProjectBase 建立這個 project 自己的額外檔案，這個 method 必需以 git 帳號身份執行
      * 
@@ -46,6 +52,8 @@ class GitHelper
 
         $rev_parse_cmd = "git rev-parse {$branch}";
         $commit_id = trim(`$rev_parse_cmd`);
+
+        $apt_packages = explode("\n", self::getGitFileContent('Aptfile', $branch));
 
         $actions = array();
         foreach (array('requirements.txt', 'Gemfile', 'package.json') as $file) {
@@ -86,6 +94,11 @@ class GitHelper
         self::system_without_error("docker exec container-{$project->name} mkdir -p /srv/web");
         self::system_without_error("docker exec container-{$project->name} find /srv/web/ -not -path  '/srv/web/node_modules/*' -not -path '/srv/web/node_modules' -not -path '/srv/web/' -delete");
         self::system_without_error("git archive --format=tar {$branch}| docker exec -i container-{$project->name} tar -xf - -C /srv/web/");
+
+        if (count($apt_packages)) {
+            $apt_install_cmd = "apt-get install -y " . implode(' ', $apt_packages);
+            self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
+        }
 
         foreach ($actions as $action) {
             $info = $action['info'];
