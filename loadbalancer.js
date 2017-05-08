@@ -337,7 +337,14 @@ var https_options = {
     cert: fs.readFileSync('/srv/config/middle2.crt'),
     secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
     SNICallback: function(domain) {
-        return secureContext[domain];
+        if ('undefined' !== typeof(secureContext[domain])) {
+            return secureContext[domain];
+        }
+        wildcard_domain = '*.' + domain.split('.').slice(1).join('.');
+        if ('undefined' !== typeof(secureContext[wildcard_domain])) {
+            return secureContext[wildcard_domain];
+        }
+        return null;
     }
 };
 
