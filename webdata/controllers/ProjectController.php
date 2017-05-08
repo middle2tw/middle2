@@ -87,11 +87,11 @@ class ProjectController extends Pix_Controller
 
         // from http://regexlib.com/REDetails.aspx?regexp_id=306
         if (!preg_match('#^(([\w][\w\-\.]*)\.)?([\w][\w\-]+)(\.([\w][\w\.]*))?$#', $_POST['domain'])) {
-            return $this->alert('Invalid domain', '/');
+            return $this->alert('Invalid domain', "/projet/detail/{$project->name}");
         }
 
         if (stripos($_POST['domain'], getenv('APP_SUFFIX'))) {
-            return $this->alert('Invalid domain', '/');
+            return $this->alert('Invalid domain', "/projet/detail/{$project->name}");
         }
 
         try {
