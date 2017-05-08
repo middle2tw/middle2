@@ -94,9 +94,14 @@ class ProjectController extends Pix_Controller
             return $this->alert('Invalid domain', '/');
         }
 
-        $project->custom_domains->insert(array(
-            'domain' => strval($_POST['domain']),
-        ));
+        try {
+            $project->custom_domains->insert(array(
+                'domain' => strval($_POST['domain']),
+            ));
+        } catch (Pix_Table_DuplicateException $e) {
+            return $this->alert('duplicate domain: ' . $_POST['domain'], "/project/detail/{$project->name}");
+        }
+
         WebNode::cleanLoadBalancerCache(); // 更改 domain 後要清空 lb cache
 
         return $this->redirect('/project/detail/' . $project->name);
