@@ -149,16 +149,28 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             if (project) {
                 return lb_core._getNodesByProject(project, current_request, callback);
             }
-            return callback({success: false, message: 'Project not found', code: 404});
+            // check wildcard domain
+            if (host.split('.')[0] == '*') {
+                return callback({success: false, message: 'Domain not found', code: 404});
+            }
+            host = '*.' + host.split('.').slice(1).join('.');
+            return lb_core.getBackendHost2(host, port, current_request, callback);
         }
         mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
             request_pools[current_request].state = 'get-project-from-domain-done';
-            mapping_cache['project-domain-to-id'][host] = rows[0];
             if (rows.length == 1) {
+                mapping_cache['project-domain-to-id'][host] = rows[0];
                 lb_core._getNodesByProject(rows[0], current_request, callback);
                 return;
             }
-            return callback({success: false, message: 'Domain not found', code: 404});
+
+            mapping_cache['project-domain-to-id'][host] = null;
+            // check wildcard domain
+            if (host.split('.')[0] == '*') {
+                return callback({success: false, message: 'Domain not found', code: 404});
+            }
+            host = '*.' + host.split('.').slice(1).join('.');
+            return lb_core.getBackendHost2(host, port, current_request, callback);
         });
     }
 };
