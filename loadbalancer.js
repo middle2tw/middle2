@@ -629,7 +629,9 @@ var http_request_callback = function(protocol){
             });
 
             backend_response.on('end', function(){
-                request_pools[current_request].state = 'load-from-backend-done';
+                if ('undefined' !== typeof(request_pools[current_request])) {
+                    request_pools[current_request].state = 'load-from-backend-done';
+                }
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
                     referer = '-';
