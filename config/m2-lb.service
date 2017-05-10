@@ -3,9 +3,10 @@ Description=Middle2 Load Balancer
 After=network.target memcached.service apache2.service
 
 [Service]
-ExecStart=/srv/code/hisoku/node_modules/.bin/forever /srv/code/hisoku/loadbalancer.js
-ExecReload=/bin/bash -c "/bin/kill -KILL `cat /tmp/middle2.pid`"
+ExecStart=/usr/bin/node /srv/code/hisoku/loadbalancer.js
+ExecReload=/bin/bash -c "/bin/kill -1 `cat /tmp/middle2.pid`"
 ExecStop=/bin/kill -s KILL $MAINPID
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
