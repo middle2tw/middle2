@@ -58,6 +58,9 @@ class FirewallGenerator
         $nfs_servers = $dev_servers;
 
         $this->_server_categories = $this->_category_servers = array();
+        foreach (Machine::search(1) as $machine) {
+            $this->_server_categories[long2ip($machine->ip)] = array();
+        }
         // dev server
         foreach ($dev_servers as $ip) {
             $this->_addServer($ip, 'dev');
