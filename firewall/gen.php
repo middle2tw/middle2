@@ -178,6 +178,13 @@ class FirewallGenerator
         return array_unique($ips);
     }
 
+    public static function updateFile($file, $content)
+    {
+        if (!file_exists($file) or md5_file($file) != md5($content)) {
+            file_put_contents($file, $content);
+        }
+    }
+
     public function main()
     {
         $this->initServers();
@@ -229,8 +236,8 @@ class FirewallGenerator
                     }
                 }
             }
-            file_put_contents(__DIR__ . '/outputs/' . $ip . '.sh', implode("\n", $rules) . "\n");
-            file_put_contents(__DIR__ . '/outputs/' . $ip . '_test.sh', implode("\n", array_merge($rules, $this->testSuffix())) . "\n");
+            self::updateFile(__DIR__ . '/outputs/' . $ip . '.sh', implode("\n", $rules) . "\n");
+            self::updateFile(__DIR__ . '/outputs/' . $ip . '_test.sh', implode("\n", array_merge($rules, $this->testSuffix())) . "\n");
             chmod(__DIR__ . '/outputs/' . $ip . '.sh', 0755);
             chmod(__DIR__ . '/outputs/' . $ip . '_test.sh', 0755);
         }
