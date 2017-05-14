@@ -32,7 +32,12 @@ class Machine extends Pix_Table
 
     public static function getMachinesByGroup($group)
     {
-        // TODO: 這邊應該要改成更好的方法
-        return Machine::search("groups LIKE '%" . urlencode($group) . "%'");
+        $return_machines = array();
+        foreach (Machine::search("groups LIKE '%" . urlencode($group) . "%'") as $machine) {
+            if (in_array($group, explode(',', $machine->groups))) {
+                $return_machines[] = $machine;
+            }
+        }
+        return $return_machines;
     }
 }
