@@ -32,9 +32,9 @@ class ProjectController extends Pix_Controller
         }
 
         $enable_addons = array(
-            'mysql' => Machine::getMachinesByGroup('mysql')->count(),
-            'pgsql' => Machine::getMachinesByGroup('pgsql')->count(),
-            'search' => Machine::getMachinesByGroup('search')->count(),
+            'mysql' => count(Machine::getMachinesByGroup('mysql')),
+            'pgsql' => count(Machine::getMachinesByGroup('pgsql')),
+            'search' => count(Machine::getMachinesByGroup('search')),
         );
         $this->view->project = $project;
         $this->view->enable_addons = $enable_addons;
