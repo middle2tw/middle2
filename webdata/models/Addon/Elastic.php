@@ -14,7 +14,7 @@ class Addon_ElasticRow extends Pix_Table_Row
             $this->project->variables->search(array(
                 'key' => $key,
             ))->update(array(
-                'value' => "Addon_MySQLDB:{$this->id}:SearchURL",
+                'value' => "Addon_Elastic:{$this->id}:SearchURL",
                 'is_magic_value' => 1,
             ));
         }
