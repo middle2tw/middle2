@@ -1,0 +1,60 @@
+#!/usr/bin/env php
+<?php
+
+$test_mode = true;
+$from = $to = null;
+if (count($_SERVER['argv']) > 2) {
+    $from = $_SERVER['argv'][1];
+    $to = $_SERVER['argv'][2];
+}
+
+if (!filter_var($from, FILTER_VALIDATE_IP) or !filter_var($to, FILTER_VALIDATE_IP)) {
+    throw new Exception("Usage: ./change-ip From-IP To-IP");
+}
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+$restart_project_ids = array();
+$effected_magic_prefixes = array();
+
+foreach (array('Addon_Elastic', 'Addon_MySQLDB', 'Addon_PgSQLDB') as $table_name) {
+    $table = Pix_Table::getTable($table_name);
+
+    foreach ($table->search(array('host' => $from)) as $addon) {
+        $effected_magic_prefixes[] = $table_name . ':' . $addon->id;
+        error_log("change $table_name addon(id={$addon->id}): " . json_encode($addon->toArray()));
+
+        if ($test_mode) {
+            continue;
+        }
+        $addon->update(array('host' => $to));
+    }
+}
+
+foreach ($effected_magic_prefixes as $effected_magic_prefix) {
+    foreach (ProjectVariable::search("is_magic_value = 1 AND `value` LIKE '{$effected_magic_prefix}:%'") as $pv) {
+        $restart_project_ids[$pv->project_id] = true;
+        error_log("reset project_id={$pv->project_id} because magic value {$pv->key} is change: " .json_encode($pv->toArray()));
+    }
+}
+
+foreach (ProjectVariable::search("is_magic_value = 0 AND `value` LIKE '%{$from}%'") as $pv) {
+    error_log("reset project_id={$pv->project_id} because value {$pv->key} is change: " .json_encode($pv->toArray()));
+    unset($restart_project_ids[$pv->project_id]);
+
+    if ($test_mode) {
+        continue;
+    }
+    $pv->update(array(
+        'value' => str_replace($from, $to, $pv->value),
+    ));
+}
+
+foreach (WebNode::search(1)->searchIn('project_id', array_keys($restart_project_ids)) as $webnode) {
+    error_log(sprintf("reset webnode %s:%d", $webnode->ip, $webnode->port));
+
+    if ($test_mode) {
+        continue;
+    }
+    $webnode->markAsUnused('change project variable');
+}
