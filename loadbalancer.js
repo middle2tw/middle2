@@ -5,6 +5,7 @@ var Memcache = require('memcache');
 var mysql = require('mysql');
 var SSH2 = require('ssh2');
 var fs = require('fs');
+var tls = require('tls');
 var crypto = require('crypto');
 var constants = require('constants');
 
@@ -315,8 +316,7 @@ var renewSSLkeys = function() {
     mysql_connection.query("SELECT * FROM `ssl_keys`", function(err, rows, fields){
         for (var i = 0; i < rows.length; i ++) {
             var row = rows[i];
-            secureContext[row.domain] = crypto.createCredentials(JSON.parse(row.config)).context;
-            https_main_request.addContext(row.domain, secureContext[row.domain]);
+            secureContext[row.domain] = JSON.parse(row.config);
         }
     });
 }
@@ -336,15 +336,28 @@ var https_options = {
     key: fs.readFileSync('/srv/config/middle2.key'),
     cert: fs.readFileSync('/srv/config/middle2.crt'),
     secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
-    SNICallback: function(domain) {
+    SNICallback: function(domain, cb) {
+        var config = null;
+
         if ('undefined' !== typeof(secureContext[domain])) {
-            return secureContext[domain];
+            config = secureContext[domain];
+        } else {
+            wildcard_domain = '*.' + domain.split('.').slice(1).join('.');
+            if ('undefined' !== typeof(secureContext[wildcard_domain])) {
+                config = secureContext[wildcard_domain];
+            }
         }
-        wildcard_domain = '*.' + domain.split('.').slice(1).join('.');
-        if ('undefined' !== typeof(secureContext[wildcard_domain])) {
-            return secureContext[wildcard_domain];
+
+        if ('undefined' === typeof(cb) || null === config) {
+            return crypto.createCredentials(config).context;
         }
-        return null;
+
+        var ctx = tls.createSecureContext({
+            ca: null,
+            key: config.key,
+            cert: config.cert + "\n" + config.ca.join("\n"),
+        });
+        cb(null, ctx);
     }
 };
 
@@ -510,6 +523,10 @@ var http_request_callback = function(protocol){
         }
 
         var backend_host = options.host;
+        if (typeof(backend_host) === "number") {
+            backend_host = long2ip(backend_host);
+        }
+
         var backend_port = options.port;
         var return_length = 0;
 
