@@ -55,7 +55,6 @@ class FirewallGenerator
         $mainpage_servers = $dev_servers;
         $git_servers = $dev_servers;
         $private_memcache_servers = $dev_servers;
-        $nfs_servers = $dev_servers;
 
         $this->_server_categories = $this->_category_servers = array();
         foreach (Machine::search(1) as $machine) {
@@ -114,10 +113,6 @@ class FirewallGenerator
         foreach ($private_memcache_servers as $ip) {
             $this->_addServer($ip, 'private_memcache');
         }
-
-        foreach ($nfs_servers as $ip) {
-            $this->_addServer($ip, 'nfs');
-        }
     }
 
     public function getAllowRules()
@@ -157,14 +152,6 @@ class FirewallGenerator
             ),
             'dev' => array(
                 array('22', array('PUBLIC')), // 以後要用 VPN 把這個 rule 拿掉
-            ),
-            'nfs' => array(
-                array('111', array('node')),
-                array('u111', array('node')),
-                array('2049', array('node')),
-                array('u2049', array('node')),
-                array('32764:32769', array('node')),
-                array('u32764:32769', array('node')),
             ),
             'ALL' => array(
                 array('22', array('dev')),
