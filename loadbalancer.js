@@ -135,6 +135,10 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
         }
 
         mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
+            if ('undefined' == typeof(rows) && err) {
+                console.log("Database error, select project detail from project name failed: " + JSON.stringify(err));
+                return callback({success: false, message: 'Database error', code: 500});
+            }
             mapping_cache['project-name-to-id'][project_name] = rows[0];
             request_pools[current_request].state = 'get-project-from-domain-done';
             if (rows.length == 1) {
@@ -159,6 +163,10 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
         }
         mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
             request_pools[current_request].state = 'get-project-from-domain-done';
+            if ('undefined' == typeof(rows) && err) {
+                console.log("Database error, select project detail from custom domain failed: " + JSON.stringify(err));
+                return callback({success: false, message: 'Database error', code: 500});
+            }
             if (rows.length == 1) {
                 mapping_cache['project-domain-to-id'][host] = rows[0];
                 lb_core._getNodesByProject(rows[0], current_request, callback);
@@ -187,6 +195,10 @@ lb_core._getNodesByProject = function(project, current_request, callback){
 
     // 1 - STATUS_WEBPROCESSING, 10 - STATUS_WEBNODE
     mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
+        if ('undefined' == typeof(rows) && err) {
+            console.log("Database error, select webnode from project id failed: " + JSON.stringify(err));
+            return callback({success: false, message: 'Database error', code: 500});
+        }
         request_pools[current_request].state = 'get-webnode-from-project-done';
         if (!rows.length) {
             request_pools[current_request].state = 'init-new-node';
@@ -237,6 +249,10 @@ var run_init = function(){
         })(project, callbacks);
 
         mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
+            if ('undefined' == typeof(rows) && err) {
+                console.log("Database error, select empty webnode failed: " + JSON.stringify(err));
+                return callback({success: false, message: 'Database error', code: 500});
+            }
             if (rows.length == 0) {
                 callbacks.map(function(callback){
                         callback({success: false, message: 'No empty node', code: 503});
@@ -266,6 +282,10 @@ lb_core._initNewNodes = function(project, callback){
 
 lb_core._initProjectOnNode = function(project, node, callback){
     mysql_connection.query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
+        if ('undefined' == typeof(rows) && err) {
+            console.log("Database error, update webnode failed: " + JSON.stringify(err));
+            return callback({success: false, message: 'Database error', code: 500});
+        }
         if (rows.affectedRows != 1) {
             return callback({success: false, message: 'Init new node failed', code: 503});
         }
