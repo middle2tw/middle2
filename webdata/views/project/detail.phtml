@@ -2,7 +2,27 @@
 $this->title = $this->project->name . (($note = $this->project->getEAV('note')) ? "({$note})" : '') . ' :: ';
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
-<h2><?= $this->escape($this->project->name) ?></h2>
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span3 bs-docs-sidebar">
+    <!--Sidebar content-->
+    <ul class="nav nav-list affix bs-docs-sidenav">
+        <li><?= $this->escape($this->project->name) ?></li>
+        <li> <a href="#title">Top</a> </li>
+        <li> <a href="#deployment">Deployment</a> </li>
+        <li> <a href="#custom-domain">Custom Domain</a> </li>
+        <li> <a href="#cronjob">CronJob</a> </li>
+        <li> <a href="#variable">Variable</a> </li>
+        <li> <a href="#addon">Addon</a> </li>
+        <li> <a href="#member">Members</a> </li>
+        <li> <a href="#node-status">Node Status</a> </li>
+        <li> <a href="#access-log">Access Log</a> </li>
+        <li> <a href="#error-log">Error Log</a> </li>
+        <li> <a href="#node-log">Node Log</a> </li>
+    </ul>
+</div>
+<div class="span9">
+<h2 id="title"><?= $this->escape($this->project->name) ?></h2>
 <form method="post" action="/project/editnote/<?= $this->project->name ?>">
     <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
     Note: <input type="text" name="note" value="<?= $this->escape($this->project->getEAV('note')) ?>">
@@ -17,7 +37,7 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
     </select>
     <button type="submit">SAVE</button>
 </form>
-<h3>deployment:</h3>
+<h3 id="deployment">deployment:</h3>
 <ul>
     <li><code>git remote add middle2 git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
     <li> or <code>git clone git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
@@ -26,7 +46,7 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
     <li>Use Shell: <code>ssh -t git@<?= GIT_SERVER ?> run <?= $this->project->name ?> bash</code></li>
 </ul>
 <hr>
-<h3>Custom domains: </h3>
+<h3 id="custom-domain">Custom domains: </h3>
 <?php if ($this->try_mode) { ?>
 <div style="color:lightcoral;margin-bottom:15px;">目前為試用模式，此功能暫不開放</div>
 <?php $disabled = ' disabled="disabled"' ?>
@@ -50,7 +70,7 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 <hr>
 <?= $this->partial('/project/cronjob.phtml', array('project' => $this->project, 'try_mode' => $this->try_mode)) ?>
 <hr>
-<h3>Variable: </h3>
+<h3 id="variable">Variable: </h3>
 <ul>
     <?php foreach ($this->project->variables as $variable) { ?>
     <li>
@@ -82,7 +102,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
 <?php } ?>
 </textarea>
 <hr>
-<h3>Addon: </h3>
+<h3 id="addon">Addon: </h3>
 <ol>
     <?php foreach (Addon_MySQLDBMember::search(array('project_id' => $this->project->id)) as $addon_member) { ?>
     <li>
@@ -155,7 +175,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </li>
 </ol>
 <hr>
-<h3>Members: </h3>
+<h3 id="member">Members: </h3>
 <ol>
     <?php $is_admin = $this->project->isAdmin($this->user); ?>
     <?php $admin_count = $this->project->members->search(array('is_admin' => 1))->count(); ?>
@@ -179,7 +199,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     <?php } ?>
 </ol>
 <hr>
-<h3>Node Status</h3>
+<h3 id="node-status">Node Status</h3>
 <table class="table">
     <thead>
         <tr>
@@ -203,19 +223,22 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </tbody>
 </table>
 <hr>
-<h3>Access Log</h3>
+<h3 id="access-log">Access Log</h3>
 <button class="older-button" data-log="access-log">Older</button>
 <button class="newer-button" data-log="access-log">Newer</button>
 <table class="table log-table" id="access-log" data-url="/project/getlog/<?= $this->project->name ?>"></table>
 <hr>
-<h3>Error Log</h3>
+<h3 id="error-log">Error Log</h3>
 <button class="older-button" data-log="error-log">Older</button>
 <button class="newer-button" data-log="error-log">Newer</button>
 <table class="table log-table" id="error-log" data-url="/project/getlog/<?= $this->project->name ?>/error"></table>
-<h3>Node Log</h3>
+<h3 id="node-log">Node Log</h3>
 <button class="older-button" data-log="node-log">Older</button>
 <button class="newer-button" data-log="node-log">Newer</button>
 <table class="table log-table" id="node-log" data-url="/project/getlog/<?= $this->project->name ?>/node"></table>
+</div>
+</div>
+</div>
 <script>
 $('.log-table').each(function(){
     var $this = $(this);
