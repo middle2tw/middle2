@@ -33,12 +33,19 @@ memcache.connect();
 if (!config.MYSQL_HOST) {
     throw "need MYSQL_HOST";
 }
-var mysql_connection = mysql.createConnection({
-      host     : config.MYSQL_HOST,
-      user     : config.MYSQL_USER,
-      password : config.MYSQL_PASS,
-      database : config.MYSQL_DATABASE,
-});
+
+var mysql_one_time_query = function(sql, params, callback){
+    var mysql_connection = mysql.createConnection({
+        host     : config.MYSQL_HOST,
+        user     : config.MYSQL_USER,
+        password : config.MYSQL_PASS,
+        database : config.MYSQL_DATABASE,
+    });
+    mysql_connection.query(sql, params, function(err, rows, fields){
+        callback(err, rows, fields);
+        mysql_connection.end();
+    });
+}
 
 if (!config.MAINPAGE_HOST) {
     throw "need MAINPAGE_HOST";
@@ -134,7 +141,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             return callback({success: false, message: 'Project not found', code: 404});
         }
 
-        mysql_connection.query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
+        mysql_one_time_query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
             if ('undefined' == typeof(rows) && err) {
                 console.log("Database error, select project detail from project name failed: " + JSON.stringify(err));
                 return callback({success: false, message: 'Database error', code: 500});
@@ -161,7 +168,7 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             host = '*.' + host.split('.').slice(1).join('.');
             return lb_core.getBackendHost2(host, port, current_request, callback);
         }
-        mysql_connection.query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
+        mysql_one_time_query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
             request_pools[current_request].state = 'get-project-from-domain-done';
             if ('undefined' == typeof(rows) && err) {
                 console.log("Database error, select project detail from custom domain failed: " + JSON.stringify(err));
@@ -194,7 +201,7 @@ lb_core._getNodesByProject = function(project, current_request, callback){
     }
 
     // 1 - STATUS_WEBPROCESSING, 10 - STATUS_WEBNODE
-    mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
+    mysql_one_time_query("SELECT * FROM `webnode` WHERE `project_id` = ? AND `status` IN (1, 10) AND `commit` = ?", [project.id, project.commit], function(err, rows, fields){
         if ('undefined' == typeof(rows) && err) {
             console.log("Database error, select webnode from project id failed: " + JSON.stringify(err));
             return callback({success: false, message: 'Database error', code: 500});
@@ -248,7 +255,7 @@ var run_init = function(){
             };
         })(project, callbacks);
 
-        mysql_connection.query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", function(err, rows, fields){
+        mysql_one_time_query("SELECT * FROM `webnode` WHERE `project_id` = 0 AND `status` = 0", [], function(err, rows, fields){
             if ('undefined' == typeof(rows) && err) {
                 console.log("Database error, select empty webnode failed: " + JSON.stringify(err));
                 return callback({success: false, message: 'Database error', code: 500});
@@ -281,7 +288,7 @@ lb_core._initNewNodes = function(project, callback){
 
 
 lb_core._initProjectOnNode = function(project, node, callback){
-    mysql_connection.query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
+    mysql_one_time_query("UPDATE `webnode` SET `project_id` = ?, `commit` = ?, `start_at` = ?, `status` = ? WHERE `ip` = ? AND `port` = ? AND `status` = 0", [project.id, project.commit, Math.floor((new Date()).getTime() / 1000), 1, node.ip, node.port], function(err, rows, fields){
         if ('undefined' == typeof(rows) && err) {
             console.log("Database error, update webnode failed: " + JSON.stringify(err));
             return callback({success: false, message: 'Database error', code: 500});
@@ -297,7 +304,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
                 stream.on('exit', function(){
                     ssh2.exec('restart-web ' + project.name + ' ' + node_id, function(err, stream){
                         stream.on('exit', function(){
-                            mysql_connection.query("UPDATE `webnode` SET `status` = 10 WHERE `ip` = ? AND `port` = ?", [node.ip, node.port], function(err, rows, fields){
+                            mysql_one_time_query("UPDATE `webnode` SET `status` = 10 WHERE `ip` = ? AND `port` = ?", [node.ip, node.port], function(err, rows, fields){
                                 if (rows.affectedRows != 1) {
                                     return callback({success: false, message: 'Init new node failed', code: 503});
                                 }
@@ -333,7 +340,7 @@ var secureContext = {};
 
 var renewSSLkeys = function() {
     console.log('renewSSLkeys');
-    mysql_connection.query("SELECT * FROM `ssl_keys`", function(err, rows, fields){
+    mysql_one_time_query("SELECT * FROM `ssl_keys`", [],  function(err, rows, fields){
         for (var i = 0; i < rows.length; i ++) {
             var row = rows[i];
             secureContext[row.domain] = JSON.parse(row.config);
