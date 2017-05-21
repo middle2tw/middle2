@@ -147,7 +147,15 @@ function main()
         $params = array('project=' . escapeshellcmd($project->name));
         $params[] = 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
         foreach ($project->variables as $variable) {
-            $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
+            if (strpos($variable->key, 'file:') === 0) {
+                list($filepath, $content) = explode("\n", $variable->getValue(), 2);
+                $tmpfile = tempnam('/tmp/', 'config-');
+                file_put_contents($tmpfile, $content);
+                $ret = exec_m2(sprintf("docker cp %s c-%d:%s", escapeshellarg($tmpfile), $id, escapeshellarg($filepath)));
+                unlink($tmpfile)
+            } else {
+                $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
+            }
         }
         $uid = 20000 + $id;
 
@@ -187,7 +195,15 @@ function main()
         file_put_contents($log_file, date('c') . " [run] loading project variables\n", FILE_APPEND);
         $params = array('project=' . escapeshellarg($project->name));
         foreach ($project->variables as $variable) {
-            $params[] = escapeshellarg($variable->key) . '=' . escapeshellarg($variable->getValue());
+            if (strpos($variable->key, 'file:') === 0) {
+                list($filepath, $content) = explode("\n", $variable->getValue(), 2);
+                $tmpfile = tempnam('/tmp/', 'config-');
+                file_put_contents($tmpfile, $content);
+                $ret = exec_m2(sprintf("docker cp %s c-%d:%s", escapeshellarg($tmpfile), $id, escapeshellarg($filepath)));
+                unlink($tmpfile)
+            } else {
+                $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
+            }
         }
         $params[] = 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
         $run_cmd = 'cd /srv/web; ' . urldecode($run_cmd);
