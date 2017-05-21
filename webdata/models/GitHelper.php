@@ -100,6 +100,10 @@ class GitHelper
             self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
         }
 
+        if (self::getGitFileContent('m2-build.sh', $branch)) {
+            self::system_without_error("docker exec --tty container-{$project->name} env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin sh -c 'cd /srv/web; ./m2-build.sh'");
+        }
+
         foreach ($actions as $action) {
             $info = $action['info'];
 
