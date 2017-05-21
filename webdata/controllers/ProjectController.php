@@ -115,6 +115,7 @@ class ProjectController extends Pix_Controller
         }
 
         list(, /*project*/, /*addvariable*/, $name, $key) = explode('/', $this->getURI());
+        $key = urldecode($key);
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
         }
@@ -147,10 +148,18 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
+        if ($_POST['file-config']) {
+            $key = 'file:' . time();
+            $value = strval($_POST['filename']) . "\n" . strval($_POST['value']);
+        } else {
+            $key = strval($_POST['key']);
+            $value = strval($_POST['value']);
+        }
+
         // TODO: check valid key & value
         $project->variables->insert(array(
-            'key' => strval($_POST['key']),
-            'value' => strval($_POST['value']),
+            'key' => $key,
+            'value' => $value,
             'is_magic_value' => 0,
         ));
 
@@ -338,6 +347,7 @@ class ProjectController extends Pix_Controller
         }
 
         list(, /*project*/, /*editvariable*/, $name, $key) = explode('/', $this->getURI());
+        $key = urldecode($key);
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
         }
@@ -350,8 +360,13 @@ class ProjectController extends Pix_Controller
             return $this->alert('Variable not found', '/');
         }
 
+        if ($_POST['file-config']) {
+            $value = strval($_POST['filename']) . "\n" . strval($_POST['value']);
+        } else {
+            $value = strval($_POST['value']);
+        }
         $variable->update(array(
-            'value' => strval($_POST['value']),
+            'value' => strval($value),
             'is_magic_value' => 0,
         ));
         return $this->redirect('/project/detail/' . $project->name);

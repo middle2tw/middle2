@@ -13,6 +13,7 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
         <li> <a href="#custom-domain">Custom Domain</a> </li>
         <li> <a href="#cronjob">CronJob</a> </li>
         <li> <a href="#variable">Variable</a> </li>
+        <li> <a href="#config-file">Config File</a> </li>
         <li> <a href="#addon">Addon</a> </li>
         <li> <a href="#member">Members</a> </li>
         <li> <a href="#node-status">Node Status</a> </li>
@@ -73,6 +74,7 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 <h3 id="variable">Variable: </h3>
 <ul>
     <?php foreach ($this->project->variables as $variable) { ?>
+    <?php if (strpos($variable->key, 'file:') === 0) { continue; } ?>
     <li>
     <form method="post" action="/project/editvariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>"<?= ($variable->is_magic_value) ? ' disabled="disabled"' : '' ?>>
         <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
@@ -98,9 +100,36 @@ CNAME to <?= $this->project->name ?><?= USER_DOMAIN ?>
 </ul>
 <textarea readonly="readonly" class="span12">
 <?php foreach ($this->project->variables as $variable) { ?>
+<?php if (strpos($variable->key, 'file:') === 0) { continue; } ?>
 putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getValue()) ?>');
 <?php } ?>
 </textarea>
+<hr>
+<h3 id="config-file">Config Files: </h3>
+<ul>
+    <?php foreach ($this->project->variables as $variable) { ?>
+    <?php if (strpos($variable->key, 'file:') !== 0) { continue; } ?>
+    <li>
+    <form method="post" action="/project/editvariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        <input type="hidden" name="file-config" value="1">
+        File Path: <input type="text" name="filename" value="<?= $this->escape(explode("\n", $variable->getValue())[0]) ?>">
+        <textarea name="value"><?= $this->escape(explode("\n", $variable->getValue(), 2)[1]) ?></textarea>
+        <button type="submit">EDIT</button>
+    </form>
+    <a href="/project/deletevariable/<?= $this->project->name ?>/<?= urlencode($variable->key) ?>" class="post-link confirm" data-confirm="Are you sure delete <?= $this->escape($variable->key) ?> variable">Delete</a>
+    </li>
+    <?php } ?>
+    <li>
+    <form method="post" action="/project/addvariable/<?= $this->project->name ?>">
+        <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+        <input type="hidden" name="file-config" value="1">
+        File Path: <input type="text" name="filename"><br>
+        File Content: <textarea name="value"></textarea>
+        <input type="submit">
+    </form>
+    </li>
+</ul>
 <hr>
 <h3 id="addon">Addon: </h3>
 <ol>
