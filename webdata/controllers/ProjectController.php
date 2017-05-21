@@ -218,7 +218,7 @@ class ProjectController extends Pix_Controller
             return $this->alert('error', '/');
         }
 
-        if (!Machine::getMachinesByGroup('search')->count()) {
+        if (!count(Machine::getMachinesByGroup('search'))) {
             return $this->alert('目前未支援 ElasticSearch', '/');
         }
 
@@ -252,7 +252,7 @@ class ProjectController extends Pix_Controller
             return $this->alert('error', '/');
         }
 
-        if (!Machine::getMachinesByGroup('pgsql')->count()) {
+        if (!count(Machine::getMachinesByGroup('pgsql'))) {
             return $this->alert('目前未支援 PgSQL', '/');
         }
 
@@ -289,7 +289,7 @@ class ProjectController extends Pix_Controller
             return $this->alert('error', '/');
         }
 
-        if (!Machine::getMachinesByGroup('mysql')->count()) {
+        if (!count(Machine::getMachinesByGroup('mysql'))) {
             return $this->alert('目前未支援 MySQL', '/');
         }
 
