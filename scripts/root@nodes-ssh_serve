@@ -152,7 +152,7 @@ function main()
                 $tmpfile = tempnam('/tmp/', 'config-');
                 file_put_contents($tmpfile, $content);
                 $ret = exec_m2(sprintf("docker cp %s c-%d:%s", escapeshellarg($tmpfile), $id, escapeshellarg($filepath)));
-                unlink($tmpfile)
+                unlink($tmpfile);
             } else {
                 $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
             }
@@ -200,7 +200,7 @@ function main()
                 $tmpfile = tempnam('/tmp/', 'config-');
                 file_put_contents($tmpfile, $content);
                 $ret = exec_m2(sprintf("docker cp %s c-%d:%s", escapeshellarg($tmpfile), $id, escapeshellarg($filepath)));
-                unlink($tmpfile)
+                unlink($tmpfile);
             } else {
                 $params[] = escapeshellcmd($variable->key) . '=' . escapeshellarg($variable->getValue());
             }
