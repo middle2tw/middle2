@@ -6,7 +6,6 @@ var mysql = require('mysql');
 var SSH2 = require('ssh2');
 var fs = require('fs');
 var tls = require('tls');
-var crypto = require('crypto');
 var constants = require('constants');
 
 var loadConfig = function(){
@@ -375,8 +374,8 @@ var https_options = {
             }
         }
 
-        if ('undefined' === typeof(cb) || null === config) {
-            return crypto.createCredentials(config).context;
+        if (null === config) {
+            return cb(null, null);
         }
 
         var ctx = tls.createSecureContext({
