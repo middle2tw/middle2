@@ -12,6 +12,10 @@ fflush($fp);            // flush output before releasing the lock
 
 include(__DIR__ . '/../../webdata/init.inc.php');
 
+if (getenv('TRY_MODE')) {
+    exit;
+}
+
 # check loadbalancer
 foreach (Hisoku::getLoadBalancers() as $host) {
     $curl = curl_init('http://' . $host . '/');
