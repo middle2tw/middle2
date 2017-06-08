@@ -21,12 +21,16 @@ while ($domain = fgets($fp)) {
         $time = max($time, $matches[1]);
     }
 
+    $cert_pattern = '/-----BEGIN CERTIFICATE-----[^-]+-----END CERTIFICATE-----/s';
+    $key_pattern = '/-----BEGIN RSA PRIVATE KEY-----[^-]+-----END RSA PRIVATE KEY-----/s';
+
     $config = new StdClass;
-    $config->ca = trim(file_get_contents("certs/{$domain}/fullchain.pem"));
-    $config->ca = str_replace("-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\n", "-----END CERTIFICATE-----\n----------\n----------\n-----BEGIN CERTIFICATE-----\n", $config->ca);
-    $config->ca = explode("----------\n----------\n", $config->ca);
-    $config->key = trim(file_get_contents("certs/{$domain}/privkey.pem"));
-    $config->cert = trim(file_get_contents("certs/{$domain}/cert.pem"));
+    preg_match_all($cert_pattern, trim(file_get_contents("certs/{$domain}/fullchain.pem")), $matches);
+    $config->ca = $matches[0];
+    preg_match($cert_pattern, trim(file_get_contents("certs/{$domain}/cert.pem")), $matches);
+    $config->cert = $matches[0];
+    preg_match($key_pattern, trim(file_get_contents("certs/{$domain}/privkey.pem")), $matches);
+    $config->key = $matches[0];
     if ($k = SSLKey::find($domain)) {
         $k->update(array(
             'config' => json_encode($config),
@@ -41,6 +45,6 @@ while ($domain = fgets($fp)) {
 
 if ($time != trim(file_get_contents('/tmp/le_version'))) {
     error_log('restart web server');
-    system("kill `cat /tmp/middle2.pid`");
+    system("systemctl reload m2-lb.service");
     file_put_contents('/tmp/le_version', $time);
 }
