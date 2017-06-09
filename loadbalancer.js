@@ -352,42 +352,6 @@ process.on('SIGHUP', function() {
         renewSSLkeys();
 });
 
-var http_main_request = http.createServer();
-var https_options = {
-    ca: [
-        fs.readFileSync('/srv/config/middle2.ca.crt'),
-        fs.readFileSync('/srv/config/middle2.ca.2.crt'),
-        fs.readFileSync('/srv/config/middle2.ca.3.crt')
-    ],
-    key: fs.readFileSync('/srv/config/middle2.key'),
-    cert: fs.readFileSync('/srv/config/middle2.crt'),
-    secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
-    SNICallback: function(domain, cb) {
-        var config = null;
-
-        if ('undefined' !== typeof(secureContext[domain])) {
-            config = secureContext[domain];
-        } else {
-            wildcard_domain = '*.' + domain.split('.').slice(1).join('.');
-            if ('undefined' !== typeof(secureContext[wildcard_domain])) {
-                config = secureContext[wildcard_domain];
-            }
-        }
-
-        if (null === config) {
-            return cb(null, null);
-        }
-
-        var ctx = tls.createSecureContext({
-            ca: null,
-            key: config.key,
-            cert: config.cert + "\n" + config.ca.join("\n"),
-        });
-        cb(null, ctx);
-    }
-};
-
-var https_main_request = https.createServer(https_options);
 var request_count = 0;
 var request_serial = 0;
 var request_pools = {};
@@ -737,5 +701,44 @@ var http_request_callback = function(protocol){
 };
 };
 
-https_main_request.on('request', http_request_callback('https')).listen(443, 0);
-http_main_request.on('request', http_request_callback('http')).listen(80, 0);
+mysql_one_time_query("SELECT * FROM `ssl_keys` WHERE `domain` = ?", [config.MAINPAGE_DOMAIN], function(err, rows, fields){
+    if ('undefined' == typeof(rows) && err) {
+        console.log("Database error, select project detail from project name failed: " + JSON.stringify(err));
+        return;
+    }
+    var ssl_config = JSON.parse(rows[0].config);
+    var https_options = {
+        ca: ssl_config.ca,
+        key: ssl_config.key,
+        cert: ssl_config.cert,
+        secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
+        SNICallback: function(domain, cb) {
+            var config = null;
+
+            if ('undefined' !== typeof(secureContext[domain])) {
+                config = secureContext[domain];
+            } else {
+                wildcard_domain = '*.' + domain.split('.').slice(1).join('.');
+                if ('undefined' !== typeof(secureContext[wildcard_domain])) {
+                    config = secureContext[wildcard_domain];
+                }
+            }
+
+            if (null === config) {
+                return cb(null, null);
+            }
+
+            var ctx = tls.createSecureContext({
+                ca: null,
+                key: config.key,
+                cert: config.cert + "\n" + config.ca.join("\n"),
+            });
+            cb(null, ctx);
+        }
+    };
+
+    var https_main_request = https.createServer(https_options);
+    var http_main_request = http.createServer();
+    https_main_request.on('request', http_request_callback('https')).listen(443, 0);
+    http_main_request.on('request', http_request_callback('http')).listen(80, 0);
+});
