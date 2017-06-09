@@ -461,7 +461,7 @@ var http_request_callback = function(protocol){
                 + ' ' + options.code + ' 0'
                 + ' "' + referer + '"'
                 + ' "' + useragent + '"'
-            ); 
+            );
             recent_logs.push(log);
             recent_logs = recent_logs.slice(recent_logs.length - 10);
 
@@ -537,7 +537,7 @@ var http_request_callback = function(protocol){
                         + ' 503 0'
                         + ' "' + referer + '"'
                         + ' "' + useragent + '"'
-                        ); 
+                        );
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
@@ -565,7 +565,7 @@ var http_request_callback = function(protocol){
                         + ' 200 0'
                         + ' "' + referer + '"'
                         + ' "' + useragent + '"'
-                        ); 
+                        );
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
@@ -593,7 +593,7 @@ var http_request_callback = function(protocol){
                         + ' 503 0'
                         + ' "' + referer + '"'
                         + ' "' + useragent + '"'
-                        ); 
+                        );
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
@@ -651,9 +651,9 @@ var http_request_callback = function(protocol){
                     + ' ' + main_request.headers['x-forwarded-for']
                     + ' - - ' + apachedate()
                     + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
-                    + ' ' + backend_response.statusCode + ' ' + return_length 
+                    + ' ' + backend_response.statusCode + ' ' + return_length
                     + ' "' + referer + '"'
-                    + ' "' + useragent + '"'); 
+                    + ' "' + useragent + '"');
 
                 if ('object' == typeof(options.project)) {
                     project_connections[options.project.name] --;
