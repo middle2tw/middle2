@@ -441,7 +441,42 @@ var http_request_callback = function(protocol){
     main_request.on('end', function(){
         main_request_end();
     });
+    main_request.on('error', function(err){
+        scribe.send('lb-error', formatdate() + ' backend_request_error: ' + err);
+        main_request_end();
+    });
+    main_request.on('aborted', function(){
+        var referer = main_request.headers['referer'];
+        if (typeof(referer) != 'string') {
+            referer = '-';
+        }
+        var useragent = main_request.headers['user-agent'];
+        if (typeof(useragent) != 'string') {
+            useragent = '-';
+        }
+        var log = (host
+            + ' ' + main_request.headers['x-forwarded-for']
+            + ' - - ' + apachedate()
+            + ' "' + main_request.method.toUpperCase() + ' ' + main_request.url + ' HTTP/' + main_request.httpVersion + '"'
+            + ' 500 0'
+            + ' "' + referer + '"'
+            + ' "' + useragent + '"'
+        );
+        recent_logs.push(log);
+        recent_logs = recent_logs.slice(recent_logs.length - 10);
+
+        main_response.writeHead(500);
+        main_response.write("Error");
+        scribe.send('500-log', log);
+        scribe.send('lb-error', ' main_request_aborted: ' + log);
+
+        main_response.end();
+        request_count --;
+        delete(request_pools[current_request]);
+        return;
+    });
     main_request.on('close', function(){
+        main_request_end();
     });
 
     lb_core.getBackendHost2(host, port, current_request, function(options){
@@ -578,7 +613,22 @@ var http_request_callback = function(protocol){
                 return;
             }
 
+            var too_many_idle_connections = false;
+
             if (project_connections[options.project.name] > 20) {
+                var idle_connections = 0;
+                var now = (new Date()).getTime();
+                for (var id in request_pools) {
+                    if (request_pools[id].project == options.project.name && request_pools[id].action_at < now - 60 * 1000) {
+                        idle_connections ++;
+                    }
+                }
+                if (idle_connections > 20) {
+                    too_many_idle_connections = true;
+                }
+            }
+
+            if (too_many_idle_connections) {
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
                     referer = '-';
@@ -635,7 +685,11 @@ var http_request_callback = function(protocol){
                 if ('undefined' !== typeof(request_pools[current_request])) {
                     request_pools[current_request].action_at = (new Date()).getTime();
                 }
-                main_response.write(chunk);
+                try {
+                    main_response.write(chunk);
+                } catch (e) {
+                    // handle write after end
+                }
                 return_length += chunk.length;
             });
 
