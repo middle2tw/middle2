@@ -391,6 +391,7 @@ var http_request_callback = function(protocol){
     request_pools[current_request] = {
         host: host,
         start_at: (new Date()).getTime(),
+        action_at: (new Date()).getTime(),
         from: main_request.headers['x-forwarded-for'],
         url: main_request.url,
         state: 'init',
@@ -631,6 +632,9 @@ var http_request_callback = function(protocol){
         }, function(backend_response){
             main_response.writeHead(backend_response.statusCode, backend_response.headers);
             backend_response.on('data', function(chunk){
+                if ('undefined' !== typeof(request_pools[current_request])) {
+                    request_pools[current_request].action_at = (new Date()).getTime();
+                }
                 main_response.write(chunk);
                 return_length += chunk.length;
             });
@@ -689,6 +693,9 @@ var http_request_callback = function(protocol){
             if (data === false) {
                 backend_request.end();
                 return;
+            }
+            if ('undefined' !== typeof(request_pools[current_request])) {
+                request_pools[current_request].action_at = (new Date()).getTime();
             }
             backend_request.write(data);
         };
