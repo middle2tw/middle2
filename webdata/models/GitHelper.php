@@ -99,9 +99,9 @@ class GitHelper
         self::system_without_error("git archive --format=tar {$branch}| docker exec -i container-{$project->name} tar -xf - -C /srv/web/");
 
         if (count($apt_packages)) {
-            $apt_install_cmd = "apt-get update";
+            $apt_install_cmd = "apt-get update -y";
             self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
-            $apt_install_cmd = "apt-get upgrade";
+            $apt_install_cmd = "apt-get upgrade -y";
             self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
             $apt_install_cmd = "apt-get install -y " . implode(' ', $apt_packages);
             self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
