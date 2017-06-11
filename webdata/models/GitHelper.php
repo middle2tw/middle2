@@ -54,6 +54,9 @@ class GitHelper
         $commit_id = trim(`$rev_parse_cmd`);
 
         $apt_packages = explode("\n", self::getGitFileContent('Aptfile', $branch));
+        if ('' == trim(implode('', $apt_packages))) {
+            $apt_packages = array();
+        }
 
         $actions = array();
         foreach (array('requirements.txt', 'Gemfile', 'package.json') as $file) {
@@ -96,6 +99,10 @@ class GitHelper
         self::system_without_error("git archive --format=tar {$branch}| docker exec -i container-{$project->name} tar -xf - -C /srv/web/");
 
         if (count($apt_packages)) {
+            $apt_install_cmd = "apt-get update";
+            self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
+            $apt_install_cmd = "apt-get upgrade";
+            self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
             $apt_install_cmd = "apt-get install -y " . implode(' ', $apt_packages);
             self::system_without_error("docker exec --tty container-{$project->name} {$apt_install_cmd}");
         }
