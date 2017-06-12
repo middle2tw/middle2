@@ -191,6 +191,10 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 };
 
 lb_core._getNodesByProject = function(project, current_request, callback){
+    if ('undefined' === typeof(request_pools[current_request])) {
+        return callback({success: false, message: 'Connection error', code: 500});
+    }
+
     request_pools[current_request].state = 'get-webnode-from-project';
     request_pools[current_request].project = project.name;
     var working_nodes = mapping_cache['project-to-webnode'][project.id + '-' + project.commit];
@@ -205,6 +209,11 @@ lb_core._getNodesByProject = function(project, current_request, callback){
             console.log("Database error, select webnode from project id failed: " + JSON.stringify(err));
             return callback({success: false, message: 'Database error', code: 500});
         }
+
+        if ('undefined' == typeof(request_pools[current_request])) {
+            return callback({success: false, message: 'Connection error', code: 500});
+        }
+
         request_pools[current_request].state = 'get-webnode-from-project-done';
         if (!rows.length) {
             request_pools[current_request].state = 'init-new-node';
@@ -464,12 +473,15 @@ var http_request_callback = function(protocol){
         recent_logs.push(log);
         recent_logs = recent_logs.slice(recent_logs.length - 10);
 
-        main_response.writeHead(500);
-        main_response.write("Error");
+        if (main_response) {
+            main_response.writeHead(500);
+            main_response.write("Error");
+            main_response.end();
+            main_response = null;
+        }
         scribe.send('500-log', log);
         scribe.send('lb-error', ' main_request_aborted: ' + log);
 
-        main_response.end();
         request_count --;
         delete(request_pools[current_request]);
         return;
@@ -479,7 +491,11 @@ var http_request_callback = function(protocol){
     });
 
     lb_core.getBackendHost2(host, port, current_request, function(options){
-        request_pools[current_request].state = 'load-from-backend';
+        if ('undefined' === typeof(request_pools[current_request])) {
+            options = {success: false, message: 'Connection failed', code: 500};
+        } else {
+            request_pools[current_request].state = 'load-from-backend';
+        }
         if (!options.success) {
             var referer = main_request.headers['referer'];
             if (typeof(referer) != 'string') {
@@ -501,12 +517,15 @@ var http_request_callback = function(protocol){
             recent_logs = recent_logs.slice(recent_logs.length - 10);
 
             scribe.send('lb-notfound', log);
-            main_response.writeHead(options.code);
-            main_response.write(options.message);
+            if (main_response) {
+                main_response.writeHead(options.code);
+                main_response.write(options.message);
+                main_response.end();
+                main_response = null;
+            }
             if (options.code >= 500) {
                 scribe.send('500-log', log);
             }
-            main_response.end();
             request_count --;
             delete(request_pools[current_request]);
             return;
@@ -540,8 +559,11 @@ var http_request_callback = function(protocol){
             if (main_request.url.indexOf('mapping_cache') >= 0) {
                 ret['mapping_cache'] = mapping_cache;
             }
-            main_response.write(JSON.stringify(ret));
-            main_response.end();
+            if (main_response) {
+                main_response.write(JSON.stringify(ret));
+                main_response.end();
+                main_response = null;
+            }
             request_count --;
             delete(request_pools[current_request]);
             return;
@@ -576,9 +598,12 @@ var http_request_callback = function(protocol){
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
-                main_response.writeHead(503);
-                main_response.write('This site is currently unavailable');
-                main_response.end();
+                if (main_response) {
+                    main_response.writeHead(503);
+                    main_response.write('This site is currently unavailable');
+                    main_response.end();
+                    main_response = null;
+                }
                 request_count --;
                 delete(request_pools[current_request]);
                 return;
@@ -604,9 +629,11 @@ var http_request_callback = function(protocol){
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
-                main_response.writeHead(200);
-                main_response.write("User-agent: *\nDisallow: /");
-                main_response.end();
+                if (main_response) {
+                    main_response.writeHead(200);
+                    main_response.write("User-agent: *\nDisallow: /");
+                    main_response.end();
+                }
                 request_count --;
                 delete(request_pools[current_request]);
                 return;
@@ -647,10 +674,13 @@ var http_request_callback = function(protocol){
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
 
-                main_response.writeHead(503);
-                main_response.write('503 Too many connections');
+                if (main_response) {
+                    main_response.writeHead(503);
+                    main_response.write('503 Too many connections');
+                    main_response.end();
+                    main_response = null;
+                }
                 scribe.send('500-log', log);
-                main_response.end();
                 request_count --;
                 delete(request_pools[current_request]);
                 return;
@@ -679,15 +709,15 @@ var http_request_callback = function(protocol){
             headers: main_request.headers,
             agent: false
         }, function(backend_response){
-            main_response.writeHead(backend_response.statusCode, backend_response.headers);
+            if (main_response) {
+                main_response.writeHead(backend_response.statusCode, backend_response.headers);
+            }
             backend_response.on('data', function(chunk){
                 if ('undefined' !== typeof(request_pools[current_request])) {
                     request_pools[current_request].action_at = (new Date()).getTime();
                 }
-                try {
+                if (main_response) {
                     main_response.write(chunk);
-                } catch (e) {
-                    // handle write after end
                 }
                 return_length += chunk.length;
             });
@@ -725,7 +755,10 @@ var http_request_callback = function(protocol){
 
                 recent_logs.push(log);
                 recent_logs = recent_logs.slice(recent_logs.length - 10);
-                main_response.end();
+                if (main_response) {
+                    main_response.end();
+                    main_response = null;
+                }
                 request_count --;
                 delete(request_pools[current_request]);
             });
@@ -737,7 +770,10 @@ var http_request_callback = function(protocol){
 
         backend_request.on('error', function(e){
             scribe.send('lb-error', formatdate() + ' backend_request_error' + ' ' + host + ' ' + backend_host + ' ' + backend_port + ' ' + e);
-            main_response.end();
+            if (main_response) {
+                main_response.end();
+                main_response = null;
+            }
             request_count --;
             delete(request_pools[current_request]);
         });
