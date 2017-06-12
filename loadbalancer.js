@@ -388,6 +388,16 @@ var http_request_callback = function(protocol){
     var current_request = request_serial;
     request_count ++;
     request_serial ++;
+
+    main_request.headers['x-forwarded-for'] = main_request.socket.remoteAddress;
+    main_request.headers['x-real-ip'] = main_request.socket.remoteAddress;
+    main_request.headers['x-forwarded-port'] = main_request.socket.address().port;
+    if ('https' == protocol) {
+        main_request.headers['x-forwarded-https'] = 'On';
+        main_request.headers['x-forwarded-proto'] = 'https';
+        main_request.headers['x-scheme'] = 'https';
+    }
+
     request_pools[current_request] = {
         host: host,
         start_at: (new Date()).getTime(),
@@ -423,17 +433,6 @@ var http_request_callback = function(protocol){
     var main_request_end = function(){
         main_request_data(false);
     };
-
-    if (!main_request.headers['x-forwarded-for']) {
-        main_request.headers['x-forwarded-for'] = main_request.socket.remoteAddress;
-        main_request.headers['x-real-ip'] = main_request.socket.remoteAddress;
-        main_request.headers['x-forwarded-port'] = main_request.socket.address().port;
-        if ('https' == protocol) {
-            main_request.headers['x-forwarded-https'] = 'On';
-            main_request.headers['x-forwarded-proto'] = 'https';
-            main_request.headers['x-scheme'] = 'https';
-        }
-    }
 
     main_request.on('data', function(chunk){
         main_request_data(chunk);
