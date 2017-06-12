@@ -154,6 +154,9 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             return callback({success: false, message: 'Project not found', code: 404});
         });
     } else {
+        if (typeof(request_pools[current_request]) === 'undefined') {
+            return callback({success: false, message: 'Connection error', code: 500});
+        }
         request_pools[current_request].state = 'get-project-from-domain';
         var project = mapping_cache['project-domain-to-id'][host];
         if ('undefined' !== typeof(project)) {
@@ -168,6 +171,9 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
             return lb_core.getBackendHost2(host, port, current_request, callback);
         }
         mysql_one_time_query("SELECT * FROM `project` WHERE `id` = (SELECT `project_id` FROM `custom_domain` WHERE `domain` = ?)", [host], function(err, rows, fields){
+            if (typeof(request_pools[current_request]) === 'undefined') {
+                return callback({success: false, message: 'Connection error', code: 500});
+            }
             request_pools[current_request].state = 'get-project-from-domain-done';
             if ('undefined' == typeof(rows) && err) {
                 console.log("Database error, select project detail from custom domain failed: " + JSON.stringify(err));
