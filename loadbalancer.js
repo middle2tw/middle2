@@ -614,6 +614,16 @@ var http_request_callback = function(protocol){
         var return_length = 0;
 
         if (options.project) {
+            if (options.project.config['always-https'] && protocol == 'http') {
+                main_response.writeHead(301, {
+                    'Content-Type': 'text/html; charset=utf-8',
+                    'Content-Length': 0,
+                    'Location': 'https://' + host + main_request.url
+                });
+                main_response.end();
+                return;
+            }
+
             if (options.project.config['maintaince']) { // project is disabled
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
