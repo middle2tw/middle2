@@ -20,6 +20,31 @@ var loadConfig = function(){
     return ret;
 };
 
+var projectConfig = function(config){
+    if (config == '') {
+        config = {};
+    } else {
+        config = JSON.parse(config);
+        if (!config) {
+            config = {};
+        }
+    }
+
+    if ('undefined' === typeof(config['always-https'])) {
+        config['always-https'] = 0; // redirect http to https
+    }
+
+    if ('undefined' === typeof(config['dev-mode'])) {
+        config['dev-mode'] = 0; // force add robots.txt Disallow all
+    }
+
+    if ('undefined' === typeof(config['maintaince'])) {
+        config['maintaince'] = 0; // force 503
+    }
+
+    return config;
+};
+
 var config = loadConfig();
 fs.writeFile('/tmp/middle2.pid', process.pid);
 
@@ -145,12 +170,15 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
                 console.log("Database error, select project detail from project name failed: " + JSON.stringify(err));
                 return callback({success: false, message: 'Database error', code: 500});
             }
-            mapping_cache['project-name-to-id'][project_name] = rows[0];
             request_pools[current_request].state = 'get-project-from-domain-done';
             if (rows.length == 1) {
-                lb_core._getNodesByProject(rows[0], current_request, callback);
+                project = rows[0];
+                project.config = projectConfig(project.config);
+                mapping_cache['project-name-to-id'][project_name] = project;
+                lb_core._getNodesByProject(project, current_request, callback);
                 return;
             }
+            mapping_cache['project-name-to-id'][project_name] = undefined;
             return callback({success: false, message: 'Project not found', code: 404});
         });
     } else {
@@ -180,8 +208,10 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
                 return callback({success: false, message: 'Database error', code: 500});
             }
             if (rows.length == 1) {
-                mapping_cache['project-domain-to-id'][host] = rows[0];
-                lb_core._getNodesByProject(rows[0], current_request, callback);
+                project = rows[0];
+                project.config = projectConfig(project.config);
+                mapping_cache['project-domain-to-id'][host] = project;
+                lb_core._getNodesByProject(project, current_request, callback);
                 return;
             }
 
@@ -584,7 +614,7 @@ var http_request_callback = function(protocol){
         var return_length = 0;
 
         if (options.project) {
-            if (options.project.status == 2) { // project is disabled
+            if (options.project.config['maintaince']) { // project is disabled
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
                     referer = '-';
@@ -615,7 +645,7 @@ var http_request_callback = function(protocol){
                 return;
             }
 
-            if (options.project.status == 1 && main_request.url == '/robots.txt') { // project is disallow robots
+            if (options.project.config['dev-mode'] && main_request.url == '/robots.txt') { // project is disallow robots
                 var referer = main_request.headers['referer'];
                 if (typeof(referer) != 'string') {
                     referer = '-';
