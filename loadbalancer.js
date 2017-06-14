@@ -621,6 +621,8 @@ var http_request_callback = function(protocol){
                     'Location': 'https://' + host + main_request.url
                 });
                 main_response.end();
+                request_count --;
+                delete(request_pools[current_request]);
                 return;
             }
 
