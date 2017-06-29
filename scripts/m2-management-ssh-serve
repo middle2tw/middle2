@@ -1,0 +1,83 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ . '/../webdata/init.inc.php');
+
+if ('git' !== getenv('USER')) {
+    die('git user only' . PHP_EOL);
+}
+
+function updateKeys() {
+
+    # call by UserKey::updateKey() from mainpage for updating ~git/.ssh/authorized_keys 
+    $update_git_config_keys = explode("\n", trim(file_get_contents('/srv/config/update-git-config-keys')));
+
+    # call by scripts/root@nodes-ssh_serve from node servers for git clone repository
+    $deploy_keys = explode("\n", trim(file_get_contents('/srv/config/deploy-keys')));
+
+    $content = '### generated at ' . date('Y/m/d H:i:s') . "\n";
+    $content .= "# deploy-keys\n";
+    foreach ($deploy_keys as $deploy_key) {
+        $content .= 'command="/srv/code/hisoku/scripts/deploy-key-archive-only",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $deploy_key . "\n";
+    }
+    $content .= "# m2-management-ssh-serve\n";
+    foreach ($update_git_config_keys as $key) {
+        $content .= 'command="/srv/code/hisoku/scripts/m2-management-ssh-serve",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $key . "\n";
+    }
+    $content .= "# user keys\n";
+
+    // 可以對 mysql 和 pgsql 的 IP 開 ssh tunnel
+    $forward_ports = array_merge(
+        array_map(function($ip){ return "{$ip}:3306"; }, Hisoku::getIPsByGroup('mysql')),
+        array_map(function($ip){ return "{$ip}:5432"; }, Hisoku::getIPsByGroup('pgsql'))
+    );
+    $permitopen = implode(',', array_map(function($ip_port) { return "permitopen=\"{$ip_port}\""; }, $forward_ports));
+
+    foreach (UserKey::search(1) as $user_key) {
+        $content .= "command=\"/srv/code/hisoku/scripts/ssh-serve {$user_key->user->name} {$user_key->id}\",no-X11-forwarding,no-agent-forwarding,{$permitopen} {$user_key->key_body}\n";
+    }
+
+    file_put_contents(getenv('HOME') . '/.ssh/authorized_keys', $content);
+}
+
+function importProjectRepo($args) {
+
+    list($project_name, $from) = explode(' ', $args);
+    if (FALSE !== strpos($project_name, '.')) {
+        return error('invalid project name: ' . $project_name);
+    }
+
+    if (!$project = Project::find_by_name(strval($project_name))) {
+        return error('project not found: ' . $project_name);
+    }
+
+    $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
+    if (!file_exists($absolute_path)) {
+        exec('git clone --bare ' . $from . ' ' . escapeshellarg($absolute_path));
+        symlink('/srv/code/hisoku/scripts/pre-receive', $absolute_path . '/hooks/pre-receive');
+    }
+}
+
+function error($message) {
+    error_log($message);
+}
+
+function main() {
+
+    if (!getenv('SSH_ORIGINAL_COMMAND')) {
+        return error('There is no SSH_ORIGINAL_COMMAND env');
+    }
+
+    list($command, $args) = explode(' ', getenv('SSH_ORIGINAL_COMMAND'), 2);
+
+    switch ($command) {
+    case 'update-keys':
+        return updateKeys();
+    case 'import-project-repo':
+        return importProjectRepo($args);
+    default:
+        return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
+    }
+}
+
+main();
