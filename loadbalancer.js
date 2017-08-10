@@ -42,6 +42,27 @@ var projectConfig = function(config){
         config['maintaince'] = 0; // force 503
     }
 
+    if ('undefined' === typeof(config['node-group'])) {
+        config['node-group'] = '';
+    }
+
+    return config;
+};
+
+var webnodeConfig = function(config){
+    if (config == '') {
+        config = {};
+    } else {
+        config = JSON.parse(config);
+        if (!config) {
+            config = {};
+        }
+    }
+
+    if ('undefined' === typeof(config['node-group'])) {
+        config['node-group'] = '';
+    }
+
     return config;
 };
 
@@ -309,6 +330,14 @@ var run_init = function(){
                         callback({success: false, message: 'No empty node', code: 503});
                 });
                 return;
+            }
+
+            filtered_rows = rows.filter(function(row){
+                row.config = webnodeConfig(row.config);
+                return row.config['node-group'] == project.config['node-group'];
+            });
+            if (filtered_rows.length) {
+                rows = filtered_rows;
             }
 
             // taoyuan-chiang-872029.middle2.me(*.hackpad.tw) use 52.187.182.156(884717212) first
