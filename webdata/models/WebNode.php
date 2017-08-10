@@ -267,6 +267,7 @@ class WebNode extends Pix_Table
             102 => 'Wait',
             103 => 'Service',
         ));
+        $this->_columns['config'] = array('type' => 'text', 'default' => '{}');
         $this->_columns['created_at'] = array('type' => 'int');
         $this->_columns['start_at'] = array('type' => 'int', 'default' => 0);
         $this->_columns['access_at'] = array('type' => 'int', 'default' => 0);
