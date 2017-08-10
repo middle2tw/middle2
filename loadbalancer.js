@@ -340,20 +340,6 @@ var run_init = function(){
                 rows = filtered_rows;
             }
 
-            // taoyuan-chiang-872029.middle2.me(*.hackpad.tw) use 52.187.182.156(884717212) first
-            // TODO: need project/node group feature
-            if (project.name == 'taoyuan-chiang-872029') {
-                filtered_rows = rows.filter(function(row){
-                    return row.ip == 884717212;
-                });
-                if (filtered_rows.length) {
-                    rows = filtered_rows;
-                }
-            } else {
-                rows = rows.filter(function(row){
-                    return row.ip != 884717212;
-                });
-            }
             lb_core._initProjectOnNode(project, rows[Math.floor(Math.random() * rows.length)], callback);
         });
         return;
