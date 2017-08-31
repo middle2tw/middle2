@@ -297,7 +297,7 @@ class WebNode extends Pix_Table
         return $return;
     }
 
-    public static function initNode($ip, $port)
+    public static function initNode($ip, $port, $config = null)
     {
         $session = ssh2_connect($ip, 22);
         if (false === $session) {
@@ -316,11 +316,15 @@ class WebNode extends Pix_Table
         if ($ret->error) {
             throw new Exception('init failed, message: ' . $ret->message);
         }
-        WebNode::insert(array(
+        $values = array(
             'ip' => ip2long($ip),
             'port' => $port + 20000,
             'status' => WebNode::STATUS_UNUSED,
-        )); 
+        );
+        if ($config) {
+            $values['config'] = json_encode($config);
+        }
+        WebNode::insert($values);
     }
 
     /**

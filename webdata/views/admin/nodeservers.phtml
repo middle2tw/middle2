@@ -47,7 +47,9 @@ $this->title = 'NodeServers Info :: ';
                 <h3><?= long2ip($ip) ?>(<?= count($nodes) ?>)</h3>
                 <form method="post" action="/admin/nodeserverbulkaddport/<?= long2ip($ip) ?>">
                     <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
-                補滿到 <input type="text" value="20" name="count" class="input-small"> 台機器<button type="submit">Go</button></form>
+                補滿到 <input type="text" value="20" name="count" class="input-small"> 台機器
+                Group: <input type="text" name="group" class="input-small">
+                    <button type="submit">Go</button></form>
                 <table class="table">
                     <thead>
                         <tr>
@@ -57,6 +59,7 @@ $this->title = 'NodeServers Info :: ';
                             <td>status</td>
                             <td>start at</td>
                             <td>access at</td>
+                            <td>group</td>
                             <td>action</td>
                         </tr>
                     </thead>
@@ -102,6 +105,7 @@ $this->title = 'NodeServers Info :: ';
                             <?php } ?>
                         </td>
                         <?php } ?>
+                        <td><?= json_decode($node->config)->{'node-group'} ?></td>
                         <td>
                             <button class="btn btn-danger post-link confirm" data-confirm="確定要刪除 <?= long2ip($node->ip) ?> 的 port <?= $node->port ?> ?" data-link="/admin/nodeserverdeleteport/<?= urlencode(long2ip($node->ip)) ?>/<?= $node->port - 20000 ?>">Delete</button>
                             <?php if (WebNode::STATUS_STOP == $node->status) { ?>
@@ -119,6 +123,7 @@ $this->title = 'NodeServers Info :: ';
                 <form method="post" action="/admin/nodeserveraddport/<?= urlencode(long2ip($ip)) ?>/" class="form-nodeserveraddport">
                     <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
                     20000 + <input type="text" name="port">
+                    Group: <input type="text" name="group" class="input-small">
                     <button type="submit">New port</button>
                 </form>
             </div>
@@ -128,6 +133,7 @@ $this->title = 'NodeServers Info :: ';
                 <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
                 IP: <input type="text" name="ip"><br>
                 Port: 20000 + <input type="text" name="port">
+                Group: <input type="text" name="group" class="input-small">
                 <button type="submit">New port</button>
             </form>
         </div>

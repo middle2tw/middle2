@@ -89,12 +89,18 @@ class AdminController extends Pix_Controller
             return $this->alert('num must in 1 ~ 100', '/admin');
         }
 
+        $group = strval($_REQUEST['group']);
+        $config = null;
+        if ($group) {
+            $config = array("node-group" => $group);
+        }
+
         for ($i = 1; $i <= $num ; $i ++) {
             if (WebNode::find(array(ip2long($ip), 20000 + $i))) {
                 continue;
             }
             try {
-                WebNode::initNode($ip, $i);
+                WebNode::initNode($ip, $i, $config);
             } catch (Exception $e) {
                 return $this->alert($e->getMessage(), '/admin');
             }
@@ -123,8 +129,14 @@ class AdminController extends Pix_Controller
             return $this->alert('port ' . (20000 + $port) . ' is existed', '/admin');
         }
 
+        $group = strval($_REQUEST['group']);
+        $config = null;
+        if ($group) {
+            $config = array("node-group" => $group);
+        }
+
         try {
-            WebNode::initNode($ip, $port);
+            WebNode::initNode($ip, $port, $config);
         } catch (Exception $e) {
             return $this->alert($e->getMessage(), '/admin');
         }
