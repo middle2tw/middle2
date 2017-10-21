@@ -1,5 +1,6 @@
 RewriteEngine on
 RewriteBase /
+RewriteRule static/ - [L]
 RewriteRule phpMyAdmin/ - [L]
 RewriteRule phpPgAdmin/ - [L]
 RewriteRule mrtg/ - [L]
