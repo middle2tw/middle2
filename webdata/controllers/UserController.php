@@ -48,8 +48,8 @@ class UserController extends Pix_Controller
 
         try {
             $this->user->addKey($_POST['key']);
-        } catch (InvalidException $e) {
-            // TODO: error
+        } catch (InvalidArgumentException $e) {
+            return $this->alert('Failed. Message: ' . $e->getMessage(), '/');
         } catch (Pix_Table_DuplicateException $e) {
             // TODO: error
         }

@@ -16,15 +16,15 @@ class UserRow extends Pix_Table_Row
         $keybody = trim($keybody);
         $terms = explode(' ', $keybody);
         if (3 !== count($terms)) {
-            throw new InvalidArgumentException('invalid key');
+            throw new InvalidArgumentException('invalid key, there should be 3 terms in key');
         }
         list($type, $body, $user) = $terms;
         if (!in_array($type, array('ssh-rsa', 'ssh-dsa'))) {
-            throw new InvalidArgumentException('invalid ssh type');
+            throw new InvalidArgumentException('invalid ssh type, first term must be ssh-rsa or ssh-dsa');
         }
 
         if (preg_match('#[^a-zA-Z0-9/+=]#', $body)) {
-            throw new InvalidArgumentException('invalid ssh key');
+            throw new InvalidArgumentException('invalid ssh key, include invalid char');
         }
 
         $key = $this->keys->insert(array(
