@@ -17,6 +17,7 @@ if (!file_Exists("{$le_docker_cert_dir}/privkey.pem")) {
 
 if (file_get_contents("{$docker_cert_dir}/privkey.pem") == file_get_contents("{$le_docker_cert_dir}/privkey.pem")) {
     error_log("not change");
+    exit;
 }
 
 foreach (array('cert', 'fullchain', 'privkey') as $f) {
