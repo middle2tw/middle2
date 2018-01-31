@@ -11,7 +11,7 @@ function error($message)
 function buildDockerProjectBase($args)
 {
     $project_name = trim($args, "' ");
-    if (preg_match('#^(.*)\.git$#', $project_name, $matches)) {
+    if (preg_match('#^(.*)\.git( clean-build)?$#', $project_name, $matches)) {
         $project_name = $matches[1];
     }
 
@@ -23,7 +23,13 @@ function buildDockerProjectBase($args)
         return error('project not found: ' . $project_name);
     }
 
-    $ret = GitHelper::buildDockerProjectBase($project);
+    if (strpos($args, 'clean-build')) {
+        $clean_build = true;
+    } else {
+        $clean_build = false;
+    }
+
+    $ret = GitHelper::buildDockerProjectBase($project, 'HEAD', $clean_build);
     echo "success:{$ret}";
     exit;
 }

@@ -41,7 +41,7 @@ class GitHelper
      * @access public
      * @return void
      */
-    public static function buildDockerProjectBase($project, $branch = 'HEAD')
+    public static function buildDockerProjectBase($project, $branch = 'HEAD', $clean_build = false)
     {
         $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
         if (!file_exists($absolute_path)) {
@@ -79,6 +79,9 @@ class GitHelper
         }
 
         try {
+            if ($clean_build) {
+                throw new Exception("clean build");
+            }
             self::system_without_error("docker --config /srv/config/docker pull {$docker_registry}/image-{$project->name}");
             $cmd = "docker inspect {$docker_registry}/image-{$project->name}";
             $obj = json_decode(`$cmd`)[0];
