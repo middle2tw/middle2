@@ -82,6 +82,11 @@ function main()
         file_put_contents($log_file, date('c') . " [clone] project: {$project_name}\n", FILE_APPEND);
         file_put_contents($log_file, date('c') . " [clone] init lang base\n", FILE_APPEND);
         file_put_contents("/srv/chroot/{$id}.project", $project_name);
+        $weblog_dir = "/srv/chroot/{$id}/srv/logs";
+        if (file_exists($weblog_dir)) {
+            system("rm -rf " . escapeshellarg($weblog_dir));
+        }
+        mkdir($weblog_dir, 0777, true);
 
         $cmd = "ssh git@" . GIT_SERVER . " build-docker-project-image " . $project_name;
         $build_image_result = `$cmd`;
@@ -102,7 +107,7 @@ function main()
         }
 
         $port = 20000 + $id;
-        $ret = exec_m2("docker create --oom-kill-disable --publish {$port}:80 --name c-{$id} {$image} init");
+        $ret = exec_m2("docker create --oom-kill-disable -v /srv/chroot/{$id}/srv/logs:/srv/logs --publish {$port}:80 --name c-{$id} {$image} init");
         if ($ret['code']) {
             $ret['error'] = true;
             $ret['message'] = "docker create $image to c-{$id} failed";
