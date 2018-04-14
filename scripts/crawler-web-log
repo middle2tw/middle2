@@ -3,6 +3,10 @@
 
 // 爬各 node 的 /srv/logs/web.log 並把他傳到
 
+if (file_exists('/srv/config/config.php')) {
+    include('/srv/config/config.php');
+}
+
 class Crawler
 {
     protected $_file_objects = array();
