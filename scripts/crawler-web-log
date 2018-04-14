@@ -46,6 +46,9 @@ class Crawler
                 continue;
             }
             $id = $matches[1];
+            if (!file_exists("/srv/chroot/{$id}.project")) {
+                continue;
+            }
 
             $file_obj = $this->getFileObj($id);
             if (filesize($log_file) == $file_obj->file_size) {
