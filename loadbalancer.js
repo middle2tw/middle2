@@ -375,9 +375,21 @@ lb_core._initProjectOnNode = function(project, node, callback){
         var node_id = node.port - 20000;
         ssh2.on('ready', function(){
             ssh2.exec('clone ' + project.name + ' ' + node_id, function(err, stream){
-                stream.on('exit', function(){
+                var result = '';
+                stream.on('data', function(chunk){ result += chunk; });
+                stream.on('exit', function(code){
+                    if (!code) {
+                        ssh2.end();
+                        return callback({success: false, message: 'clone project ' + project.name + ' to node ' + node_id + ' failed', code: 503});
+                    }
                     ssh2.exec('restart-web ' + project.name + ' ' + node_id, function(err, stream){
-                        stream.on('exit', function(){
+                        var result = '';
+                        stream.on('data', function(chunk){ result += chunk; });
+                        stream.on('exit', function(code){
+                            if (!code) {
+                                ssh2.end();
+                                return callback({success: false, message: 'start web project ' + project.name + ' to node ' + node_id + ' failed', code: 503});
+                            }
                             mysql_one_time_query("UPDATE `webnode` SET `status` = 10 WHERE `ip` = ? AND `port` = ?", [node.ip, node.port], function(err, rows, fields){
                                 if (rows.affectedRows != 1) {
                                     return callback({success: false, message: 'Init new node failed', code: 503});
