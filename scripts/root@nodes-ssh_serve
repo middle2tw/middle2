@@ -180,6 +180,7 @@ function main()
             file_put_contents($log_file, date('c') . " [restart-web] code={$ret} error: " . json_encode($ret) . "(spent: $spent)\n", FILE_APPEND);
 
             echo json_encode($ret);
+            exit($ret['code']);
             break;
         }
 
