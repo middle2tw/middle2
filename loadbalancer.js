@@ -378,7 +378,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
                 var result = '';
                 stream.on('data', function(chunk){ result += chunk; });
                 stream.on('exit', function(code){
-                    if (!code) {
+                    if (code) {
                         ssh2.end();
                         return callback({success: false, message: 'clone project ' + project.name + ' to node ' + node_id + ' failed', code: 503});
                     }
@@ -386,7 +386,7 @@ lb_core._initProjectOnNode = function(project, node, callback){
                         var result = '';
                         stream.on('data', function(chunk){ result += chunk; });
                         stream.on('exit', function(code){
-                            if (!code) {
+                            if (code) {
                                 ssh2.end();
                                 return callback({success: false, message: 'start web project ' + project.name + ' to node ' + node_id + ' failed', code: 503});
                             }
