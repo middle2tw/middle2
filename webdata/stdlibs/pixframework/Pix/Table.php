@@ -97,6 +97,7 @@ abstract class Pix_Table
     protected $_filters = array();
     public static $_verify = true;
     public static $_save_memory = false;
+    protected $_table_save_memory = false;
 
     /**
      *  記錄哪些東西要 Cache
@@ -576,6 +577,33 @@ abstract class Pix_Table
 	return new $rowClass($conf);
     }
 
+
+    /**
+     * bulk insert
+     *
+     * @param array $keys
+     * @param array $values_list
+     * @param array $options (optional)
+     * @static
+     * @access public
+     * @return void
+     */
+    public static function bulkInsert($keys, $values_list, $options = array())
+    {
+        $table = self::getTable();
+        if (!$values_list) {
+            return;
+        }
+        if (array_key_exists('chunk', $options)) {
+            foreach (array_chunk($values_list, intval($options['chunk'])) as $chunk_list) {
+                $table->getDb()->bulkInsert($table, $keys, $chunk_list, $options);
+            }
+            return true;
+        }
+
+        return $table->getDb()->bulkInsert($table, $keys, $values_list, $options);
+    }
+
     /**
      * insert 新增一筆資料進資料庫(立刻會存進資料庫)
      * 
@@ -779,6 +807,11 @@ abstract class Pix_Table
 	$this->_table_cache = true;
     }
 
+    public function setTableSaveMemory($save_memory)
+    {
+        $this->_table_save_memory = $save_memory;
+    }
+
     /**
      * disableTableCache 停用 Table Cache
      *
@@ -820,7 +853,7 @@ abstract class Pix_Table
 	    $data = $cache->load($cache_key);
             if (is_null($data)) {
                 // write to array cache
-                if (!self::$_save_memory) {
+                if (!self::$_save_memory and !$this->_table_save_memory) {
                     $this->_cache_rows[$array_cache_key] = null;
                 }
 		return null;
@@ -832,7 +865,7 @@ abstract class Pix_Table
             $data = $data['data'];
 
             // write to array cache
-            if (!self::$_save_memory) {
+            if (!self::$_save_memory and !$this->_table_save_memory) {
                 $this->_cache_rows[$array_cache_key] = $data;
             }
 	}
@@ -868,7 +901,7 @@ abstract class Pix_Table
 	}
 
 	// memory cache
-        if (!self::$_save_memory) {
+        if (!self::$_save_memory and !$this->_table_save_memory) {
             $array_cache_key = implode('&', array_map('urlencode', $primary_values));
             $this->_cache_rows[$array_cache_key] = $data;
 	}
@@ -1067,13 +1100,13 @@ abstract class Pix_Table
         if (is_null($table_name)) {
             while (true) {
                 $table_name = 'Pix_Table_EmptyTable_' . crc32(uniqid());
-                if (!class_exists($table_name)) {
+                if (!class_exists($table_name, false)) {
                     break;
                 }
             }
         }
 
-        if (class_exists($table_name)) {
+        if (class_exists($table_name, false)) {
             throw new Pix_Table_Exception("newEmptyTable failed, {$table_name} is existed.");
         }
 

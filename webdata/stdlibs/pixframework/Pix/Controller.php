@@ -116,6 +116,7 @@ class Pix_Controller
      */
     public function redirect($url, $code = 302)
     {
+        $url = preg_replace_callback('#[^A-Za-z0-9&/=\#?()%]*#', function($matches) { return urlencode($matches[0]); }, $url);
         Pix_HttpResponse::redirect($url, $code);
         return $this->noview();
     }
@@ -236,10 +237,12 @@ class Pix_Controller
 
             $className = ucfirst($controllerName) . 'Controller';
             $file = $baseDir . '/controllers/' . $className . '.php';
-            if (file_exists($file)) {
-                include($file);
-            } else {
-                throw new Pix_Controller_Dispatcher_Exception('404 Controller file not found: ' . $file);
+            if (!class_exists($className, false)) {
+                if (file_exists($file)) {
+                    include($file);
+                } else {
+                    throw new Pix_Controller_Dispatcher_Exception('404 Controller file not found: ' . $file);
+                }
             }
 
             if (!class_exists($className)) {

@@ -30,12 +30,18 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
         return array('force_master', 'immediate_consistency', 'check_table');
     }
 
-    protected function _getLink($type = 'master')
+    protected function _getLink($type = 'master', $with_ping = true)
     {
-        if (array_key_exists('master', $this->_link_pools) and ($link = $this->_link_pools['master']) and $this->_link_pool_version == self::$_connect_version and @$link->ping()) {
+        if (array_key_exists('master', $this->_link_pools) and ($link = $this->_link_pools['master']) and $this->_link_pool_version == self::$_connect_version) {
+            if ($with_ping) {
+                $link->ping();
+            }
             return $link;
         }
-        if (array_key_exists($type, $this->_link_pools) and ($link = $this->_link_pools[$type])  and $this->_link_pool_version == self::$_connect_version and @$link->ping()) {
+        if (array_key_exists($type, $this->_link_pools) and ($link = $this->_link_pools[$type])  and $this->_link_pool_version == self::$_connect_version) {
+            if ($with_ping) {
+                $link->ping();
+            }
             return $link;
         }
 
@@ -143,12 +149,12 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             $starttime = microtime(true);
             $res = $link->query($sql);
             $this->insert_id = $link->insert_id;
-            $this->affected_rows = $link->affected_rows;
             $delta = microtime(true) - $starttime;
+            $short_sql = mb_strimwidth($sql, 0, 512, "...len=" . strlen($sql));
             if (array_key_exists(Pix_Table::LOG_QUERY, Pix_Table::$_log_groups) and Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
-                Pix_Table::debug(sprintf("[%s-%s](%f)%s", strval($link->host_info), $type, $delta, $sql));
+                Pix_Table::debug(sprintf("[%s-%s](%f)%s", strval($link->host_info), $type, $delta, $short_sql));
             } elseif (($t = Pix_Table::getLongQueryTime()) and $delta > $t) {
-                Pix_Table::debug(sprintf("[%s-%s](%f)%s", strval($link->host_info), $type, $delta, $sql));
+                Pix_Table::debug(sprintf("[%s-%s](%f)%s", strval($link->host_info), $type, $delta, $short_sql));
             }
 
             if ($res === false) {
@@ -191,11 +197,6 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
     public function getLastInsertId($table = null)
     {
         return $this->insert_id;
-    }
-
-    public function getAffectedRows($table = null)
-    {
-        return $this->affected_rows;
     }
 
 }

@@ -48,6 +48,11 @@ class Pix_Session_Adapter_Cookie extends Pix_Session_Adapter
         return $this->hasOption('cookie_domain') ? $this->getOption('cookie_domain') : $_SERVER['HTTP_HOST'];
     }
 
+    protected function _getSecure()
+    {
+        return $this->hasOption('secure') ? $this->getOption('secure') : false;
+    }
+
     protected function _getTimeout()
     {
         return $this->hasOption('timeout') ? $this->getOption('timeout') : null;
@@ -63,7 +68,8 @@ class Pix_Session_Adapter_Cookie extends Pix_Session_Adapter
             $sig . '|' . $data,
             $this->_getTimeout() ? (time() + $this->_getTimeout()) : null,
             $this->_getCookiePath(),
-            $this->_getCookieDomain()
+            $this->_getCookieDomain(),
+            $this->_getSecure()
         );
     }
 
