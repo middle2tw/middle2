@@ -113,6 +113,20 @@ class FirewallGenerator
         foreach ($private_memcache_servers as $ip) {
             $this->_addServer($ip, 'private_memcache');
         }
+
+        // mysql_old, pgsql_old for migration
+        foreach (Hisoku::getIPsByGroup('mysql_old') as $ip) {
+            $this->_addServer($ip, 'mysql_old');
+        }
+        foreach (Hisoku::getIPsByGroup('pgsql_old') as $ip) {
+            $this->_addServer($ip, 'pgsql_old');
+        }
+        foreach (Hisoku::getIPsByGroup('mysql_new') as $ip) {
+            $this->_addServer($ip, 'mysql_new');
+        }
+        foreach (Hisoku::getIPsByGroup('pgsql_new') as $ip) {
+            $this->_addServer($ip, 'pgsql_new');
+        }
     }
 
     public function getAllowRules()
@@ -143,6 +157,12 @@ class FirewallGenerator
             ),
             'mysql' => array(
                 array('3306', array('loadbalancer', 'mainpage', 'node')),
+            ),
+            'mysql_old' => array(
+                array('3306', array('mysql_new')),
+            ),
+            'pgsql_old' => array(
+                array('5432', array('pgsql_new')),
             ),
             'pgsql' => array(
                 array('5432', array('loadbalancer', 'mainpage', 'node')),
