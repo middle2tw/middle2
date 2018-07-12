@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:jessie
 RUN apt-get update
 RUN apt-get install -y git ca-certificates locales curl debian-archive-keyring multiarch-support g++ gcc make dpkg-dev libcurl3
 RUN echo 'zh_TW.UTF-8 UTF-8' >> /etc/locale.gen
