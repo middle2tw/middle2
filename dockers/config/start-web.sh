@@ -7,7 +7,9 @@ export HOME=/srv/web
 cd /srv/web
 
 if [ -f "/srv/web/Procfile" ]; then
-    `cat /srv/web/Procfile | grep '^web:' |  awk '{print substr($0, 5); }' | sed "s/\\$PORT/$PORT/"` > ${LOG_FILE} 2>&1 &
+    CMD=`cat /srv/web/Procfile | grep '^web:' |  awk '{print substr($0, 5);}' | sed "s/\\$PORT/$PORT/"`
+    echo "$CMD" > ${LOG_FILE}
+    echo "$CMD" | sh >> ${LOG_FILE} 2>&1 &
 elif [ -f "/srv/web/manage.py" ]; then
  # python django
     python ./manage.py runserver 0.0.0.0:80 --noreload > ${LOG_FILE} 2>&1 &
