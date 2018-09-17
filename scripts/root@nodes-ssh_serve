@@ -173,7 +173,7 @@ function main()
 
         $ret = exec_m2("docker exec c-{$id} mkdir /srv/logs");
         file_put_contents($log_file, date('c') . " [restart-web] start-web.sh\n", FILE_APPEND);
-        $ret = exec_m2("docker exec c-{$id} env -i " . implode(" ", $params) . " /start-web.sh", $ret);
+        $ret = exec_m2("docker exec c-{$id} env " . implode(" ", $params) . " /start-web.sh", $ret);
         if ($ret['code']) {
             $ret['error'] = true;
             $ret['message'] = "docker exec start-web failed";
