@@ -44,7 +44,6 @@ while ($domain = fgets($fp)) {
 }
 
 $fp = fopen('dns-domains.txt', 'r');
-$time = 0;
 while ($domains = fgets($fp)) {
     $domains = explode(' ', trim($domains));
     $first_domain = $domains[0];
