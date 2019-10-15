@@ -26,7 +26,7 @@ else
     env | awk -F '=' '{print "env[" $1 "]=\"" substr($0, index($0, "=") + 1) "\""}' > /srv/logs/env.conf
 
     # start php-fpm
-    /usr/sbin/php5-fpm
+    /usr/sbin/php-fpm7.3
 
     # start apache
     /usr/sbin/apache2ctl start

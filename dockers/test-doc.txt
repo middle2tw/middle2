@@ -1,0 +1,38 @@
+offline 測試
+============
+* docker build . -t middle2-new
+* docker create --name test-new middle2-new init
+* docker start test-new
+* docker exec test-new  mkdir -p /srv/web /srv/logs
+* docker exec test-new  find /srv/web/ -not -path  '/srv/web/node_modules/*' -not -path '/srv/web/node_modules' -not -path '/srv/web/' -delete
+
+* # nodejs
+* git clone git@middle2.com:taitung-feng-131489; cd ./taitung-feng-131489
+* git archive --format=tar master | docker exec -i test-new tar -xf - -C /srv/web/
+* docker cp /srv/code/hisoku/dockers/generated-config/* test-new:/
+* docker exec -i -t test-new bash
+  * sh /start-web.sh
+  * curl http://localhost/
+
+* # php
+* git clone git@github.com:middle2tw/helloworld-php; cd ./helloworld-php
+* git archive --format=tar master | docker exec -i test-new tar -xf - -C /srv/web/
+* docker exec -i -t test-new bash
+  * sh /start-web.sh
+  * curl http://localhost/
+
+test-by-project
+===============
+* docker tag middle2-new docker-registry-linode-1.middle2.com:5000/middle2-new
+* docker  --config /srv/config/docker push docker-registry-linode-1.middle2.com:5000/middle2-new
+* sudo ssh git@middle2.com build-docker-project-image matsu-lang-307312.git clean-build base=middle2-new
+    * check https://matsu-lang-307312.middle2.me/
+    * Release and try again
+* docker pull docker-registry-linode-1.middle2.com:5000/middle2-new
+
+
+reset
+=====
+docker stop test-new
+docker rm test-new
+docker rmi middle2-new
