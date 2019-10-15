@@ -29,7 +29,7 @@ test-by-project
     * check https://matsu-lang-307312.middle2.me/
     * Release and try again
 * docker pull docker-registry-linode-1.middle2.com:5000/middle2-new
-
+    * on every nodes
 
 reset
 =====
