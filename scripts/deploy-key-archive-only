@@ -52,7 +52,7 @@ function main()
         buildDockerProjectBase($args);
         return;
     } elseif (!in_array($command, array('git-upload-archive'))) {
-        return error('Unknown command: ' . getenv('SSH_ORIGINAL_COMMAND'));
+        return error("Unknown command: {$command} (full: " . getenv('SSH_ORIGINAL_COMMAND') . ")");
     }
 
     $project_name = trim($args, "' ");
