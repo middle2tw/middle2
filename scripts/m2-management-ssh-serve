@@ -18,6 +18,9 @@ function updateKeys() {
     $content = '### generated at ' . date('Y/m/d H:i:s') . "\n";
     $content .= "# deploy-keys\n";
     foreach ($deploy_keys as $deploy_key) {
+        if (trim($deploy_key) == '') {
+            continue;
+        }
         $content .= 'command="/srv/code/hisoku/scripts/deploy-key-archive-only",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ' . $deploy_key . "\n";
     }
     $content .= "# m2-management-ssh-serve\n";
