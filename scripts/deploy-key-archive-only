@@ -11,7 +11,7 @@ function error($message)
 function buildDockerProjectBase($args)
 {
     $project_name = trim($args, "' ");
-    if (preg_match('#^(.*)\.git( clean-build)?$#', $project_name, $matches)) {
+    if (preg_match('#^(.*)\.git( clean-build)?( base=.*)?$#', $project_name, $matches)) {
         $project_name = $matches[1];
     }
 
@@ -29,7 +29,13 @@ function buildDockerProjectBase($args)
         $clean_build = false;
     }
 
-    $ret = GitHelper::buildDockerProjectBase($project, 'HEAD', $clean_build);
+    if ($matches[3]) {
+        $base = explode('=', $matches[3])[1];
+    } else {
+        $base = 'middle2';
+    }
+
+    $ret = GitHelper::buildDockerProjectBase($project, 'HEAD', $clean_build, $base);
     echo "success:{$ret}";
     exit;
 }
