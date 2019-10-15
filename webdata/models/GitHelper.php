@@ -41,7 +41,7 @@ class GitHelper
      * @access public
      * @return void
      */
-    public static function buildDockerProjectBase($project, $branch = 'HEAD', $clean_build = false)
+    public static function buildDockerProjectBase($project, $branch = 'HEAD', $clean_build = false, $base = 'middle2')
     {
         $absolute_path = getenv('HOME') . '/git/' . $project->id . '.git';
         if (!file_exists($absolute_path)) {
@@ -93,7 +93,7 @@ class GitHelper
 
         } catch (Exception $e) {
             // image is not on remote
-            self::system_without_error("docker create --name container-{$project->name} middle2 init");
+            self::system_without_error("docker create --name container-{$project->name} {$base} init");
         }
 
         self::system_without_error("docker start container-{$project->name}");
