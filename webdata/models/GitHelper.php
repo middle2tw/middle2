@@ -123,7 +123,7 @@ class GitHelper
 
             try {
                 if ($action['file'] == 'requirements.txt') {
-                    self::system_without_error("docker exec --tty container-{$project->name} pip install --requirement /srv/web/requirements.txt");
+                    self::system_without_error("docker exec --tty container-{$project->name} pip3 install --requirement /srv/web/requirements.txt");
                 } elseif ($action['file'] == 'Gemfile') {
                     self::system_without_error("docker exec --tty container-{$project->name} sh -c 'cd /srv/web; gem install bundler'");
                     self::system_without_error("docker exec --tty container-{$project->name} sh -c 'cd /srv/web; bundle install --without development test'");
