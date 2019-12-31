@@ -56,13 +56,51 @@ class ProjectRow extends Pix_Table_Row
             return $node;
         }
 
-        $free_nodes_count = count(WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)));
-        if (!$free_nodes_count) {
-            // TODO; log it
-            throw new Exception('No free nodes');
+        $project_config = json_decode($this->config);
+        $project_group = property_exists($project_config, 'node-group') ? $project_config->{'node-group'} : '';
+        
+        $node_pools = array();
+        foreach (WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)) as $webnode) {
+            $node_pools[] = $webnode;
         }
 
-        if (!$random_node = WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED))->offset(rand(0, $free_nodes_count - 1))->first()) {
+        // random pick nodes, if project has node-group, pick same group webnodes first
+        // if project has no node-group, pick webnodes without group first
+        usort($node_pools, function($a, $b) use ($project_group) {
+            $a_config = json_decode($a->config);
+            $b_config = json_decode($b->config);
+            $a_group = property_exists($a_config, 'node-group') ? $a_config->{'node-group'} : '';
+            $b_group = property_exists($b_config, 'node-group') ? $b_config->{'node-group'} : '';
+
+            if ($project_group) {
+                // same group first
+                if ($project_group == $a_group) {
+                    return -1;
+                }
+                if ($project_group == $b_group) {
+                    return 1;
+                }
+                // then no group
+                if ($a_group == '') {
+                    return -1;
+                }
+                if ($b_group == '') {
+                    return 1;
+                }
+            } else {
+                // no group first
+                if ($a_group == '') {
+                    return -1;
+                }
+                if ($b_group == '') {
+                    return 1;
+                }
+            }
+            return rand(-1, 1);
+        });
+        $random_node = array_shift($node_pools);
+            
+        if (!$random_node) {
             throw new Exception('free node not found');
         }
 
