@@ -426,6 +426,7 @@ class ProjectController extends Pix_Controller
 
     public function cronlogAction()
     {
+        ini_set('memory_limit', '2g');
         list(, /*project*/, /*cronlog*/, $name) = explode('/', $this->getURI());
         if (!$project = Project::find_by_name($name)) {
             return $this->alert('Project not found', '/');
