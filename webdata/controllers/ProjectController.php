@@ -438,6 +438,35 @@ class ProjectController extends Pix_Controller
         }
     }
 
+    public function downloadcronlogAction()
+    {
+        ini_set('memory_limit', '2g');
+        list(, /*project*/, /*downloadcronlog*/, $name, $start, $cron_id, $type) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        if (!$project->isMember($this->user)) {
+            return $this->alert('Project not found', '/');
+        }
+        $logs = array();
+        if (!$cronjob = $project->cronjobs->find($cron_id)) {
+            return $this->alert('Cronjob not found', '/');
+        }
+        header('Content-Type: text/plain');
+        foreach (json_decode($cronjob->getEAV('recent_logs')) ?: array() as $log) {
+            if ($log->status->start != $start) {
+                continue;
+            }
+            if ($type == 'stdout') {
+                echo $log->stdout;
+            } else {
+                echo $log->stderr;
+            }
+        }
+        return $this->noview();
+    }
+
     public function editcronjobAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {

@@ -25,8 +25,9 @@ Spent time:<?= $log->status->spent ?> second</br>
 node: <?= long2ip($log->node[0]) ?> <?= $log->node[1] ?><br>
 <?php } ?>
 Return status: <?= $log->status->code ?><br>
-Stdout: <br>
+Stdout: <a href="/project/downloadcronlog/<?= $this->project->name ?>/<?= $log->status->start ?>/<?= $log->cronjob->id ?>/stdout">download</a>(size: <?= strlen($log->stdout) ?>)<br>
 <pre><?= $this->escape(mb_strimwidth($log->stdout, 0, 4096, '...', 'UTF-8')) ?></pre>
+Stderr: <a href="/project/downloadcronlog/<?= $this->project->name ?>/<?= $log->status->start ?>/<?= $log->cronjob->id ?>/stderr">download</a>(size: <?= strlen($log->stderr) ?>)<br>
 Stderr: <br>
 <pre><?= $this->escape(mb_strimwidth($log->stderr, 0, 4096, '...', 'UTF-8')) ?></pre>
 
