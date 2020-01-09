@@ -77,6 +77,9 @@ class UserRow extends Pix_Table_Row
             'user_id' => $this->id,
             'is_admin' => 1,
         ));
+        if ($this->getEAV('try-user')) {
+            $project->update(array('config' => json_encode(array('node-group' => 'try'))));
+        }
 
         return $project;
     }
