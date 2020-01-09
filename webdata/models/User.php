@@ -117,6 +117,11 @@ class UserRow extends Pix_Table_Row
 
         return Addon_MySQLDB::search(1)->searchIn('project_id', $project_ids);
     }
+
+    public function getEAVs()
+    {
+        return EAV::search(array('table' => 'User', 'id' => $this->id));
+    }
 }
 
 class User extends Pix_Table
@@ -141,5 +146,9 @@ class User extends Pix_Table
 
         $this->_relations['keys'] = array('rel' => 'has_many', 'type' => 'UserKey', 'foreign_key' => 'user_id', 'delete' => true);
         $this->_relations['project_members'] = array('rel' => 'has_many', 'type' => 'ProjectMember', 'foreign_key' => 'user_id');
+
+        $this->_hooks['eavs'] = array('get' => 'getEAVs');
+
+        $this->addRowHelper('Pix_Table_Helper_EAV', array('getEAV', 'setEAV'));
     }
 }
