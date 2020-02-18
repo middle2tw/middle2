@@ -86,7 +86,22 @@ class Addon_MySQLDB extends Pix_Table
             return;
         }
 
-        $ips = Hisoku::getMysqlServers();
+        $project_config = json_decode($project->config);
+        $project_group = property_exists($project_config, 'node-group') ? $project_config->{'node-group'} : '';
+        if ($project_group and $ips = Machine::getIPsByGroup('mysql_' . $project_group)) {
+        } else {
+            $ips = array();
+            foreach (Machine::getMachinesByGroup('mysql') as $machine) {
+                $groups = $machine->getGroups();
+                foreach ($groups as $group) {
+                    if (strpos($group, 'mysql_') === 0) { // skip mysql with group
+                        continue 2;
+                    }
+                }
+                $ips[] = long2ip($machine->ip);
+            }
+        }
+
         $host = array_pop($ips);
         $database = 'user_' . $project->name;
 
