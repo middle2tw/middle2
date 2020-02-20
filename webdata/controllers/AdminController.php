@@ -242,10 +242,12 @@ class AdminController extends Pix_Controller
 
         if ($machine = Machine::find(intval($_GET['machine_id']))) {
             $machine->update(array(
+                'name' => strval($_POST['name']),
                 'ip' => ip2long($_REQUEST['ip']),
             ));
         } else {
             $machine = Machine::insert(array(
+                'name' => strval($_POST['name']),
                 'ip' => ip2long($_REQUEST['ip']),
             ));
         }
