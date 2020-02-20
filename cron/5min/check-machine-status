@@ -68,7 +68,7 @@ foreach (Machine::search(1) as $machine) {
 if ($messages) {
     $content = '';
     foreach ($messages as $message) {
-        $content .= sprintf("%s (%s) %s\n", long2ip($message[0]->ip), $message[0]->groups, $message[1]);
+        $content .= sprintf("%s %s (%s) %s\n", Machine::find_by_ip($message[0]->ip)->name, long2ip($message[0]->ip), $message[0]->groups, $message[1]);
         if ($status = $message[2]) {
             $content .= "https://" . getenv("MAINPAGE_DOMAIN") . "/admin/machinelog/{$status->machine_id}/{$status->updated_at}\n";
         }
