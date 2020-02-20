@@ -2,7 +2,9 @@
 $grouped_nodes = WebNode::getGroupedNodes();
 $projects = array();
 $project_members = array();
+$machine_names = array();
 foreach ($grouped_nodes as $ip => $nodes) {
+    $machine_names[$ip] = Machine::find_by_ip($ip)->name;
     foreach ($nodes as $node) {
         if ($project = $node->project) {
             $projects[$project->id] = $project->id;
@@ -34,7 +36,7 @@ $this->title = 'NodeServers Info :: ';
                 <li>
                 <a href="#node-<?= $ip ?>">
                     <i class="icon-chevron-right"></i>
-                    <?= long2ip($ip) ?>(<?= count($nodes) ?>)
+                    <?= $this->escape($machine_names[$ip]) ?>(<?= count($nodes) ?>)
                 </a>
                 </li>
                 <?php } ?>
@@ -44,7 +46,8 @@ $this->title = 'NodeServers Info :: ';
             <!--Body content-->
             <?php foreach ($grouped_nodes as $ip => $nodes) { ?>
             <div id="node-<?= $ip ?>">
-                <h3><?= long2ip($ip) ?>(<?= count($nodes) ?>)</h3>
+                <h3><?= $this->escape($machine_names[$ip]) ?>(<?= count($nodes) ?>)</h3>
+                <h4>IP: <?= $this->escape(long2ip($ip)) ?></h4>
                 <form method="post" action="/admin/nodeserverbulkaddport/<?= long2ip($ip) ?>">
                     <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
                 補滿到 <input type="text" value="20" name="count" class="input-small"> 台機器
