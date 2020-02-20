@@ -23,6 +23,7 @@ class Machine extends Pix_Table
         $this->_rowClass = 'MachineRow';
 
         $this->_columns['machine_id'] = array('type' => 'int', 'auto_increment' => true);
+        $this->_columns['name'] = array('type' => 'varchar', 'size' => 32);
         $this->_columns['ip'] = array('type' => 'int', 'unsigned' => true);
         // TODO: 之後搬出另一個 model
         $this->_columns['groups'] = array('type' => 'text');
