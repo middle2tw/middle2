@@ -41,7 +41,7 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
         $addon_member->addon->host = $ip;
         $addon_member->username = getenv('MYSQL_USERDB_USER');
         $addon_member->password = getenv('MYSQL_USERDB_PASS');
-        $addon_member->verbose = 'UserDB';
+        $addon_member->verbose = Machine::find_by_ip(ip2long($ip))->name;
         $addon_members[] = $addon_member;
     }
 
