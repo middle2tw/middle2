@@ -307,6 +307,8 @@ function main()
             break;
         }
 
+        exec_m2("docker network disconnect -f bridge c-{$id}");
+
         echo json_encode(array('error' => false, 'port' => $port));
 
         $spent = microtime(true) - $start;
