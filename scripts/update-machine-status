@@ -40,9 +40,72 @@ foreach (explode("\n", trim(file_get_contents('/proc/meminfo'))) as $line) {
     list($key, $value) = array_map('trim', explode(':', $line));
     $ret->memory->{$key} = $value;
 }
+// docker memory info
+$fp = popen("docker ps --format '{{json .}}'", 'r');
+$container_pid = array();
+while ($line = fgets($fp)) {
+        $container_obj = json_decode($line);
+
+        $pid = trim(`docker inspect -f '{{.State.Pid}}' {$container_obj->Names}`);
+        $container_obj->pid = $pid;
+        $container_pid[$container_obj->Names] = $container_obj;
+}
+fclose($fp);
+
+$fp = popen("ps -eo pid,ppid,%mem,%cpu,size,vsize,rssize,cmd --sort=-%mem", "r");
+//   PID  PPID %MEM %CPU  SIZE    VSZ   RSS CMD
+$columns = preg_split('/\s+/', trim(fgets($fp)));
+$pid_children = new StdClass;
+$pid_data = array();
+while (false !== ($line = fgets($fp))) {
+        $rows = preg_split('/\s+/', trim($line), count($columns));
+        $values = array_combine($columns, $rows);
+
+        if (!property_exists($pid_children, $values['PPID'])) {
+                $pid_children->{$values['PPID']} = array();
+        }
+        $pid_children->{$values['PPID']}[] = $values['PID'];
+        $pid_data[$values['PID']] = $values;
+}
+fclose($fp);
+
+uasort($pid_data, function($a, $b) {
+        return $b['RSS'] - $a['RSS'];
+});
+
+$get_all_children = null;
+$get_all_children = function($pid) use (&$pid_children, &$get_all_children) {
+        if (!property_exists($pid_children, $pid)) {
+                return array();
+        }
+        $ret = $pid_children->{$pid};
+        foreach ($pid_children->{$pid} as $child_pid) {
+                $ret = array_merge($ret, $get_all_children($child_pid));
+        }
+        return $ret;
+};
+
+foreach ($container_pid as $cid => $obj) {
+        $pid = $obj->pid;
+        $ppid = $pid_data[$pid]['PPID'];
+        $pids = $get_all_children($ppid);
+
+        $total = 0;
+        $process_data = array();
+        foreach ($pids as $pid) {
+                $total += $pid_data[$pid]['RSS'];
+                $process_data[] = $pid_data[$pid];
+        }
+        $container_pid[$cid]->total_memory = $total;
+        $container_pid[$cid]->process_data = $process_data;
+}
+uasort($container_pid, function($a, $b) { return $b->total_memory - $a->total_memory; });
+$ret->docker_container_memory = $container_pid;
 
 // TODO: 增加 firewall 是否有正常跑起來的資訊
 $curl = curl_init('https://' . getenv('MAINPAGE_DOMAIN') . '/api/updatemachinestatus');
 curl_setopt($curl, CURLOPT_POSTFIELDS, 'status=' . urlencode(json_encode($ret, JSON_UNESCAPED_UNICODE)));
 curl_exec($curl);
 curl_close($curl);
+
+
