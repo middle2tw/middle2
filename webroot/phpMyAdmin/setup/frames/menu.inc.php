@@ -5,19 +5,29 @@
  *
  * @package PhpMyAdmin-Setup
  */
+use PhpMyAdmin\Url;
+use PhpMyAdmin\Config\Forms\Setup\SetupFormList;
 
 if (!defined('PHPMYADMIN')) {
     exit;
 }
 
-$separator = PMA_get_arg_separator('html');
-?>
-<ul>
-    <li><a href="index.php"><?php echo __('Overview') ?></a></li>
-    <li><a href="?page=form<?php echo $separator ?>formset=Features"><?php echo __('Features') ?></a></li>
-    <li><a href="?page=form<?php echo $separator ?>formset=Sql_queries"><?php echo __('SQL queries') ?></a></li>
-    <li><a href="?page=form<?php echo $separator ?>formset=Navi_panel"><?php echo __('Navigation panel') ?></a></li>
-    <li><a href="?page=form<?php echo $separator ?>formset=Main_panel"><?php echo __('Main panel') ?></a></li>
-    <li><a href="?page=form<?php echo $separator ?>formset=Import"><?php echo __('Import') ?></a></li>
-    <li><a href="?page=form<?php echo $separator ?>formset=Export"><?php echo __('Export') ?></a></li>
-</ul>
+$formset_id = isset($_GET['formset']) ? $_GET['formset'] : null;
+
+echo '<ul>';
+echo '<li><a href="index.php' , Url::getCommon() , '"'
+    , ($formset_id === null ? ' class="active' : '')
+    , '">' , __('Overview') , '</a></li>';
+
+$ignored = array('Config', 'Servers');
+foreach (SetupFormList::getAll() as $formset) {
+    if (in_array($formset, $ignored)) {
+        continue;
+    }
+    $form_class = SetupFormList::get($formset);
+    echo '<li><a href="index.php' , Url::getCommon(array('page' => 'form', 'formset' => $formset)) , '" '
+        , ($formset_id === $formset ? ' class="active' : '')
+        , '">' , $form_class::getName() , '</a></li>';
+}
+
+echo '</ul>';

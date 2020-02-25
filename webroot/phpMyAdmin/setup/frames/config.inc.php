@@ -6,43 +6,34 @@
  * @package PhpMyAdmin-Setup
  */
 
+use PhpMyAdmin\Config\FormDisplayTemplate;
+use PhpMyAdmin\Core;
+use PhpMyAdmin\Setup\ConfigGenerator;
+
 if (!defined('PHPMYADMIN')) {
     exit;
 }
 
-/**
- * Core libraries.
- */
-require_once './libraries/config/FormDisplay.class.php';
-require_once './setup/lib/index.lib.php';
-require_once './setup/lib/ConfigGenerator.class.php';
+echo '<h2>' , __('Configuration file') , '</h2>';
 
-$config_readable = false;
-$config_writable = false;
-$config_exists = false;
-check_config_rw($config_readable, $config_writable, $config_exists);
-?>
-<h2><?php echo __('Configuration file') ?></h2>
-<?php PMA_displayFormTop('config.php'); ?>
-<input type="hidden" name="eol" value="<?php echo htmlspecialchars(PMA_ifSetOr($_GET['eol'], 'unix')) ?>" />
-<?php PMA_displayFieldsetTop('', '', null, array('class' => 'simple')); ?>
-<tr>
-    <td>
-        <textarea cols="50" rows="20" name="textconfig" id="textconfig" spellcheck="false"><?php
-            echo htmlspecialchars(ConfigGenerator::getConfigFile())
-        ?></textarea>
-    </td>
-</tr>
-<tr>
-    <td class="lastrow" style="text-align: left">
-        <input type="submit" name="submit_download" value="<?php echo __('Download') ?>" class="green" />
-        <input type="submit" name="submit_save" value="<?php echo __('Save') ?>"<?php
-if (!$config_writable) {
-    echo ' disabled="disabled"';
-} ?> />
-    </td>
-</tr>
-<?php
-PMA_displayFieldsetBottomSimple();
-PMA_displayFormBottom();
-?>
+echo FormDisplayTemplate::displayFormTop('config.php');
+echo '<input type="hidden" name="eol" value="'
+    , htmlspecialchars(Core::ifSetOr($_GET['eol'], 'unix')) , '" />';
+echo FormDisplayTemplate::displayFieldsetTop('config.inc.php', '', null, array('class' => 'simple'));
+echo '<tr>';
+echo '<td>';
+echo '<textarea cols="50" rows="20" name="textconfig" '
+    , 'id="textconfig" spellcheck="false">';
+echo htmlspecialchars(ConfigGenerator::getConfigFile($GLOBALS['ConfigFile']));
+echo '</textarea>';
+echo '</td>';
+echo '</tr>';
+echo '<tr>';
+echo '<td class="lastrow" style="text-align: left">';
+echo '<input type="submit" name="submit_download" value="'
+    , __('Download') , '" class="green" />';
+echo '</td>';
+echo '</tr>';
+
+echo FormDisplayTemplate::displayFieldsetBottom(false);
+echo FormDisplayTemplate::displayFormBottom();

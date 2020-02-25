@@ -1,7 +1,7 @@
 <?php
 
 if (!class_exists('Pix_Session')) {
-    include(__DIR__ . '/../../../webdata/init.inc.php');
+    include(__DIR__ . '/../../webdata/init.inc.php');
 
     if (!getenv('SESSION_KEY')) {
         putenv('SESSION_KEY=MIDDLE2_SESSION');
@@ -28,9 +28,9 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
     $addon_member = new StdClass;
     $addon_member->addon = new StdClass;
     $addon_member->addon->host = getenv('MYSQL_HOST');
+    $addon_member->addon->database = getenv('MYSQL_DATABASE');
     $addon_member->username = getenv('MYSQL_USER');
     $addon_member->password = getenv('MYSQL_PASS');
-    $addon_member->addon->database = getenv('MYSQL_DATABASE');
     $addon_member->verbose = 'Main';
 
     $addon_members = array($addon_member);
@@ -39,6 +39,7 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
         $addon_member = new StdClass;
         $addon_member->addon = new StdClass;
         $addon_member->addon->host = $ip;
+        $addon_member->addon->database = '';
         $addon_member->username = getenv('MYSQL_USERDB_USER');
         $addon_member->password = getenv('MYSQL_USERDB_PASS');
         $addon_member->verbose = Machine::find_by_ip(ip2long($ip))->name;
@@ -60,12 +61,12 @@ foreach ($addon_members as $addon_member) {
     /* Server parameters */
     $cfg['Servers'][$i]['host'] = $addon_member->addon->host;
     $cfg['Servers'][$i]['user'] = $addon_member->username;
-    if ($addon_member->project) {
+    if (property_exists($addon_member, 'project') and $addon_member->project) {
         $cfg['Servers'][$i]['verbose'] = $addon_member->project->name . '(' . $addon_member->project->getEAV('note') . ')';
     } elseif ($addon_member->verbose) {
         $cfg['Servers'][$i]['verbose'] = $addon_member->verbose;
     }
-    if ($addon_member->readonly) {
+    if (property_exists($addon_member, 'readonly') and $addon_member->readonly) {
         $cfg['Servers'][$i]['verbose'] .= '(readonly)';
     }
     $cfg['Servers'][$i]['password'] = $addon_member->password;

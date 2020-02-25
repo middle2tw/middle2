@@ -1,1 +1,2197 @@
-var runtime={},server_time_diff,server_os,is_superuser,server_db_isLocal;AJAX.registerOnload("server_status_monitor.js",function(){var a=$("#js_data");server_time_diff=new Date().getTime()-a.find("input[name=server_time]").val();server_os=a.find("input[name=server_os]").val();is_superuser=a.find("input[name=is_superuser]").val();server_db_isLocal=a.find("input[name=server_db_isLocal]").val()});AJAX.registerTeardown("server_status_monitor.js",function(){$("#emptyDialog").remove();$("#addChartDialog").remove();$("a.popupLink").unbind("click");$("body").unbind("click")});AJAX.registerOnload("server_status_monitor.js",function(){$("<div />").attr("id","emptyDialog").appendTo("#page_content");$("#addChartDialog").appendTo("#page_content");$("a.popupLink").click(function(){var a=$(this);$("div."+a.attr("href").substr(1)).show().offset({top:a.offset().top+a.height()+5,left:a.offset().left}).addClass("openedPopup");return false});$("body").click(function(a){$("div.openedPopup").each(function(){var b=$(this);var c=b.offset();if(a.pageX<c.left||a.pageY<c.top||a.pageX>c.left+b.outerWidth()||a.pageY>c.top+b.outerHeight()){b.hide().removeClass("openedPopup")}})})});AJAX.registerTeardown("server_status_monitor.js",function(){$('a[href="#rearrangeCharts"], a[href="#endChartEditMode"]').unbind("click");$('div.popupContent select[name="chartColumns"]').unbind("change");$('div.popupContent select[name="gridChartRefresh"]').unbind("change");$('a[href="#addNewChart"]').unbind("click");$('a[href="#exportMonitorConfig"]').unbind("click");$('a[href="#importMonitorConfig"]').unbind("click");$('a[href="#clearMonitorConfig"]').unbind("click");$('a[href="#pauseCharts"]').unbind("click");$('a[href="#monitorInstructionsDialog"]').unbind("click");$('input[name="chartType"]').unbind("click");$('input[name="useDivisor"]').unbind("click");$('input[name="useUnit"]').unbind("click");$('select[name="varChartList"]').unbind("click");$('a[href="#kibDivisor"]').unbind("click");$('a[href="#mibDivisor"]').unbind("click");$('a[href="#submitClearSeries"]').unbind("click");$('a[href="#submitAddSeries"]').unbind("click");$("#chartPreset").unbind("click");$("#chartStatusVar").unbind("click");destroyGrid()});AJAX.registerOnload("server_status_monitor.js",function(){$("div.tabLinks").show();$("#loadingMonitorIcon").remove();if(!codemirror_editor){var u=$("#sqlquery");if(u.length>0&&typeof CodeMirror!="undefined"){codemirror_editor=CodeMirror.fromTextArea(u[0],{lineNumbers:true,matchBrackets:true,indentUnit:4,mode:"text/x-mysql"})}}$("#logAnalyseDialog .datetimefield").each(function(){PMA_addDatepicker($(this))});var p=null;var J=null;var n;var k="1.0";runtime={charts:null,refreshTimeout:null,refreshRequest:null,chartAI:0,redrawCharts:false,dataList:[],gridMaxPoints:20,xmin:-1,xmax:-1};var a=null;var I={columns:3,chartSize:{width:295,height:250},gridMaxPoints:"auto",gridRefresh:5000};var s=false;var H={qce:{title:PMA_messages.strQueryCacheEfficiency,series:[{label:PMA_messages.strQueryCacheEfficiency}],nodes:[{dataPoints:[{type:"statusvar",name:"Qcache_hits"},{type:"statusvar",name:"Com_select"}],transformFn:"qce"}],maxYLabel:0},qcu:{title:PMA_messages.strQueryCacheUsage,series:[{label:PMA_messages.strQueryCacheUsed}],nodes:[{dataPoints:[{type:"statusvar",name:"Qcache_free_memory"},{type:"servervar",name:"query_cache_size"}],transformFn:"qcu"}],maxYLabel:0}};var F=[];var d,c,C,A;var i=false;var j;switch(server_os){case"WINNT":$.extend(H,{cpu:{title:PMA_messages.strSystemCPUUsage,series:[{label:PMA_messages.strAverageLoad}],nodes:[{dataPoints:[{type:"cpu",name:"loadavg"}]}],maxYLabel:100},memory:{title:PMA_messages.strSystemMemory,series:[{label:PMA_messages.strTotalMemory,fill:true},{dataType:"memory",label:PMA_messages.strUsedMemory,fill:true}],nodes:[{dataPoints:[{type:"memory",name:"MemTotal"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"MemUsed"}],valueDivisor:1024}],maxYLabel:0},swap:{title:PMA_messages.strSystemSwap,series:[{label:PMA_messages.strTotalSwap,fill:true},{label:PMA_messages.strUsedSwap,fill:true}],nodes:[{dataPoints:[{type:"memory",name:"SwapTotal"}]},{dataPoints:[{type:"memory",name:"SwapUsed"}]}],maxYLabel:0}});break;case"Linux":$.extend(H,{cpu:{title:PMA_messages.strSystemCPUUsage,series:[{label:PMA_messages.strAverageLoad}],nodes:[{dataPoints:[{type:"cpu",name:"irrelevant"}],transformFn:"cpu-linux"}],maxYLabel:0},memory:{title:PMA_messages.strSystemMemory,series:[{label:PMA_messages.strBufferedMemory,fill:true},{label:PMA_messages.strUsedMemory,fill:true},{label:PMA_messages.strCachedMemory,fill:true},{label:PMA_messages.strFreeMemory,fill:true}],nodes:[{dataPoints:[{type:"memory",name:"Buffers"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"MemUsed"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"Cached"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"MemFree"}],valueDivisor:1024}],maxYLabel:0},swap:{title:PMA_messages.strSystemSwap,series:[{label:PMA_messages.strCachedSwap,fill:true},{label:PMA_messages.strUsedSwap,fill:true},{label:PMA_messages.strFreeSwap,fill:true}],nodes:[{dataPoints:[{type:"memory",name:"SwapCached"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"SwapUsed"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"SwapFree"}],valueDivisor:1024}],maxYLabel:0}});break;case"SunOS":$.extend(H,{cpu:{title:PMA_messages.strSystemCPUUsage,series:[{label:PMA_messages.strAverageLoad}],nodes:[{dataPoints:[{type:"cpu",name:"loadavg"}]}],maxYLabel:0},memory:{title:PMA_messages.strSystemMemory,series:[{label:PMA_messages.strUsedMemory,fill:true},{label:PMA_messages.strFreeMemory,fill:true}],nodes:[{dataPoints:[{type:"memory",name:"MemUsed"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"MemFree"}],valueDivisor:1024}],maxYLabel:0},swap:{title:PMA_messages.strSystemSwap,series:[{label:PMA_messages.strUsedSwap,fill:true},{label:PMA_messages.strFreeSwap,fill:true}],nodes:[{dataPoints:[{type:"memory",name:"SwapUsed"}],valueDivisor:1024},{dataPoints:[{type:"memory",name:"SwapFree"}],valueDivisor:1024}],maxYLabel:0}});break}var h={c0:{title:PMA_messages.strQuestions,series:[{label:PMA_messages.strQuestions}],nodes:[{dataPoints:[{type:"statusvar",name:"Questions"}],display:"differential"}],maxYLabel:0},c1:{title:PMA_messages.strChartConnectionsTitle,series:[{label:PMA_messages.strConnections},{label:PMA_messages.strProcesses}],nodes:[{dataPoints:[{type:"statusvar",name:"Connections"}],display:"differential"},{dataPoints:[{type:"proc",name:"processes"}]}],maxYLabel:0},c2:{title:PMA_messages.strTraffic,series:[{label:PMA_messages.strBytesSent},{label:PMA_messages.strBytesReceived}],nodes:[{dataPoints:[{type:"statusvar",name:"Bytes_sent"}],display:"differential",valueDivisor:1024},{dataPoints:[{type:"statusvar",name:"Bytes_received"}],display:"differential",valueDivisor:1024}],maxYLabel:0}};if(server_db_isLocal){h.c3=H.cpu;h.c4=H.memory;h.c5=H.swap}var x={cogButton:{symbol:"url("+pmaThemeImage+"s_cog.png)",x:-36,symbolFill:"#B5C9DF",hoverSymbolFill:"#779ABF",_titleKey:"settings",menuName:"gridsettings",menuItems:[{textKey:"editChart",onclick:function(){v(this)}},{textKey:"removeChart",onclick:function(){K(this)}}]}};$('a[href="#rearrangeCharts"], a[href="#endChartEditMode"]').click(function(L){L.preventDefault();s=!s;if($(this).attr("href")=="#endChartEditMode"){s=false}$("#chartGrid div svg").find("*[zIndex=20], *[zIndex=21], *[zIndex=19]").toggle(s);$('a[href="#endChartEditMode"]').toggle(s);if(s){$("div.popupContent").hide().removeClass("openedPopup");$("#chartGrid").sortableTable({ignoreRect:{top:8,left:t().width-63,width:54,height:24},events:{drop:function(R,O,W){var X,M,U;var N=$(R).children().first().attr("id");if($(O).children().length>0){U=$(O).children().first().attr("id")}$.each(runtime.charts,function(aa,ab){if(ab.chart.options.chart.renderTo==N){X=aa}if(U&&ab.chart.options.chart.renderTo==U){M=aa}});if(M){if(X){dragChart=runtime.charts[X];runtime.charts[X]=runtime.charts[M];runtime.charts[M]=dragChart}else{var Z=[];var Q=parseInt(M.substr(1));var T=W.col+W.row*a.columns;var Y=[];var S={};var V=0;$.each(runtime.charts,function(aa,ab){if(aa!=M){Z.push(aa)}});Z.sort();for(var P=0;P<Z.length;P++){if(Z[P]==T){S["c"+(V++)]=runtime.charts[M];T=-1}S["c"+(V++)]=runtime.charts[Z[P]]}if(T!=-1){S["c"+(V++)]=runtime.charts[M]}runtime.charts=S}e()}}}})}else{$("#chartGrid").sortableTable("destroy");e()}return false});$('div.popupContent select[name="chartColumns"]').change(function(){a.columns=parseInt(this.value);var L=t();$("#chartGrid tr td").css("width",L.width+"px");var O;var P=$("#chartGrid tr:first");var Q=0;while(P.length!=0){O=1;P.find("td").each(function(){if(O>a.columns){if(P.next().length==0){P.after("<tr></tr>")}P.next().prepend($(this))}O++});if(P.next().length>0){var N=a.columns-P.find("td").length;for(var M=0;M<N;M++){P.append(P.next().find("td:first"));P.nextAll().each(function(){if($(this).next().length!=0){$(this).append($(this).next().find("td:first"))}})}}P=P.next();Q++}$.each(runtime.charts,function(R,S){S.chart.setSize(L.width,L.height,false)});if(a.gridMaxPoints=="auto"){runtime.gridMaxPoints=Math.round((L.width-40)/12)}runtime.xmin=new Date().getTime()-server_time_diff-runtime.gridMaxPoints*a.gridRefresh;runtime.xmax=new Date().getTime()-server_time_diff+a.gridRefresh;if(s){$("#chartGrid").sortableTable("refresh")}e()});$('div.popupContent select[name="gridChartRefresh"]').change(function(){a.gridRefresh=parseInt(this.value)*1000;clearTimeout(runtime.refreshTimeout);if(runtime.refreshRequest){runtime.refreshRequest.abort()}runtime.xmin=new Date().getTime()-server_time_diff-runtime.gridMaxPoints*a.gridRefresh;runtime.refreshTimeout=setTimeout(m,a.gridRefresh);e()});$('a[href="#addNewChart"]').click(function(M){M.preventDefault();var L={};L[PMA_messages.strAddChart]=function(){var O=$('input[name="chartType"]:checked').val();if(O=="preset"){J=H[$('#addChartDialog select[name="presetCharts"]').prop("value")]}else{if(!J||!J.nodes||J.nodes.length==0){alert(PMA_messages.strAddOneSeriesWarning);return}}J.title=$('input[name="chartTitle"]').val();f($.extend(true,{},J));J=null;e();$(this).dialog("close")};L[PMA_messages.strClose]=function(){J=null;$("span#clearSeriesLink").hide();$("#seriesPreview").html("");$(this).dialog("close")};var N=$('#addChartDialog select[name="presetCharts"]');if(N.html().length==0){$.each(H,function(O,P){N.append('<option value="'+O+'">'+P.title+"</option>")});N.change(function(){$('input[name="chartTitle"]').val(N.find(":selected").text());$("#chartPreset").prop("checked",true)});$("#chartPreset").click(function(){$('input[name="chartTitle"]').val(N.find(":selected").text())});$("#chartStatusVar").click(function(){$('input[name="chartTitle"]').val($("#chartSeries").find(":selected").text().replace(/_/g," "))});$("#chartSeries").change(function(){$('input[name="chartTitle"]').val($("#chartSeries").find(":selected").text().replace(/_/g," "))})}$("#addChartDialog").dialog({width:"auto",height:"auto",buttons:L});$("#addChartDialog #seriesPreview").html("<i>"+PMA_messages.strNone+"</i>");return false});$('a[href="#exportMonitorConfig"]').click(function(M){M.preventDefault();var N={};$.each(runtime.charts,function(O,P){N[O]={};N[O].nodes=P.nodes;N[O].settings=P.settings;N[O].title=P.title});var L={monitorCharts:N,monitorSettings:a};$("<form />",{"class":"disableAjax",method:"post",action:"file_echo.php?"+PMA_commonParams.get("common_query")+"&filename=1",style:"display:none;"}).append($("<input />",{type:"hidden",name:"monitorconfig",value:$.toJSON(L)})).appendTo("body").submit().remove()});$('a[href="#importMonitorConfig"]').click(function(M){M.preventDefault();$("#emptyDialog").dialog({title:PMA_messages.strImportDialogTitle});$("#emptyDialog").html(PMA_messages.strImportDialogMessage+':<br/><form action="file_echo.php?'+PMA_commonParams.get("common_query")+'&import=1" method="post" enctype="multipart/form-data"><input type="file" name="file"> <input type="hidden" name="import" value="1"> </form>');var L={};L[PMA_messages.strImport]=function(){var O,N;$("body").append(O=$('<iframe id="monitorConfigUpload" style="display:none;"></iframe>'));var P=O[0].contentWindow.document;P.open();P.close();mew=P;O.load(function(){var Q;try{var S=$("body",$("iframe#monitorConfigUpload")[0].contentWindow.document).html();Q=$.secureEvalJSON(S.substring(S.indexOf("{"),S.lastIndexOf("}")+1))}catch(R){alert(PMA_messages.strFailedParsingConfig);$("#emptyDialog").dialog("close");return}if(!Q||!Q.monitorCharts||!Q.monitorCharts){alert(PMA_messages.strFailedParsingConfig);$("#emptyDialog").dialog("close");return}try{window.localStorage.monitorCharts=$.toJSON(Q.monitorCharts);window.localStorage.monitorSettings=$.toJSON(Q.monitorSettings);D()}catch(R){alert(PMA_messages.strFailedBuildingGrid);window.localStorage.removeItem("monitorCharts");window.localStorage.removeItem("monitorSettings");D()}$("#emptyDialog").dialog("close")});$("body",P).append(N=$("#emptyDialog").find("form"));N.submit();$("#emptyDialog").append('<img class="ajaxIcon" src="'+pmaThemeImage+'ajax_clock_small.gif" alt="">')};L[PMA_messages.strCancel]=function(){$(this).dialog("close")};$("#emptyDialog").dialog({width:"auto",height:"auto",buttons:L})});$('a[href="#clearMonitorConfig"]').click(function(L){L.preventDefault();window.localStorage.removeItem("monitorCharts");window.localStorage.removeItem("monitorSettings");window.localStorage.removeItem("monitorVersion");$(this).hide();D()});$('a[href="#pauseCharts"]').click(function(L){L.preventDefault();runtime.redrawCharts=!runtime.redrawCharts;if(!runtime.redrawCharts){$(this).html(PMA_getImage("play.png")+" "+PMA_messages.strResumeMonitor)}else{$(this).html(PMA_getImage("pause.png")+" "+PMA_messages.strPauseMonitor);if(!runtime.charts){r();$('a[href="#settingsPopup"]').show()}}return false});$('a[href="#monitorInstructionsDialog"]').click(function(L){L.preventDefault();var N=$("#monitorInstructionsDialog");N.dialog({width:595,height:"auto"}).find("img.ajaxIcon").show();var M=function(O){var P={ajax_request:true,logging_vars:true};if(O){$.extend(P,O)}$.get("server_status_monitor.php?"+PMA_commonParams.get("common_query"),P,function(S){var R;if(S.success==true){R=S.message}else{return serverResponseError()}var Q=PMA_getImage("s_success.png"),U="",T="";if(R.general_log=="ON"){if(R.slow_query_log=="ON"){U=PMA_messages.strBothLogOn}else{U=PMA_messages.strGenLogOn}}if(U.length==0&&R.slow_query_log=="ON"){U=PMA_messages.strSlowLogOn}if(U.length==0){Q=PMA_getImage("s_error.png");U=PMA_messages.strBothLogOff}T="<b>"+PMA_messages.strCurrentSettings+'</b><br/><div class="smallIndent">';T+=Q+U+"<br />";if(R.log_output!="TABLE"){T+=PMA_getImage("s_error.png")+" "+PMA_messages.strLogOutNotTable+"<br />"}else{T+=PMA_getImage("s_success.png")+" "+PMA_messages.strLogOutIsTable+"<br />"}if(R.slow_query_log=="ON"){if(R.long_query_time>2){T+=PMA_getImage("s_attention.png")+" "+$.sprintf(PMA_messages.strSmallerLongQueryTimeAdvice,R.long_query_time)+"<br />"}if(R.long_query_time<2){T+=PMA_getImage("s_success.png")+" "+$.sprintf(PMA_messages.strLongQueryTimeSet,R.long_query_time)+"<br />"}}T+="</div>";if(is_superuser){T+="<p></p><b>"+PMA_messages.strChangeSettings+"</b>";T+='<div class="smallIndent">';T+=PMA_messages.strSettingsAppliedGlobal+"<br/>";var V="TABLE";if(R.log_output=="TABLE"){V="FILE"}T+='- <a class="set" href="#log_output-'+V+'">'+$.sprintf(PMA_messages.strSetLogOutput,V)+" </a><br />";if(R.general_log!="ON"){T+='- <a class="set" href="#general_log-ON">'+$.sprintf(PMA_messages.strEnableVar,"general_log")+" </a><br />"}else{T+='- <a class="set" href="#general_log-OFF">'+$.sprintf(PMA_messages.strDisableVar,"general_log")+" </a><br />"}if(R.slow_query_log!="ON"){T+='- <a class="set" href="#slow_query_log-ON">'+$.sprintf(PMA_messages.strEnableVar,"slow_query_log")+" </a><br />"}else{T+='- <a class="set" href="#slow_query_log-OFF">'+$.sprintf(PMA_messages.strDisableVar,"slow_query_log")+" </a><br />"}V=5;if(R.long_query_time>2){V=1}T+='- <a class="set" href="#long_query_time-'+V+'">'+$.sprintf(PMA_messages.setSetLongQueryTime,V)+" </a><br />"}else{T+=PMA_messages.strNoSuperUser+"<br/>"}T+="</div>";N.find("div.monitorUse").toggle(R.log_output=="TABLE"&&(R.slow_query_log=="ON"||R.general_log=="ON"));N.find("div.ajaxContent").html(T);N.find("img.ajaxIcon").hide();N.find("a.set").click(function(){var W=$(this).attr("href").split("-");M({varName:W[0].substr(1),varValue:W[1]});N.find("img.ajaxIcon").show()})})};M();return false});$('input[name="chartType"]').change(function(){$("#chartVariableSettings").toggle(this.checked&&this.value=="variable");var L=$('input[name="chartTitle"]').val();if(L==PMA_messages.strChartTitle||L==$('label[for="'+$('input[name="chartTitle"]').data("lastRadio")+'"]').text()){$('input[name="chartTitle"]').data("lastRadio",$(this).attr("id")).val($('label[for="'+$(this).attr("id")+'"]').text())}});$('input[name="useDivisor"]').change(function(){$("span.divisorInput").toggle(this.checked)});$('input[name="useUnit"]').change(function(){$("span.unitInput").toggle(this.checked)});$('select[name="varChartList"]').change(function(){if(this.selectedIndex!=0){$("#variableInput").val(this.value)}});$('a[href="#kibDivisor"]').click(function(L){L.preventDefault();$('input[name="valueDivisor"]').val(1024);$('input[name="valueUnit"]').val(PMA_messages.strKiB);$("span.unitInput").toggle(true);$('input[name="useUnit"]').prop("checked",true);return false});$('a[href="#mibDivisor"]').click(function(L){L.preventDefault();$('input[name="valueDivisor"]').val(1024*1024);$('input[name="valueUnit"]').val(PMA_messages.strMiB);$("span.unitInput").toggle(true);$('input[name="useUnit"]').prop("checked",true);return false});$('a[href="#submitClearSeries"]').click(function(L){L.preventDefault();$("#seriesPreview").html("<i>"+PMA_messages.strNone+"</i>");J=null;$("#clearSeriesLink").hide()});$('a[href="#submitAddSeries"]').click(function(N){N.preventDefault();if($("#variableInput").val()==""){return false}if(J==null){$("#seriesPreview").html("");J={title:$('input[name="chartTitle"]').val(),nodes:[],series:[],maxYLabel:0}}var M={dataPoints:[{type:"statusvar",name:$("#variableInput").val()}],display:$('input[name="differentialValue"]').prop("checked")?"differential":""};if(M.dataPoints[0].name=="Processes"){M.dataPoints[0].type="proc"}if($('input[name="useDivisor"]').prop("checked")){M.valueDivisor=parseInt($('input[name="valueDivisor"]').val())}if($('input[name="useUnit"]').prop("checked")){M.unit=$('input[name="valueUnit"]').val()}var O=M.display=="differential"?", "+PMA_messages.strDifferential:"";O+=M.valueDivisor?(", "+$.sprintf(PMA_messages.strDividedBy,M.valueDivisor)):"";O+=M.unit?(", "+PMA_messages.strUnit+": "+M.unit):"";var L={label:$("#variableInput").val().replace(/_/g," ")};J.series.push(L);$("#seriesPreview").append("- "+L.label+O+"<br/>");J.nodes.push(M);$("#variableInput").val("");$('input[name="differentialValue"]').prop("checked",true);$('input[name="useDivisor"]').prop("checked",false);$('input[name="useUnit"]').prop("checked",false);$('input[name="useDivisor"]').trigger("change");$('input[name="useUnit"]').trigger("change");$('select[name="varChartList"]').get(0).selectedIndex=0;$("#clearSeriesLink").show();return false});$("#variableInput").autocomplete({source:variableNames});function r(){if(window.localStorage){if(window.localStorage.monitorCharts){runtime.charts=$.parseJSON(window.localStorage.monitorCharts)}if(window.localStorage.monitorSettings){a=$.parseJSON(window.localStorage.monitorSettings)}$('a[href="#clearMonitorConfig"]').toggle(runtime.charts!=null);if(runtime.charts!=null&&k!=window.localStorage.monitorVersion){$("#emptyDialog").dialog({title:PMA_messages.strIncompatibleMonitorConfig});$("#emptyDialog").html(PMA_messages.strIncompatibleMonitorConfigDescription);var N={};N[PMA_messages.strClose]=function(){$(this).dialog("close")};$("#emptyDialog").dialog({width:400,buttons:N})}}if(runtime.charts==null){runtime.charts=h}if(a==null){a=I}$('select[name="gridChartRefresh"]').val(a.gridRefresh/1000);$('select[name="chartColumns"]').val(a.columns);if(a.gridMaxPoints=="auto"){runtime.gridMaxPoints=Math.round((a.chartSize.width-40)/12)}else{runtime.gridMaxPoints=a.gridMaxPoints}runtime.xmin=new Date().getTime()-server_time_diff-runtime.gridMaxPoints*a.gridRefresh;runtime.xmax=new Date().getTime()-server_time_diff+a.gridRefresh;$("#chartGrid").html("<tr><td></td><td></td></tr><tr><td></td><td></td></tr>");n={width:$("#chartGrid td:nth-child(2)").offset().left-$("#chartGrid td:nth-child(1)").offset().left,height:$("#chartGrid tr:nth-child(2) td:nth-child(2)").offset().top-$("#chartGrid tr:nth-child(1) td:nth-child(1)").offset().top};$("#chartGrid").html("");var P=[];$.each(runtime.charts,function(Q,R){P.push(Q)});P.sort();for(var M=0;M<P.length;M++){f(runtime.charts[P[M]],true)}var O=$("#chartGrid .monitorChart").length;var L=(a.columns-O%a.columns)%a.columns;for(var M=0;M<L;M++){$("#chartGrid tr:last").append("<td></td>")}$("#chartGrid tr td").css("width",t().width+"px");y();m()}function D(){var L=null;if(runtime.charts){L={};$.each(runtime.charts,function(P,Q){for(var O=0,M=Q.nodes.length;O<M;O++){L[Q.nodes[O].dataPoint]=[];for(var N=0,R=Q.chart.series[O].data.length;N<R;N++){L[Q.nodes[O].dataPoint].push([Q.chart.series[O].data[N].x,Q.chart.series[O].data[N].y])}}})}destroyGrid();r();if(L){$.each(runtime.charts,function(O,P){for(var N=0,M=P.nodes.length;N<M;N++){if(L[P.nodes[N].dataPoint]){P.chart.series[N].setData(L[P.nodes[N].dataPoint])}}})}}function t(){var L=$("#logTable").innerWidth()/a.columns-(a.columns-1)*n.width;return{width:L,height:0.75*L}}function f(Q,L){var O={title:escapeHtml(Q.title),grid:{drawBorder:false,shadow:false,background:"rgba(0,0,0,0)"},axes:{xaxis:{renderer:$.jqplot.DateAxisRenderer,tickOptions:{formatString:"%H:%M:%S",showGridline:false},min:runtime.xmin,max:runtime.xmax},yaxis:{min:0,max:100,tickInterval:20}},seriesDefaults:{rendererOptions:{smooth:true},showLine:true,lineWidth:2},highlighter:{show:true,showTooltip:true,tooltipAxes:"y",useAxesFormatters:true}};if(O.title===PMA_messages.strSystemCPUUsage||O.title===PMA_messages.strQueryCacheEfficiency){O.axes.yaxis.tickOptions={formatString:"%d %%"}}else{if(O.title===PMA_messages.strSystemMemory||O.title===PMA_messages.strSystemSwap){O.stackSeries=true;O.axes.yaxis.tickOptions={formatter:$.jqplot.byteFormatter(2)}}else{if(O.title===PMA_messages.strTraffic){O.axes.yaxis.tickOptions={formatter:$.jqplot.byteFormatter(1)}}}}O.series=Q.series;if($("#gridchart"+runtime.chartAI).length==0){var P=$("#chartGrid .monitorChart").length;if(P==0||!(P%a.columns)){$("#chartGrid").append("<tr></tr>")}$("#chartGrid tr:last").append('<td><div class="ui-state-default monitorChart" id="gridchart'+runtime.chartAI+'"></div></td>')}var N=[];for(M in Q.series){N.push([[0,0]])}Q.chart=$.jqplot("gridchart"+runtime.chartAI,N,O);for(M in Q.chart.series){Q.chart.series[M].data.shift()}var R=$("<div />").css("padding","0.5em");for(var M in Q.chart.series){R.append($("<div />").append($("<div>").css({width:"1em",height:"1em",background:Q.chart.seriesColors[M]}).addClass("floatleft")).append($("<div>").text(Q.chart.series[M].label).addClass("floatleft")).append($('<div class="clearfloat">')).addClass("floatleft"))}$("#gridchart"+runtime.chartAI).css("overflow","hidden").parent().append(R);if(L!=true){runtime.charts["c"+runtime.chartAI]=Q;y()}$("#gridchart"+runtime.chartAI).bind("jqplotMouseDown",function(T,S,W,V,U){i=true;F.push(W.xaxis);if($("#selection_box").length){$("#selection_box").remove()}selectionBox=$('<div id="selection_box" style="z-index:1000;height:250px;position:absolute;background-color:#87CEEB;opacity:0.4;filter:alpha(opacity=40);pointer-events:none;">');$(document.body).append(selectionBox);d=T.pageX;c=T.pageY;selectionBox.attr({id:"selection_box"}).css({top:c-S.y,left:d}).fadeIn()});$("#gridchart"+runtime.chartAI).bind("jqplotMouseUp",function(V,T,Y,X,W){if(!i){return}F.push(Y.xaxis);if(F[1]<F[0]){F=[];return}var U=new Date(Math.ceil(F[0]));var S=new Date(Math.ceil(F[1]));w(U,S);F=[];i=false});$("#gridchart"+runtime.chartAI).bind("jqplotMouseMove",function(T,S,W,V,U){if(!i){return}if(d!=undefined){$("#selection_box").css({width:Math.ceil(T.pageX-d)}).fadeIn()}});$("#gridchart"+runtime.chartAI).bind("jqplotMouseLeave",function(T,S,W,V,U){i=false});$(document.body).mouseup(function(){if($("#selection_box").length){selectionBox.remove()}});$("#chartGrid div svg").find("*[zIndex=20], *[zIndex=21], *[zIndex=19]").toggle(s);runtime.chartAI++}function v(O){var Q=O.options.chart.renderTo;if(!Q){return}var N=null;var L=null;$.each(runtime.charts,function(R,S){if(S.chart.options.chart.renderTo==Q){N=S;L=R;return false}});if(N==null){return}var P="<p><b>"+PMA_messages.strChartTitle+': </b> <br/> <input type="text" size="35" name="chartTitle" value="'+N.title+'" />';P+="</p><p><b>"+PMA_messages.strSeries+":</b> </p><ol>";for(var M=0;M<N.nodes.length;M++){P+="<li><i>"+N.nodes[M].dataPoints[0].name+': </i><br/><input type="text" name="chartSerie-'+M+'" value="'+N.nodes[M].name+'" /></li>'}dlgBtns={};dlgBtns[PMA_messages.strSave]=function(){runtime.charts[L].title=$('#emptyDialog input[name="chartTitle"]').val();runtime.charts[L].chart.setTitle({text:runtime.charts[L].title});$('#emptyDialog input[name*="chartSerie"]').each(function(){var S=$(this);var R=S.attr("name").split("-")[1];runtime.charts[L].nodes[R].name=S.val();runtime.charts[L].chart.series[R].name=S.val()});$(this).dialog("close");e()};dlgBtns[PMA_messages.strCancel]=function(){$(this).dialog("close")};$("#emptyDialog").html(P+"</ol>");$("#emptyDialog").dialog({title:PMA_messages.strChartEdit,width:"auto",height:"auto",buttons:dlgBtns})}function w(M,L){$('#logAnalyseDialog input[name="dateStart"]').val(formatDate(M,"yyyy-MM-dd HH:mm:ss"));$('#logAnalyseDialog input[name="dateEnd"]').val(formatDate(L,"yyyy-MM-dd HH:mm:ss"));var N={};N[PMA_messages.strFromSlowLog]=function(){G("slow",M,L);$(this).dialog("close")};N[PMA_messages.strFromGeneralLog]=function(){G("general",M,L);$(this).dialog("close")};$("#logAnalyseDialog").dialog({width:"auto",height:"auto",buttons:N})}function G(O,M,L){var P=Date.parse($('#logAnalyseDialog input[name="dateStart"]').prop("value"))||M;var N=Date.parse($('#logAnalyseDialog input[name="dateEnd"]').prop("value"))||L;l({src:O,start:P,end:N,removeVariables:$("#removeVariables").prop("checked"),limitTypes:$("#limitTypes").prop("checked")})}function K(L){var M=L.options.chart.renderTo;if(!M){return}$.each(runtime.charts,function(N,O){if(O.chart.options.chart.renderTo==M){delete runtime.charts[N];return false}});y();setTimeout(function(){L.destroy();$("#"+M).remove()},10);e()}function m(){runtime.refreshRequest=$.post("server_status_monitor.php?"+PMA_commonParams.get("common_query"),{ajax_request:true,chart_data:1,type:"chartgrid",requiredData:$.toJSON(runtime.dataList)},function(P){var O;if(P.success==true){O=P.message}else{return serverResponseError()}var N,L=0;var Q;var M;$.each(runtime.charts,function(V,U){var T=U.chartID;if(!O[T]){return}M=0;for(var S=0;S<U.nodes.length;S++){if(L==0&&S==0){if(p==null){Q=O.x-runtime.xmax}else{Q=parseInt(O.x-p.x)}runtime.xmin+=Q;runtime.xmax+=Q}if(U.nodes[S].transformFn){N=o(U.nodes[S].transformFn,O[T][S],(p==null||p[T]==null?null:p[T][S]))}else{N=parseFloat(O[T][S][0].value);if(U.nodes[S].display=="differential"){if(p==null||p[T]==null){continue}N-=p[T][S][0].value}if(U.nodes[S].valueDivisor){N=N/U.nodes[S].valueDivisor}}if(N!=undefined){U.chart.series[S].data.push([O.x,N]);if(N>U.maxYLabel){U.maxYLabel=N}else{if(U.maxYLabel==0){U.maxYLabel=0.5}}if(U.chart.series[S].data.length>runtime.gridMaxPoints&&U.chart.series[S].data[0][0]<runtime.xmin){if(U.maxYLabel<=U.chart.series[S].data[0][1]){U.chart.series[S].data.splice(0,U.chart.series[S].data.length-runtime.gridMaxPoints);U.maxYLabel=B(U.chart.series[S].data)}else{U.chart.series[S].data.splice(0,U.chart.series[S].data.length-runtime.gridMaxPoints)}}if(U.title===PMA_messages.strSystemMemory||U.title===PMA_messages.strSystemSwap){M+=N}}}var R=(runtime.xmax-runtime.xmin)/5;U.chart.axes["xaxis"].ticks=[(runtime.xmax-R*4),(runtime.xmax-R*3),(runtime.xmax-R*2),(runtime.xmax-R),runtime.xmax];if(U.title!==PMA_messages.strSystemCPUUsage&&U.title!==PMA_messages.strQueryCacheEfficiency&&U.title!==PMA_messages.strSystemMemory&&U.title!==PMA_messages.strSystemSwap){U.chart.axes["yaxis"]["max"]=Math.ceil(U.maxYLabel*1.1);U.chart.axes["yaxis"]["tickInterval"]=Math.ceil(U.maxYLabel*1.1/5)}else{if(U.title===PMA_messages.strSystemMemory||U.title===PMA_messages.strSystemSwap){U.chart.axes["yaxis"]["max"]=Math.ceil(M*1.1/100)*100;U.chart.axes["yaxis"]["tickInterval"]=Math.ceil(M*1.1/5)}}L++;if(runtime.redrawCharts){U.chart.replot()}});p=O;runtime.refreshTimeout=setTimeout(m,a.gridRefresh)})}function B(L){var M=L[0][1];$.each(L,function(O,N){M=(N[1]>M)?N[1]:M});return M}function o(M,Q,O){switch(M){case"cpu-linux":if(O==null){return undefined}Q=Q[0];O=O[0];var P=Q.busy+Q.idle-(O.busy+O.idle);var N=Q.idle-O.idle;return 100*(P-N)/P;case"qce":if(O==null){return undefined}var L=Q[0].value-O[0].value;if(Q[1].value-O[1].value==0){return 0}return L/(Q[1].value-O[1].value+L)*100;case"qcu":if(Q[1].value==0){return 0}return 100-Q[0].value/Q[1].value*100}return undefined}function y(){runtime.dataList={};var L=0;$.each(runtime.charts,function(O,P){runtime.dataList[L]=[];for(var N=0,M=P.nodes.length;N<M;N++){runtime.dataList[L][N]=P.nodes[N].dataPoints}runtime.charts[O].chartID=L;L++})}function l(N){var L="";var P=null;if(!N.removeVariables){N.removeVariables=false}if(!N.limitTypes){N.limitTypes=false}$("#emptyDialog").dialog({title:PMA_messages.strAnalysingLogsTitle});$("#emptyDialog").html(PMA_messages.strAnalysingLogs+' <img class="ajaxIcon" src="'+pmaThemeImage+'ajax_clock_small.gif" alt="">');var M={};M[PMA_messages.strCancelRequest]=function(){if(P!=null){P.abort()}$(this).dialog("close")};$("#emptyDialog").dialog({width:"auto",height:"auto",buttons:M});P=$.get("server_status_monitor.php?"+PMA_commonParams.get("common_query"),{ajax_request:true,log_data:1,type:N.src,time_start:Math.round(N.start/1000),time_end:Math.round(N.end/1000),removeVariables:N.removeVariables,limitTypes:N.limitTypes},function(S){var R;if(S.success==true){R=S.message}else{return serverResponseError()}if(R.rows.length!=0){runtime.logDataCols=g(R);$("#emptyDialog").dialog({title:PMA_messages.strLoadingLogs});$("#emptyDialog").html("<p>"+PMA_messages.strLogDataLoaded+"</p>");$.each(R.sum,function(T,U){T=T.charAt(0).toUpperCase()+T.slice(1).toLowerCase();if(T=="Total"){T="<b>"+T+"</b>"}$("#emptyDialog").append(T+": "+U+"<br/>")});if(R.numRows>12){$("#logTable").prepend('<fieldset id="logDataFilter">    <legend>'+PMA_messages.strFiltersForLogTable+'</legend>    <div class="formelement">        <label for="filterQueryText">'+PMA_messages.strFilterByWordRegexp+'</label>        <input name="filterQueryText" type="text" id="filterQueryText" style="vertical-align: baseline;" />    </div>'+((R.numRows>250)?' <div class="formelement"><button name="startFilterQueryText" id="startFilterQueryText">'+PMA_messages.strFilter+"</button></div>":"")+'    <div class="formelement">       <input type="checkbox" id="noWHEREData" name="noWHEREData" value="1" />        <label for="noWHEREData"> '+PMA_messages.strIgnoreWhereAndGroup+"</label>   </div</fieldset>");$("#logTable #noWHEREData").change(function(){O(true)});if(R.numRows>250){$("#logTable #startFilterQueryText").click(O)}else{$("#logTable #filterQueryText").keyup(O)}}var Q={};Q[PMA_messages.strJumpToTable]=function(){$(this).dialog("close");$(document).scrollTop($("#logTable").offset().top)};$("#emptyDialog").dialog("option","buttons",Q)}else{$("#emptyDialog").dialog({title:PMA_messages.strNoDataFoundTitle});$("#emptyDialog").html("<p>"+PMA_messages.strNoDataFound+"</p>");var Q={};Q[PMA_messages.strClose]=function(){$(this).dialog("close")};$("#emptyDialog").dialog("option","buttons",Q)}});function O(R){var T=false,Q,aj;var an=$("#logTable #filterQueryText").val();if(an.length==0){aj=null}else{aj=new RegExp(an,"i")}var ae=0,W=0,ah=0,ac;var ai=$("#logTable #noWHEREData").prop("checked");var al=/([^=]+)=(\d+|((\'|"|).*?[^\\])\4((\s+)|$))/gi;var ad=/([a-z0-9_]+)\(.+?\)/gi;var U={},af={};var aa=false,X;var ab=runtime.logDataCols[runtime.logDataCols.length-2];var am=runtime.logDataCols[runtime.logDataCols.length-1];var S=N.src=="slow";var ag={};var ak=function(ap,aq){var ao=aq.match(/<td>(.*?)<\/td>/gi);if(!ag[ap]){ag[ap]=[0,0,0,0]}ag[ap][0]+=b(ao[2].replace(/(<td>|<\/td>)/gi,""));ag[ap][1]+=b(ao[3].replace(/(<td>|<\/td>)/gi,""));ag[ap][2]+=parseInt(ao[4].replace(/(<td>|<\/td>)/gi,""));ag[ap][3]+=parseInt(ao[5].replace(/(<td>|<\/td>)/gi,""))};$("#logTable table tbody tr td:nth-child("+(runtime.logDataCols.length-1)+")").each(function(){var ao=$(this);if(R&&ao.html().match(/^SELECT/i)){if(ai){ac=ao.text().replace(al,"$1=...$6").trim();ac=ac.replace(ad," $1(...)");if(U[ac]){U[ac]+=parseInt(ao.next().text());W+=parseInt(ao.next().text());aa=true}else{U[ac]=parseInt(ao.next().text());af[ac]=ah;ao.text(ac)}if(S){ak(ac,ao.parent().html())}}else{X=ao.parent().data("query");ao.text(X[ab]);ao.next().text(X[am]);if(S){ao.parent().children("td:nth-child(3)").text(X.query_time);ao.parent().children("td:nth-child(4)").text(X.lock_time);ao.parent().children("td:nth-child(5)").text(X.rows_sent);ao.parent().children("td:nth-child(6)").text(X.rows_examined)}}}if(!aa&&(aj!=null&&!aj.exec(ao.text()))){aa=true}if(aa){ao.parent().css("display","none")}else{W+=parseInt(ao.next().text());ae++;T=!T;ao.parent().css("display","");if(T){ao.parent().addClass("odd");ao.parent().removeClass("even")}else{ao.parent().addClass("even");ao.parent().removeClass("odd")}}aa=false;ah++});if(R){if(ai){var Z,V,Y=$("#logTable table tbody");$.each(af,function(ao,ap){if(U[ao]<=1){return}V=Y.children("tr:nth-child("+(ap+1)+")");Z=V.children(":nth-child("+(runtime.logDataCols.length)+")");Z.text(U[ao]);if(S){V.children("td:nth-child(3)").text(z(ag[ao][0]));V.children("td:nth-child(4)").text(z(ag[ao][1]));V.children("td:nth-child(5)").text(ag[ao][2]);V.children("td:nth-child(6)").text(ag[ao][3])}})}$("#logTable table").trigger("update");setTimeout(function(){$("#logTable table").trigger("sorton",[[[runtime.logDataCols.length-1,1]]])},0)}$("#logTable table tfoot tr").html('<th colspan="'+(runtime.logDataCols.length-1)+'">'+PMA_messages.strSumRows+" "+ae+'<span style="float:right">'+PMA_messages.strTotal+'</span></th><th class="right">'+W+"</th>")}}function b(M){var L=M.split(":");return parseInt(L[0]*3600)+parseInt(L[1]*60)+parseInt(L[2])}function z(M){var L=Math.floor(M/3600);M-=L*3600;var N=Math.floor(M/60);M-=N*60;if(L<10){L="0"+L}if(N<10){N="0"+N}if(M<10){M="0"+M}return L+":"+N+":"+M}function g(P){var Y=P.rows;var T=[];var X=$('<table class="sortable"></table>');var U,R,L;$("#logTable").html(X);var Q=function(Z,aa){switch(Z){case"user_host":return aa.replace(/(\[.*?\])+/g,"")}return aa};for(var O=0,M=Y.length;O<M;O++){if(O==0){$.each(Y[0],function(Z,aa){T.push(Z)});X.append('<thead><tr><th class="nowrap">'+T.join('</th><th class="nowrap">')+"</th></tr></thead>");X.append(U=$("<tbody></tbody>"))}U.append(R=$('<tr class="noclick"></tr>'));var W="";for(var N=0,S=T.length;N<S;N++){if(N==T.length-2&&Y[O][T[N]].match(/^SELECT/i)){R.append(L=$('<td class="linkElem">'+Q(T[N],Y[O][T[N]])+"</td>"));L.click(q)}else{R.append("<td>"+Q(T[N],Y[O][T[N]])+"</td>")}R.data("query",Y[O])}}X.append('<tfoot><tr><th colspan="'+(T.length-1)+'">'+PMA_messages.strSumRows+" "+P.numRows+'<span style="float:right">'+PMA_messages.strTotal+'</span></th><th class="right">'+P.sum.TOTAL+"</th></tr></tfoot>");if($("#logTable th:last").html()=="#"){$("#logTable th:last").append("&nbsp;"+PMA_getImage("b_docs.png","",{"class":"qroupedQueryInfoIcon"}));var V=PMA_messages.strCountColumnExplanation;if(groupInserts){V+="<p>"+PMA_messages.strMoreCountColumnExplanation+"</p>"}PMA_tooltip($("img.qroupedQueryInfoIcon"),"img",V)}$("#logTable table").tablesorter({sortList:[[T.length-1,1]],widgets:["fast-zebra"]});$("#logTable table thead th").append('<img class="icon sortableIcon" src="themes/dot.gif" alt="">');return T}function q(){var N=$(this).parent().data("query");var M=N.argument||N.sql_text;if(codemirror_editor){M=PMA_SQLPrettyPrint(M);codemirror_editor.setValue(M);setTimeout(function(){codemirror_editor.refresh()},50)}else{$("#sqlquery").val(M)}var O=null;var L={};L[PMA_messages.strAnalyzeQuery]=function(){E(N)};L[PMA_messages.strClose]=function(){$(this).dialog("close")};$("#queryAnalyzerDialog").dialog({width:"auto",height:"auto",resizable:false,buttons:L,close:function(){if(O!=null){O.destroy()}$("#queryAnalyzerDialog div.placeHolder").html("");if(codemirror_editor){codemirror_editor.setValue("")}else{$("#sqlquery").val("")}}})}function E(M){var L=M.db||"";$("#queryAnalyzerDialog div.placeHolder").html(PMA_messages.strAnalyzing+' <img class="ajaxIcon" src="'+pmaThemeImage+'ajax_clock_small.gif" alt="">');$.post("server_status_monitor.php?"+PMA_commonParams.get("common_query"),{ajax_request:true,query_analyzer:true,query:codemirror_editor?codemirror_editor.getValue():$("#sqlquery").val(),database:L},function(T){if(T.success==true){T=T.message}else{$("#queryAnalyzerDialog div.placeHolder").html('<div class="error">'+T.error+"</div>");return}var N=0;$("#queryAnalyzerDialog div.placeHolder").html('<table width="100%" border="0"><tr><td class="explain"></td><td class="chart"></td></tr></table>');var V="<b>"+PMA_messages.strExplainOutput+"</b> "+$("#explain_docu").html();if(T.explain.length>1){V+=" (";for(var U=0;U<T.explain.length;U++){if(U>0){V+=", "}V+='<a href="#showExplain-'+U+'">'+U+"</a>"}V+=")"}V+="<p></p>";for(var U=0,O=T.explain.length;U<O;U++){V+='<div class="explain-'+U+'"'+(U>0?'style="display:none;"':"")+">";$.each(T.explain[U],function(W,X){X=(X==null)?"null":X;if(W=="type"&&X.toLowerCase()=="all"){X='<span class="attention">'+X+"</span>"}if(W=="Extra"){X=X.replace(/(using (temporary|filesort))/gi,'<span class="attention">$1</span>')}V+=W+": "+X+"<br />"});V+="</div>"}V+="<p><b>"+PMA_messages.strAffectedRows+"</b> "+T.affectedRows;$("#queryAnalyzerDialog div.placeHolder td.explain").append(V);$('#queryAnalyzerDialog div.placeHolder a[href*="#showExplain"]').click(function(){var W=$(this).attr("href").split("-")[1];$(this).parent().find('div[class*="explain"]').hide();$(this).parent().find('div[class*="explain-'+W+'"]').show()});if(T.profiling){var S=[];var R='<table class="queryNums"><thead><tr><th>'+PMA_messages.strStatus+"</th><th>"+PMA_messages.strTime+"</th></tr></thead><tbody>";var P;var Q=0;for(var U=0,O=T.profiling.length;U<O;U++){P=parseFloat(T.profiling[U].duration);N+=P;R+="<tr><td>"+T.profiling[U].state+" </td><td> "+PMA_prettyProfilingNum(P,2)+"</td></tr>"}for(var U=0,O=T.profiling.length;U<O;U++){P=parseFloat(T.profiling[U].duration);if(P/N>0.02){S.push([PMA_prettyProfilingNum(P,2)+" "+T.profiling[U].state,P])}else{Q+=P}}if(Q>0){S.push([PMA_prettyProfilingNum(Q,2)+" "+PMA_messages.strOther,Q])}R+="<tr><td><b>"+PMA_messages.strTotalTime+"</b></td><td>"+PMA_prettyProfilingNum(N,2)+"</td></tr>";R+="</tbody></table>";$("#queryAnalyzerDialog div.placeHolder td.chart").append("<b>"+PMA_messages.strProfilingResults+" "+$("#profiling_docu").html()+'</b> (<a href="#showNums">'+PMA_messages.strTable+'</a>, <a href="#showChart">'+PMA_messages.strChart+"</a>)<br/>"+R+' <div id="queryProfiling"></div>');$('#queryAnalyzerDialog div.placeHolder a[href="#showNums"]').click(function(){$("#queryAnalyzerDialog #queryProfiling").hide();$("#queryAnalyzerDialog table.queryNums").show();return false});$('#queryAnalyzerDialog div.placeHolder a[href="#showChart"]').click(function(){$("#queryAnalyzerDialog #queryProfiling").show();$("#queryAnalyzerDialog table.queryNums").hide();return false});profilingChart=PMA_createProfilingChartJqplot("queryProfiling",S)}})}function e(){var L={};$.each(runtime.charts,function(M,N){L[M]={};L[M].nodes=N.nodes;L[M].settings=N.settings;L[M].title=N.title;L[M].series=N.series;L[M].maxYLabel=N.maxYLabel});if(window.localStorage){window.localStorage.monitorCharts=$.toJSON(L);window.localStorage.monitorSettings=$.toJSON(a);window.localStorage.monitorVersion=k}$('a[href="#clearMonitorConfig"]').show()}});AJAX.registerOnload("server_status_monitor.js",function(){$('a[href="#pauseCharts"]').trigger("click")});function serverResponseError(){var a={};a[PMA_messages.strReloadPage]=function(){window.location.reload()};$("#emptyDialog").dialog({title:PMA_messages.strRefreshFailed});$("#emptyDialog").html(PMA_getImage("s_attention.png")+PMA_messages.strInvalidResponseExplanation);$("#emptyDialog").dialog({buttons:a})}function destroyGrid(){if(runtime.charts){$.each(runtime.charts,function(b,d){try{d.chart.destroy()}catch(c){}})}try{runtime.refreshRequest.abort()}catch(a){}try{clearTimeout(runtime.refreshTimeout)}catch(a){}$("#chartGrid").html("");runtime.charts=null;runtime.chartAI=0;monitorSettings=null};
+/* vim: set expandtab sw=4 ts=4 sts=4: */
+var runtime = {};
+var server_time_diff;
+var server_os;
+var is_superuser;
+var server_db_isLocal;
+var chartSize;
+AJAX.registerOnload('server_status_monitor.js', function () {
+    var $js_data_form = $('#js_data');
+    server_time_diff  = new Date().getTime() - $js_data_form.find('input[name=server_time]').val();
+    server_os =         $js_data_form.find('input[name=server_os]').val();
+    is_superuser =      $js_data_form.find('input[name=is_superuser]').val();
+    server_db_isLocal = $js_data_form.find('input[name=server_db_isLocal]').val();
+});
+
+/**
+ * Unbind all event handlers before tearing down a page
+ */
+AJAX.registerTeardown('server_status_monitor.js', function () {
+    $('#emptyDialog').remove();
+    $('#addChartDialog').remove();
+    $('a.popupLink').off('click');
+    $('body').off('click');
+});
+/**
+ * Popup behaviour
+ */
+AJAX.registerOnload('server_status_monitor.js', function () {
+    $('<div />')
+        .attr('id', 'emptyDialog')
+        .appendTo('#page_content');
+    $('#addChartDialog')
+        .appendTo('#page_content');
+
+    $('a.popupLink').click(function () {
+        var $link = $(this);
+        $('div.' + $link.attr('href').substr(1))
+            .show()
+            .offset({ top: $link.offset().top + $link.height() + 5, left: $link.offset().left })
+            .addClass('openedPopup');
+
+        return false;
+    });
+    $('body').click(function (event) {
+        $('div.openedPopup').each(function () {
+            var $cnt = $(this);
+            var pos = $cnt.offset();
+            // Hide if the mouseclick is outside the popupcontent
+            if (event.pageX < pos.left ||
+                event.pageY < pos.top ||
+                event.pageX > pos.left + $cnt.outerWidth() ||
+                event.pageY > pos.top + $cnt.outerHeight()
+            ) {
+                $cnt.hide().removeClass('openedPopup');
+            }
+        });
+    });
+});
+
+AJAX.registerTeardown('server_status_monitor.js', function () {
+    $('a[href="#rearrangeCharts"], a[href="#endChartEditMode"]').off('click');
+    $('div.popupContent select[name="chartColumns"]').off('change');
+    $('div.popupContent select[name="gridChartRefresh"]').off('change');
+    $('a[href="#addNewChart"]').off('click');
+    $('a[href="#exportMonitorConfig"]').off('click');
+    $('a[href="#importMonitorConfig"]').off('click');
+    $('a[href="#clearMonitorConfig"]').off('click');
+    $('a[href="#pauseCharts"]').off('click');
+    $('a[href="#monitorInstructionsDialog"]').off('click');
+    $('input[name="chartType"]').off('click');
+    $('input[name="useDivisor"]').off('click');
+    $('input[name="useUnit"]').off('click');
+    $('select[name="varChartList"]').off('click');
+    $('a[href="#kibDivisor"]').off('click');
+    $('a[href="#mibDivisor"]').off('click');
+    $('a[href="#submitClearSeries"]').off('click');
+    $('a[href="#submitAddSeries"]').off('click');
+    // $("input#variableInput").destroy();
+    $('#chartPreset').off('click');
+    $('#chartStatusVar').off('click');
+    destroyGrid();
+});
+
+AJAX.registerOnload('server_status_monitor.js', function () {
+    // Show tab links
+    $('div.tabLinks').show();
+    $('#loadingMonitorIcon').remove();
+    // Codemirror is loaded on demand so we might need to initialize it
+    if (! codemirror_editor) {
+        var $elm = $('#sqlquery');
+        if ($elm.length > 0 && typeof CodeMirror !== 'undefined') {
+            codemirror_editor = CodeMirror.fromTextArea(
+                $elm[0],
+                {
+                    lineNumbers: true,
+                    matchBrackets: true,
+                    indentUnit: 4,
+                    mode: 'text/x-mysql',
+                    lineWrapping: true
+                }
+            );
+        }
+    }
+    // Timepicker is loaded on demand so we need to initialize
+    // datetime fields from the 'load log' dialog
+    $('#logAnalyseDialog').find('.datetimefield').each(function () {
+        PMA_addDatepicker($(this));
+    });
+
+    /** ** Monitor charting implementation ****/
+    /* Saves the previous ajax response for differential values */
+    var oldChartData = null;
+    // Holds about to be created chart
+    var newChart = null;
+    var chartSpacing;
+
+    // Whenever the monitor object (runtime.charts) or the settings object
+    // (monitorSettings) changes in a way incompatible to the previous version,
+    // increase this number. It will reset the users monitor and settings object
+    // in his localStorage to the default configuration
+    var monitorProtocolVersion = '1.0';
+
+    // Runtime parameter of the monitor, is being fully set in initGrid()
+    runtime = {
+        // Holds all visible charts in the grid
+        charts: null,
+        // Stores the timeout handler so it can be cleared
+        refreshTimeout: null,
+        // Stores the GET request to refresh the charts
+        refreshRequest: null,
+        // Chart auto increment
+        chartAI: 0,
+        // To play/pause the monitor
+        redrawCharts: false,
+        // Object that contains a list of nodes that need to be retrieved
+        // from the server for chart updates
+        dataList: [],
+        // Current max points per chart (needed for auto calculation)
+        gridMaxPoints: 20,
+        // displayed time frame
+        xmin: -1,
+        xmax: -1
+    };
+    var monitorSettings = null;
+
+    var defaultMonitorSettings = {
+        columns: 3,
+        chartSize: { width: 295, height: 250 },
+        // Max points in each chart. Settings it to 'auto' sets
+        // gridMaxPoints to (chartwidth - 40) / 12
+        gridMaxPoints: 'auto',
+        /* Refresh rate of all grid charts in ms */
+        gridRefresh: 5000
+    };
+
+    // Allows drag and drop rearrange and print/edit icons on charts
+    var editMode = false;
+
+    /* List of preconfigured charts that the user may select */
+    var presetCharts = {
+        // Query cache efficiency
+        'qce': {
+            title: PMA_messages.strQueryCacheEfficiency,
+            series: [{
+                label: PMA_messages.strQueryCacheEfficiency
+            }],
+            nodes: [{
+                dataPoints: [{ type: 'statusvar', name: 'Qcache_hits' }, { type: 'statusvar', name: 'Com_select' }],
+                transformFn: 'qce'
+            }],
+            maxYLabel: 0
+        },
+        // Query cache usage
+        'qcu': {
+            title: PMA_messages.strQueryCacheUsage,
+            series: [{
+                label: PMA_messages.strQueryCacheUsed
+            }],
+            nodes: [{
+                dataPoints: [{ type: 'statusvar', name: 'Qcache_free_memory' }, { type: 'servervar', name: 'query_cache_size' }],
+                transformFn: 'qcu'
+            }],
+            maxYLabel: 0
+        }
+    };
+
+    // time span selection
+    var selectionTimeDiff = [];
+    var selectionStartX;
+    var selectionStartY;
+    var selectionEndX;
+    var selectionEndY;
+    var drawTimeSpan = false;
+
+    // chart tooltip
+    var tooltipBox;
+
+    /* Add OS specific system info charts to the preset chart list */
+    switch (server_os) {
+    case 'WINNT':
+        $.extend(presetCharts, {
+            'cpu': {
+                title: PMA_messages.strSystemCPUUsage,
+                series: [{
+                    label: PMA_messages.strAverageLoad
+                }],
+                nodes: [{
+                    dataPoints: [{ type: 'cpu', name: 'loadavg' }]
+                }],
+                maxYLabel: 100
+            },
+
+            'memory': {
+                title: PMA_messages.strSystemMemory,
+                series: [{
+                    label: PMA_messages.strTotalMemory,
+                    fill: true
+                }, {
+                    dataType: 'memory',
+                    label: PMA_messages.strUsedMemory,
+                    fill: true
+                }],
+                nodes: [{ dataPoints: [{ type: 'memory', name: 'MemTotal' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'MemUsed' }], valueDivisor: 1024 }
+                ],
+                maxYLabel: 0
+            },
+
+            'swap': {
+                title: PMA_messages.strSystemSwap,
+                series: [{
+                    label: PMA_messages.strTotalSwap,
+                    fill: true
+                }, {
+                    label: PMA_messages.strUsedSwap,
+                    fill: true
+                }],
+                nodes: [{ dataPoints: [{ type: 'memory', name: 'SwapTotal' }] },
+                    { dataPoints: [{ type: 'memory', name: 'SwapUsed' }] }
+                ],
+                maxYLabel: 0
+            }
+        });
+        break;
+
+    case 'Linux':
+        $.extend(presetCharts, {
+            'cpu': {
+                title: PMA_messages.strSystemCPUUsage,
+                series: [{
+                    label: PMA_messages.strAverageLoad
+                }],
+                nodes: [{ dataPoints: [{ type: 'cpu', name: 'irrelevant' }], transformFn: 'cpu-linux' }],
+                maxYLabel: 0
+            },
+            'memory': {
+                title: PMA_messages.strSystemMemory,
+                series: [
+                    { label: PMA_messages.strBufferedMemory, fill: true },
+                    { label: PMA_messages.strUsedMemory, fill: true },
+                    { label: PMA_messages.strCachedMemory, fill: true },
+                    { label: PMA_messages.strFreeMemory, fill: true }
+                ],
+                nodes: [
+                    { dataPoints: [{ type: 'memory', name: 'Buffers' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'MemUsed' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'Cached' }],  valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'MemFree' }], valueDivisor: 1024 }
+                ],
+                maxYLabel: 0
+            },
+            'swap': {
+                title: PMA_messages.strSystemSwap,
+                series: [
+                    { label: PMA_messages.strCachedSwap, fill: true },
+                    { label: PMA_messages.strUsedSwap, fill: true },
+                    { label: PMA_messages.strFreeSwap, fill: true }
+                ],
+                nodes: [
+                    { dataPoints: [{ type: 'memory', name: 'SwapCached' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'SwapUsed' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'SwapFree' }], valueDivisor: 1024 }
+                ],
+                maxYLabel: 0
+            }
+        });
+        break;
+
+    case 'SunOS':
+        $.extend(presetCharts, {
+            'cpu': {
+                title: PMA_messages.strSystemCPUUsage,
+                series: [{
+                    label: PMA_messages.strAverageLoad
+                }],
+                nodes: [{
+                    dataPoints: [{ type: 'cpu', name: 'loadavg' }]
+                }],
+                maxYLabel: 0
+            },
+            'memory': {
+                title: PMA_messages.strSystemMemory,
+                series: [
+                    { label: PMA_messages.strUsedMemory, fill: true },
+                    { label: PMA_messages.strFreeMemory, fill: true }
+                ],
+                nodes: [
+                    { dataPoints: [{ type: 'memory', name: 'MemUsed' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'MemFree' }], valueDivisor: 1024 }
+                ],
+                maxYLabel: 0
+            },
+            'swap': {
+                title: PMA_messages.strSystemSwap,
+                series: [
+                    { label: PMA_messages.strUsedSwap, fill: true },
+                    { label: PMA_messages.strFreeSwap, fill: true }
+                ],
+                nodes: [
+                    { dataPoints: [{ type: 'memory', name: 'SwapUsed' }], valueDivisor: 1024 },
+                    { dataPoints: [{ type: 'memory', name: 'SwapFree' }], valueDivisor: 1024 }
+                ],
+                maxYLabel: 0
+            }
+        });
+        break;
+    }
+
+    // Default setting for the chart grid
+    var defaultChartGrid = {
+        'c0': {
+            title: PMA_messages.strQuestions,
+            series: [
+                { label: PMA_messages.strQuestions }
+            ],
+            nodes: [
+                { dataPoints: [{ type: 'statusvar', name: 'Questions' }], display: 'differential' }
+            ],
+            maxYLabel: 0
+        },
+        'c1': {
+            title: PMA_messages.strChartConnectionsTitle,
+            series: [
+                { label: PMA_messages.strConnections },
+                { label: PMA_messages.strProcesses }
+            ],
+            nodes: [
+                { dataPoints: [{ type: 'statusvar', name: 'Connections' }], display: 'differential' },
+                { dataPoints: [{ type: 'proc', name: 'processes' }] }
+            ],
+            maxYLabel: 0
+        },
+        'c2': {
+            title: PMA_messages.strTraffic,
+            series: [
+                { label: PMA_messages.strBytesSent },
+                { label: PMA_messages.strBytesReceived }
+            ],
+            nodes: [
+                { dataPoints: [{ type: 'statusvar', name: 'Bytes_sent' }], display: 'differential', valueDivisor: 1024 },
+                { dataPoints: [{ type: 'statusvar', name: 'Bytes_received' }], display: 'differential', valueDivisor: 1024 }
+            ],
+            maxYLabel: 0
+        }
+    };
+
+    // Server is localhost => We can add cpu/memory/swap to the default chart
+    if (server_db_isLocal && typeof presetCharts.cpu !== 'undefined') {
+        defaultChartGrid.c3 = presetCharts.cpu;
+        defaultChartGrid.c4 = presetCharts.memory;
+        defaultChartGrid.c5 = presetCharts.swap;
+    }
+
+    $('a[href="#rearrangeCharts"], a[href="#endChartEditMode"]').click(function (event) {
+        event.preventDefault();
+        editMode = !editMode;
+        if ($(this).attr('href') === '#endChartEditMode') {
+            editMode = false;
+        }
+
+        $('a[href="#endChartEditMode"]').toggle(editMode);
+
+        if (editMode) {
+            // Close the settings popup
+            $('div.popupContent').hide().removeClass('openedPopup');
+
+            $('#chartGrid').sortableTable({
+                ignoreRect: {
+                    top: 8,
+                    left: chartSize.width - 63,
+                    width: 54,
+                    height: 24
+                }
+            });
+        } else {
+            $('#chartGrid').sortableTable('destroy');
+        }
+        saveMonitor(); // Save settings
+        return false;
+    });
+
+    // global settings
+    $('div.popupContent select[name="chartColumns"]').change(function () {
+        monitorSettings.columns = parseInt(this.value, 10);
+
+        calculateChartSize();
+        // Empty cells should keep their size so you can drop onto them
+        $('#chartGrid').find('tr td').css('width', chartSize.width + 'px');
+        $('#chartGrid').find('.monitorChart').css({
+            width: chartSize.width + 'px',
+            height: chartSize.height + 'px'
+        });
+
+        /* Reorder all charts that it fills all column cells */
+        var numColumns;
+        var $tr = $('#chartGrid').find('tr:first');
+        var row = 0;
+
+        var tempManageCols = function () {
+            if (numColumns > monitorSettings.columns) {
+                if ($tr.next().length === 0) {
+                    $tr.after('<tr></tr>');
+                }
+                $tr.next().prepend($(this));
+            }
+            numColumns++;
+        };
+
+        var tempAddCol = function () {
+            if ($(this).next().length !== 0) {
+                $(this).append($(this).next().find('td:first'));
+            }
+        };
+
+        while ($tr.length !== 0) {
+            numColumns = 1;
+            // To many cells in one row => put into next row
+            $tr.find('td').each(tempManageCols);
+
+            // To little cells in one row => for each cell to little,
+            // move all cells backwards by 1
+            if ($tr.next().length > 0) {
+                var cnt = monitorSettings.columns - $tr.find('td').length;
+                for (var i = 0; i < cnt; i++) {
+                    $tr.append($tr.next().find('td:first'));
+                    $tr.nextAll().each(tempAddCol);
+                }
+            }
+
+            $tr = $tr.next();
+            row++;
+        }
+
+        if (monitorSettings.gridMaxPoints === 'auto') {
+            runtime.gridMaxPoints = Math.round((chartSize.width - 40) / 12);
+        }
+
+        runtime.xmin = new Date().getTime() - server_time_diff - runtime.gridMaxPoints * monitorSettings.gridRefresh;
+        runtime.xmax = new Date().getTime() - server_time_diff + monitorSettings.gridRefresh;
+
+        if (editMode) {
+            $('#chartGrid').sortableTable('refresh');
+        }
+
+        refreshChartGrid();
+        saveMonitor(); // Save settings
+    });
+
+    $('div.popupContent select[name="gridChartRefresh"]').change(function () {
+        monitorSettings.gridRefresh = parseInt(this.value, 10) * 1000;
+        clearTimeout(runtime.refreshTimeout);
+
+        if (runtime.refreshRequest) {
+            runtime.refreshRequest.abort();
+        }
+
+        runtime.xmin = new Date().getTime() - server_time_diff - runtime.gridMaxPoints * monitorSettings.gridRefresh;
+        // fixing chart shift towards left on refresh rate change
+        // runtime.xmax = new Date().getTime() - server_time_diff + monitorSettings.gridRefresh;
+        runtime.refreshTimeout = setTimeout(refreshChartGrid, monitorSettings.gridRefresh);
+
+        saveMonitor(); // Save settings
+    });
+
+    $('a[href="#addNewChart"]').click(function (event) {
+        event.preventDefault();
+        var dlgButtons = { };
+
+        dlgButtons[PMA_messages.strAddChart] = function () {
+            var type = $('input[name="chartType"]:checked').val();
+
+            if (type === 'preset') {
+                newChart = presetCharts[$('#addChartDialog').find('select[name="presetCharts"]').prop('value')];
+            } else {
+                // If user builds his own chart, it's being set/updated
+                // each time he adds a series
+                // So here we only warn if he didn't add a series yet
+                if (! newChart || ! newChart.nodes || newChart.nodes.length === 0) {
+                    alert(PMA_messages.strAddOneSeriesWarning);
+                    return;
+                }
+            }
+
+            newChart.title = $('input[name="chartTitle"]').val();
+            // Add a cloned object to the chart grid
+            addChart($.extend(true, {}, newChart));
+
+            newChart = null;
+
+            saveMonitor(); // Save settings
+
+            $(this).dialog('close');
+        };
+
+        dlgButtons[PMA_messages.strClose] = function () {
+            newChart = null;
+            $('span#clearSeriesLink').hide();
+            $('#seriesPreview').html('');
+            $(this).dialog('close');
+        };
+
+        var $presetList = $('#addChartDialog').find('select[name="presetCharts"]');
+        if ($presetList.html().length === 0) {
+            $.each(presetCharts, function (key, value) {
+                $presetList.append('<option value="' + key + '">' + value.title + '</option>');
+            });
+            $presetList.change(function () {
+                $('input[name="chartTitle"]').val(
+                    $presetList.find(':selected').text()
+                );
+                $('#chartPreset').prop('checked', true);
+            });
+            $('#chartPreset').click(function () {
+                $('input[name="chartTitle"]').val(
+                    $presetList.find(':selected').text()
+                );
+            });
+            $('#chartStatusVar').click(function () {
+                $('input[name="chartTitle"]').val(
+                    $('#chartSeries').find(':selected').text().replace(/_/g, ' ')
+                );
+            });
+            $('#chartSeries').change(function () {
+                $('input[name="chartTitle"]').val(
+                    $('#chartSeries').find(':selected').text().replace(/_/g, ' ')
+                );
+            });
+        }
+
+        $('#addChartDialog').dialog({
+            width: 'auto',
+            height: 'auto',
+            buttons: dlgButtons
+        });
+
+        $('#seriesPreview').html('<i>' + PMA_messages.strNone + '</i>');
+
+        return false;
+    });
+
+    $('a[href="#exportMonitorConfig"]').click(function (event) {
+        event.preventDefault();
+        var gridCopy = {};
+        $.each(runtime.charts, function (key, elem) {
+            gridCopy[key] = {};
+            gridCopy[key].nodes = elem.nodes;
+            gridCopy[key].series = elem.series;
+            gridCopy[key].settings = elem.settings;
+            gridCopy[key].title = elem.title;
+            gridCopy[key].maxYLabel = elem.maxYLabel;
+        });
+        var exportData = {
+            monitorCharts: gridCopy,
+            monitorSettings: monitorSettings
+        };
+
+        var blob = new Blob([JSON.stringify(exportData)], { type: 'application/octet-stream' });
+        var url = null;
+        var fileName = 'monitor-config.json';
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blob, fileName);
+        } else {
+            url = URL.createObjectURL(blob);
+            window.location.href = url;
+        }
+        setTimeout(function () {
+            // For some browsers it is necessary to delay revoking the ObjectURL
+            if (url !== null) {
+                window.URL.revokeObjectURL(url);
+            }
+            url = undefined;
+            blob = undefined;
+        }, 100);
+    });
+
+    $('a[href="#importMonitorConfig"]').click(function (event) {
+        event.preventDefault();
+        $('#emptyDialog').dialog({ title: PMA_messages.strImportDialogTitle });
+        $('#emptyDialog').html(PMA_messages.strImportDialogMessage + ':<br/><form>' +
+            '<input type="file" name="file" id="import_file"> </form>');
+
+        var dlgBtns = {};
+
+        dlgBtns[PMA_messages.strImport] = function () {
+            var input = $('#emptyDialog').find('#import_file')[0];
+            var reader = new FileReader();
+
+            reader.onerror = function (event) {
+                alert(PMA_messages.strFailedParsingConfig + '\n' + event.target.error.code);
+            };
+            reader.onload = function (e) {
+                var data = e.target.result;
+                var json = null;
+                // Try loading config
+                try {
+                    json = JSON.parse(data);
+                } catch (err) {
+                    alert(PMA_messages.strFailedParsingConfig);
+                    $('#emptyDialog').dialog('close');
+                    return;
+                }
+
+                // Basic check, is this a monitor config json?
+                if (!json || ! json.monitorCharts || ! json.monitorCharts) {
+                    alert(PMA_messages.strFailedParsingConfig);
+                    $('#emptyDialog').dialog('close');
+                    return;
+                }
+
+                // If json ok, try applying config
+                try {
+                    if (isStorageSupported('localStorage')) {
+                        window.localStorage.monitorCharts = JSON.stringify(json.monitorCharts);
+                        window.localStorage.monitorSettings = JSON.stringify(json.monitorSettings);
+                    }
+                    rebuildGrid();
+                } catch (err) {
+                    alert(PMA_messages.strFailedBuildingGrid);
+                    // If an exception is thrown, load default again
+                    if (isStorageSupported('localStorage')) {
+                        window.localStorage.removeItem('monitorCharts');
+                        window.localStorage.removeItem('monitorSettings');
+                    }
+                    rebuildGrid();
+                }
+
+                $('#emptyDialog').dialog('close');
+            };
+            reader.readAsText(input.files[0]);
+        };
+
+        dlgBtns[PMA_messages.strCancel] = function () {
+            $(this).dialog('close');
+        };
+
+        $('#emptyDialog').dialog({
+            width: 'auto',
+            height: 'auto',
+            buttons: dlgBtns
+        });
+    });
+
+    $('a[href="#clearMonitorConfig"]').click(function (event) {
+        event.preventDefault();
+        if (isStorageSupported('localStorage')) {
+            window.localStorage.removeItem('monitorCharts');
+            window.localStorage.removeItem('monitorSettings');
+            window.localStorage.removeItem('monitorVersion');
+        }
+        $(this).hide();
+        rebuildGrid();
+    });
+
+    $('a[href="#pauseCharts"]').click(function (event) {
+        event.preventDefault();
+        runtime.redrawCharts = ! runtime.redrawCharts;
+        if (! runtime.redrawCharts) {
+            $(this).html(PMA_getImage('play') + PMA_messages.strResumeMonitor);
+        } else {
+            $(this).html(PMA_getImage('pause') + PMA_messages.strPauseMonitor);
+            if (! runtime.charts) {
+                initGrid();
+                $('a[href="#settingsPopup"]').show();
+            }
+        }
+        return false;
+    });
+
+    $('a[href="#monitorInstructionsDialog"]').click(function (event) {
+        event.preventDefault();
+
+        var $dialog = $('#monitorInstructionsDialog');
+
+        $dialog.dialog({
+            width: '60%',
+            height: 'auto'
+        }).find('img.ajaxIcon').show();
+
+        var loadLogVars = function (getvars) {
+            var vars = { ajax_request: true, logging_vars: true };
+            if (getvars) {
+                $.extend(vars, getvars);
+            }
+
+            $.post('server_status_monitor.php' + PMA_commonParams.get('common_query'), vars,
+                function (data) {
+                    var logVars;
+                    if (typeof data !== 'undefined' && data.success === true) {
+                        logVars = data.message;
+                    } else {
+                        return serverResponseError();
+                    }
+                    var icon = PMA_getImage('s_success');
+                    var msg = '';
+                    var str = '';
+
+                    if (logVars.general_log === 'ON') {
+                        if (logVars.slow_query_log === 'ON') {
+                            msg = PMA_messages.strBothLogOn;
+                        } else {
+                            msg = PMA_messages.strGenLogOn;
+                        }
+                    }
+
+                    if (msg.length === 0 && logVars.slow_query_log === 'ON') {
+                        msg = PMA_messages.strSlowLogOn;
+                    }
+
+                    if (msg.length === 0) {
+                        icon = PMA_getImage('s_error');
+                        msg = PMA_messages.strBothLogOff;
+                    }
+
+                    str = '<b>' + PMA_messages.strCurrentSettings + '</b><br/><div class="smallIndent">';
+                    str += icon + msg + '<br />';
+
+                    if (logVars.log_output !== 'TABLE') {
+                        str += PMA_getImage('s_error') + ' ' + PMA_messages.strLogOutNotTable + '<br />';
+                    } else {
+                        str += PMA_getImage('s_success') + ' ' + PMA_messages.strLogOutIsTable + '<br />';
+                    }
+
+                    if (logVars.slow_query_log === 'ON') {
+                        if (logVars.long_query_time > 2) {
+                            str += PMA_getImage('s_attention') + ' ';
+                            str += PMA_sprintf(PMA_messages.strSmallerLongQueryTimeAdvice, logVars.long_query_time);
+                            str += '<br />';
+                        }
+
+                        if (logVars.long_query_time < 2) {
+                            str += PMA_getImage('s_success') + ' ';
+                            str += PMA_sprintf(PMA_messages.strLongQueryTimeSet, logVars.long_query_time);
+                            str += '<br />';
+                        }
+                    }
+
+                    str += '</div>';
+
+                    if (is_superuser) {
+                        str += '<p></p><b>' + PMA_messages.strChangeSettings + '</b>';
+                        str += '<div class="smallIndent">';
+                        str += PMA_messages.strSettingsAppliedGlobal + '<br/>';
+
+                        var varValue = 'TABLE';
+                        if (logVars.log_output === 'TABLE') {
+                            varValue = 'FILE';
+                        }
+
+                        str += '- <a class="set" href="#log_output-' + varValue + '">';
+                        str += PMA_sprintf(PMA_messages.strSetLogOutput, varValue);
+                        str += ' </a><br />';
+
+                        if (logVars.general_log !== 'ON') {
+                            str += '- <a class="set" href="#general_log-ON">';
+                            str += PMA_sprintf(PMA_messages.strEnableVar, 'general_log');
+                            str += ' </a><br />';
+                        } else {
+                            str += '- <a class="set" href="#general_log-OFF">';
+                            str += PMA_sprintf(PMA_messages.strDisableVar, 'general_log');
+                            str += ' </a><br />';
+                        }
+
+                        if (logVars.slow_query_log !== 'ON') {
+                            str += '- <a class="set" href="#slow_query_log-ON">';
+                            str +=  PMA_sprintf(PMA_messages.strEnableVar, 'slow_query_log');
+                            str += ' </a><br />';
+                        } else {
+                            str += '- <a class="set" href="#slow_query_log-OFF">';
+                            str +=  PMA_sprintf(PMA_messages.strDisableVar, 'slow_query_log');
+                            str += ' </a><br />';
+                        }
+
+                        varValue = 5;
+                        if (logVars.long_query_time > 2) {
+                            varValue = 1;
+                        }
+
+                        str += '- <a class="set" href="#long_query_time-' + varValue + '">';
+                        str += PMA_sprintf(PMA_messages.setSetLongQueryTime, varValue);
+                        str += ' </a><br />';
+                    } else {
+                        str += PMA_messages.strNoSuperUser + '<br/>';
+                    }
+
+                    str += '</div>';
+
+                    $dialog.find('div.monitorUse').toggle(
+                        logVars.log_output === 'TABLE' && (logVars.slow_query_log === 'ON' || logVars.general_log === 'ON')
+                    );
+
+                    $dialog.find('div.ajaxContent').html(str);
+                    $dialog.find('img.ajaxIcon').hide();
+                    $dialog.find('a.set').click(function () {
+                        var nameValue = $(this).attr('href').split('-');
+                        loadLogVars({ varName: nameValue[0].substr(1), varValue: nameValue[1] });
+                        $dialog.find('img.ajaxIcon').show();
+                    });
+                }
+            );
+        };
+
+
+        loadLogVars();
+
+        return false;
+    });
+
+    $('input[name="chartType"]').change(function () {
+        $('#chartVariableSettings').toggle(this.checked && this.value === 'variable');
+        var title = $('input[name="chartTitle"]').val();
+        if (title === PMA_messages.strChartTitle ||
+            title === $('label[for="' + $('input[name="chartTitle"]').data('lastRadio') + '"]').text()
+        ) {
+            $('input[name="chartTitle"]')
+                .data('lastRadio', $(this).attr('id'))
+                .val($('label[for="' + $(this).attr('id') + '"]').text());
+        }
+    });
+
+    $('input[name="useDivisor"]').change(function () {
+        $('span.divisorInput').toggle(this.checked);
+    });
+
+    $('input[name="useUnit"]').change(function () {
+        $('span.unitInput').toggle(this.checked);
+    });
+
+    $('select[name="varChartList"]').change(function () {
+        if (this.selectedIndex !== 0) {
+            $('#variableInput').val(this.value);
+        }
+    });
+
+    $('a[href="#kibDivisor"]').click(function (event) {
+        event.preventDefault();
+        $('input[name="valueDivisor"]').val(1024);
+        $('input[name="valueUnit"]').val(PMA_messages.strKiB);
+        $('span.unitInput').toggle(true);
+        $('input[name="useUnit"]').prop('checked', true);
+        return false;
+    });
+
+    $('a[href="#mibDivisor"]').click(function (event) {
+        event.preventDefault();
+        $('input[name="valueDivisor"]').val(1024 * 1024);
+        $('input[name="valueUnit"]').val(PMA_messages.strMiB);
+        $('span.unitInput').toggle(true);
+        $('input[name="useUnit"]').prop('checked', true);
+        return false;
+    });
+
+    $('a[href="#submitClearSeries"]').click(function (event) {
+        event.preventDefault();
+        $('#seriesPreview').html('<i>' + PMA_messages.strNone + '</i>');
+        newChart = null;
+        $('#clearSeriesLink').hide();
+    });
+
+    $('a[href="#submitAddSeries"]').click(function (event) {
+        event.preventDefault();
+        if ($('#variableInput').val() === '') {
+            return false;
+        }
+
+        if (newChart === null) {
+            $('#seriesPreview').html('');
+
+            newChart = {
+                title: $('input[name="chartTitle"]').val(),
+                nodes: [],
+                series: [],
+                maxYLabel: 0
+            };
+        }
+
+        var serie = {
+            dataPoints: [{ type: 'statusvar', name: $('#variableInput').val() }],
+            display: $('input[name="differentialValue"]').prop('checked') ? 'differential' : ''
+        };
+
+        if (serie.dataPoints[0].name === 'Processes') {
+            serie.dataPoints[0].type = 'proc';
+        }
+
+        if ($('input[name="useDivisor"]').prop('checked')) {
+            serie.valueDivisor = parseInt($('input[name="valueDivisor"]').val(), 10);
+        }
+
+        if ($('input[name="useUnit"]').prop('checked')) {
+            serie.unit = $('input[name="valueUnit"]').val();
+        }
+
+        var str = serie.display === 'differential' ? ', ' + PMA_messages.strDifferential : '';
+        str += serie.valueDivisor ? (', ' + PMA_sprintf(PMA_messages.strDividedBy, serie.valueDivisor)) : '';
+        str += serie.unit ? (', ' + PMA_messages.strUnit + ': ' + serie.unit) : '';
+
+        var newSeries = {
+            label: $('#variableInput').val().replace(/_/g, ' ')
+        };
+        newChart.series.push(newSeries);
+        $('#seriesPreview').append('- ' + escapeHtml(newSeries.label + str) + '<br/>');
+        newChart.nodes.push(serie);
+        $('#variableInput').val('');
+        $('input[name="differentialValue"]').prop('checked', true);
+        $('input[name="useDivisor"]').prop('checked', false);
+        $('input[name="useUnit"]').prop('checked', false);
+        $('input[name="useDivisor"]').trigger('change');
+        $('input[name="useUnit"]').trigger('change');
+        $('select[name="varChartList"]').get(0).selectedIndex = 0;
+
+        $('#clearSeriesLink').show();
+
+        return false;
+    });
+
+    $('#variableInput').autocomplete({
+        source: variableNames
+    });
+
+    /* Initializes the monitor, called only once */
+    function initGrid () {
+        var i;
+
+        /* Apply default values & config */
+        if (isStorageSupported('localStorage')) {
+            if (typeof window.localStorage.monitorCharts !== 'undefined') {
+                runtime.charts = JSON.parse(window.localStorage.monitorCharts);
+            }
+            if (typeof window.localStorage.monitorSettings !== 'undefined') {
+                monitorSettings = JSON.parse(window.localStorage.monitorSettings);
+            }
+
+            $('a[href="#clearMonitorConfig"]').toggle(runtime.charts !== null);
+
+            if (runtime.charts !== null
+                && typeof window.localStorage.monitorVersion !== 'undefined'
+                && monitorProtocolVersion !== window.localStorage.monitorVersion
+            ) {
+                $('#emptyDialog').dialog({ title: PMA_messages.strIncompatibleMonitorConfig });
+                $('#emptyDialog').html(PMA_messages.strIncompatibleMonitorConfigDescription);
+
+                var dlgBtns = {};
+                dlgBtns[PMA_messages.strClose] = function () {
+                    $(this).dialog('close');
+                };
+
+                $('#emptyDialog').dialog({
+                    width: 400,
+                    buttons: dlgBtns
+                });
+            }
+        }
+
+        if (runtime.charts === null) {
+            runtime.charts = defaultChartGrid;
+        }
+        if (monitorSettings === null) {
+            monitorSettings = defaultMonitorSettings;
+        }
+
+        $('select[name="gridChartRefresh"]').val(monitorSettings.gridRefresh / 1000);
+        $('select[name="chartColumns"]').val(monitorSettings.columns);
+
+        if (monitorSettings.gridMaxPoints === 'auto') {
+            runtime.gridMaxPoints = Math.round((monitorSettings.chartSize.width - 40) / 12);
+        } else {
+            runtime.gridMaxPoints = monitorSettings.gridMaxPoints;
+        }
+
+        runtime.xmin = new Date().getTime() - server_time_diff - runtime.gridMaxPoints * monitorSettings.gridRefresh;
+        runtime.xmax = new Date().getTime() - server_time_diff + monitorSettings.gridRefresh;
+
+        /* Calculate how much spacing there is between each chart */
+        $('#chartGrid').html('<tr><td></td><td></td></tr><tr><td></td><td></td></tr>');
+        chartSpacing = {
+            width: $('#chartGrid').find('td:nth-child(2)').offset().left -
+                $('#chartGrid').find('td:nth-child(1)').offset().left,
+            height: $('#chartGrid').find('tr:nth-child(2) td:nth-child(2)').offset().top -
+                $('#chartGrid').find('tr:nth-child(1) td:nth-child(1)').offset().top
+        };
+        $('#chartGrid').html('');
+
+        /* Add all charts - in correct order */
+        var keys = [];
+        $.each(runtime.charts, function (key, value) {
+            keys.push(key);
+        });
+        keys.sort();
+        for (i = 0; i < keys.length; i++) {
+            addChart(runtime.charts[keys[i]], true);
+        }
+
+        /* Fill in missing cells */
+        var numCharts = $('#chartGrid').find('.monitorChart').length;
+        var numMissingCells = (monitorSettings.columns - numCharts % monitorSettings.columns) % monitorSettings.columns;
+        for (i = 0; i < numMissingCells; i++) {
+            $('#chartGrid').find('tr:last').append('<td></td>');
+        }
+
+        // Empty cells should keep their size so you can drop onto them
+        calculateChartSize();
+        $('#chartGrid').find('tr td').css('width', chartSize.width + 'px');
+
+        buildRequiredDataList();
+        refreshChartGrid();
+    }
+
+    /* Calls destroyGrid() and initGrid(), but before doing so it saves the chart
+     * data from each chart and restores it after the monitor is initialized again */
+    function rebuildGrid () {
+        var oldData = null;
+        if (runtime.charts) {
+            oldData = {};
+            $.each(runtime.charts, function (key, chartObj) {
+                for (var i = 0, l = chartObj.nodes.length; i < l; i++) {
+                    oldData[chartObj.nodes[i].dataPoint] = [];
+                    for (var j = 0, ll = chartObj.chart.series[i].data.length; j < ll; j++) {
+                        oldData[chartObj.nodes[i].dataPoint].push([chartObj.chart.series[i].data[j].x, chartObj.chart.series[i].data[j].y]);
+                    }
+                }
+            });
+        }
+
+        destroyGrid();
+        initGrid();
+    }
+
+    /* Calculactes the dynamic chart size that depends on the column width */
+    function calculateChartSize () {
+        var panelWidth;
+        if ($('body').height() > $(window).height()) { // has vertical scroll bar
+            panelWidth = $('#logTable').innerWidth();
+        } else {
+            panelWidth = $('#logTable').innerWidth() - 10; // leave some space for vertical scroll bar
+        }
+
+        var wdt = panelWidth;
+        var windowWidth = $(window).width();
+
+        if (windowWidth > 768) {
+            wdt = (panelWidth - monitorSettings.columns * chartSpacing.width) / monitorSettings.columns;
+        }
+
+        chartSize = {
+            width: Math.floor(wdt),
+            height: Math.floor(0.75 * wdt)
+        };
+    }
+
+    /* Adds a chart to the chart grid */
+    function addChart (chartObj, initialize) {
+        var i;
+        var settings = {
+            title: escapeHtml(chartObj.title),
+            grid: {
+                drawBorder: false,
+                shadow: false,
+                background: 'rgba(0,0,0,0)'
+            },
+            axes: {
+                xaxis: {
+                    renderer: $.jqplot.DateAxisRenderer,
+                    tickOptions: {
+                        formatString: '%H:%M:%S',
+                        showGridline: false
+                    },
+                    min: runtime.xmin,
+                    max: runtime.xmax
+                },
+                yaxis: {
+                    min: 0,
+                    max: 100,
+                    tickInterval: 20
+                }
+            },
+            seriesDefaults: {
+                rendererOptions: {
+                    smooth: true
+                },
+                showLine: true,
+                lineWidth: 2,
+                markerOptions: {
+                    size: 6
+                }
+            },
+            highlighter: {
+                show: true
+            }
+        };
+
+        if (settings.title === PMA_messages.strSystemCPUUsage ||
+            settings.title === PMA_messages.strQueryCacheEfficiency
+        ) {
+            settings.axes.yaxis.tickOptions = {
+                formatString: '%d %%'
+            };
+        } else if (settings.title === PMA_messages.strSystemMemory ||
+            settings.title === PMA_messages.strSystemSwap
+        ) {
+            settings.stackSeries = true;
+            settings.axes.yaxis.tickOptions = {
+                formatter: $.jqplot.byteFormatter(2) // MiB
+            };
+        } else if (settings.title === PMA_messages.strTraffic) {
+            settings.axes.yaxis.tickOptions = {
+                formatter: $.jqplot.byteFormatter(1) // KiB
+            };
+        } else if (settings.title === PMA_messages.strQuestions ||
+            settings.title === PMA_messages.strConnections
+        ) {
+            settings.axes.yaxis.tickOptions = {
+                formatter: function (format, val) {
+                    if (Math.abs(val) >= 1000000) {
+                        return $.jqplot.sprintf('%.3g M', val / 1000000);
+                    } else if (Math.abs(val) >= 1000) {
+                        return $.jqplot.sprintf('%.3g k', val / 1000);
+                    } else {
+                        return $.jqplot.sprintf('%d', val);
+                    }
+                }
+            };
+        }
+
+        settings.series = chartObj.series;
+
+        if ($('#' + 'gridchart' + runtime.chartAI).length === 0) {
+            var numCharts = $('#chartGrid').find('.monitorChart').length;
+
+            if (numCharts === 0 || (numCharts % monitorSettings.columns === 0)) {
+                $('#chartGrid').append('<tr></tr>');
+            }
+
+            if (!chartSize) {
+                calculateChartSize();
+            }
+            $('#chartGrid').find('tr:last').append(
+                '<td><div id="gridChartContainer' + runtime.chartAI + '" class="">' +
+                '<div class="ui-state-default monitorChart"' +
+                ' id="gridchart' + runtime.chartAI + '"' +
+                ' style="width:' + chartSize.width + 'px; height:' + chartSize.height + 'px;"></div>' +
+                '</div></td>'
+            );
+        }
+
+        // Set series' data as [0,0], smooth lines won't plot with data array having null values.
+        // also chart won't plot initially with no data and data comes on refreshChartGrid()
+        var series = [];
+        for (i in chartObj.series) {
+            series.push([[0, 0]]);
+        }
+
+        var tempTooltipContentEditor = function (str, seriesIndex, pointIndex, plot) {
+            var j;
+            // TODO: move style to theme CSS
+            var tooltipHtml = '<div style="font-size:12px;background-color:#FFFFFF;' +
+                'opacity:0.95;filter:alpha(opacity=95);padding:5px;">';
+            // x value i.e. time
+            var timeValue = str.split(',')[0];
+            var seriesValue;
+            tooltipHtml += 'Time: ' + timeValue;
+            tooltipHtml += '<span style="font-weight:bold;">';
+            // Add y values to the tooltip per series
+            for (j in plot.series) {
+                // get y value if present
+                if (plot.series[j].data.length > pointIndex) {
+                    seriesValue = plot.series[j].data[pointIndex][1];
+                } else {
+                    return;
+                }
+                var seriesLabel = plot.series[j].label;
+                var seriesColor = plot.series[j].color;
+                // format y value
+                if (plot.series[0]._yaxis.tickOptions.formatter) {
+                    // using formatter function
+                    seriesValue = plot.series[0]._yaxis.tickOptions.formatter('%s', seriesValue);
+                } else if (plot.series[0]._yaxis.tickOptions.formatString) {
+                    // using format string
+                    seriesValue = PMA_sprintf(plot.series[0]._yaxis.tickOptions.formatString, seriesValue);
+                }
+                tooltipHtml += '<br /><span style="color:' + seriesColor + '">' +
+                    seriesLabel + ': ' + seriesValue + '</span>';
+            }
+            tooltipHtml += '</span></div>';
+            return tooltipHtml;
+        };
+
+        // set Tooltip for each series
+        for (i in settings.series) {
+            settings.series[i].highlighter = {
+                show: true,
+                tooltipContentEditor: tempTooltipContentEditor
+            };
+        }
+
+        chartObj.chart = $.jqplot('gridchart' + runtime.chartAI, series, settings);
+        // remove [0,0] after plotting
+        for (i in chartObj.chart.series) {
+            chartObj.chart.series[i].data.shift();
+        }
+
+        var $legend = $('<div />').css('padding', '0.5em');
+        for (i in chartObj.chart.series) {
+            $legend.append(
+                $('<div />').append(
+                    $('<div>').css({
+                        width: '1em',
+                        height: '1em',
+                        background: chartObj.chart.seriesColors[i]
+                    }).addClass('floatleft')
+                ).append(
+                    $('<div>').text(
+                        chartObj.chart.series[i].label
+                    ).addClass('floatleft')
+                ).append(
+                    $('<div class="clearfloat">')
+                ).addClass('floatleft')
+            );
+        }
+        $('#gridchart' + runtime.chartAI)
+            .parent()
+            .append($legend);
+
+        if (initialize !== true) {
+            runtime.charts['c' + runtime.chartAI] = chartObj;
+            buildRequiredDataList();
+        }
+
+        // time span selection
+        $('#gridchart' + runtime.chartAI).on('jqplotMouseDown', function (ev, gridpos, datapos, neighbor, plot) {
+            drawTimeSpan = true;
+            selectionTimeDiff.push(datapos.xaxis);
+            if ($('#selection_box').length) {
+                $('#selection_box').remove();
+            }
+            var selectionBox = $('<div id="selection_box" style="z-index:1000;height:205px;position:absolute;background-color:#87CEEB;opacity:0.4;filter:alpha(opacity=40);pointer-events:none;">');
+            $(document.body).append(selectionBox);
+            selectionStartX = ev.pageX;
+            selectionStartY = ev.pageY;
+            selectionBox
+                .attr({ id: 'selection_box' })
+                .css({
+                    top: selectionStartY - gridpos.y,
+                    left: selectionStartX
+                })
+                .fadeIn();
+        });
+
+        $('#gridchart' + runtime.chartAI).on('jqplotMouseUp', function (ev, gridpos, datapos, neighbor, plot) {
+            if (! drawTimeSpan || editMode) {
+                return;
+            }
+
+            selectionTimeDiff.push(datapos.xaxis);
+
+            if (selectionTimeDiff[1] <= selectionTimeDiff[0]) {
+                selectionTimeDiff = [];
+                return;
+            }
+            // get date from timestamp
+            var min = new Date(Math.ceil(selectionTimeDiff[0]));
+            var max = new Date(Math.ceil(selectionTimeDiff[1]));
+            PMA_getLogAnalyseDialog(min, max);
+            selectionTimeDiff = [];
+            drawTimeSpan = false;
+        });
+
+        $('#gridchart' + runtime.chartAI).on('jqplotMouseMove', function (ev, gridpos, datapos, neighbor, plot) {
+            if (! drawTimeSpan || editMode) {
+                return;
+            }
+            if (selectionStartX !== undefined) {
+                $('#selection_box')
+                    .css({
+                        width: Math.ceil(ev.pageX - selectionStartX)
+                    })
+                    .fadeIn();
+            }
+        });
+
+        $('#gridchart' + runtime.chartAI).on('jqplotMouseLeave', function (ev, gridpos, datapos, neighbor, plot) {
+            drawTimeSpan = false;
+        });
+
+        $(document.body).mouseup(function () {
+            if ($('#selection_box').length) {
+                $('#selection_box').remove();
+            }
+        });
+
+        // Edit, Print icon only in edit mode
+        $('#chartGrid').find('div svg').find('*[zIndex=20], *[zIndex=21], *[zIndex=19]').toggle(editMode);
+
+        runtime.chartAI++;
+    }
+
+    function PMA_getLogAnalyseDialog (min, max) {
+        var $logAnalyseDialog = $('#logAnalyseDialog');
+        var $dateStart = $logAnalyseDialog.find('input[name="dateStart"]');
+        var $dateEnd = $logAnalyseDialog.find('input[name="dateEnd"]');
+        $dateStart.prop('readonly', true);
+        $dateEnd.prop('readonly', true);
+
+        var dlgBtns = { };
+
+        dlgBtns[PMA_messages.strFromSlowLog] = function () {
+            loadLog('slow', min, max);
+            $(this).dialog('close');
+        };
+
+        dlgBtns[PMA_messages.strFromGeneralLog] = function () {
+            loadLog('general', min, max);
+            $(this).dialog('close');
+        };
+
+        $logAnalyseDialog.dialog({
+            width: 'auto',
+            height: 'auto',
+            buttons: dlgBtns
+        });
+
+        PMA_addDatepicker($dateStart, 'datetime', {
+            showMillisec: false,
+            showMicrosec: false,
+            timeFormat: 'HH:mm:ss'
+        });
+        PMA_addDatepicker($dateEnd, 'datetime', {
+            showMillisec: false,
+            showMicrosec: false,
+            timeFormat: 'HH:mm:ss'
+        });
+        $dateStart.datepicker('setDate', min);
+        $dateEnd.datepicker('setDate', max);
+    }
+
+    function loadLog (type, min, max) {
+        var dateStart = Date.parse($('#logAnalyseDialog').find('input[name="dateStart"]').datepicker('getDate')) || min;
+        var dateEnd = Date.parse($('#logAnalyseDialog').find('input[name="dateEnd"]').datepicker('getDate')) || max;
+
+        loadLogStatistics({
+            src: type,
+            start: dateStart,
+            end: dateEnd,
+            removeVariables: $('#removeVariables').prop('checked'),
+            limitTypes: $('#limitTypes').prop('checked')
+        });
+    }
+
+    /* Called in regular intervals, this function updates the values of each chart in the grid */
+    function refreshChartGrid () {
+        /* Send to server */
+        runtime.refreshRequest = $.post('server_status_monitor.php' + PMA_commonParams.get('common_query'), {
+            ajax_request: true,
+            chart_data: 1,
+            type: 'chartgrid',
+            requiredData: JSON.stringify(runtime.dataList),
+            server: PMA_commonParams.get('server')
+        }, function (data) {
+            var chartData;
+            if (typeof data !== 'undefined' && data.success === true) {
+                chartData = data.message;
+            } else {
+                return serverResponseError();
+            }
+            var value;
+            var i = 0;
+            var diff;
+            var total;
+
+            /* Update values in each graph */
+            $.each(runtime.charts, function (orderKey, elem) {
+                var key = elem.chartID;
+                // If newly added chart, we have no data for it yet
+                if (! chartData[key]) {
+                    return;
+                }
+                // Draw all series
+                total = 0;
+                for (var j = 0; j < elem.nodes.length; j++) {
+                    // Update x-axis
+                    if (i === 0 && j === 0) {
+                        if (oldChartData === null) {
+                            diff = chartData.x - runtime.xmax;
+                        } else {
+                            diff = parseInt(chartData.x - oldChartData.x, 10);
+                        }
+
+                        runtime.xmin += diff;
+                        runtime.xmax += diff;
+                    }
+
+                    // elem.chart.xAxis[0].setExtremes(runtime.xmin, runtime.xmax, false);
+                    /* Calculate y value */
+
+                    // If transform function given, use it
+                    if (elem.nodes[j].transformFn) {
+                        value = chartValueTransform(
+                            elem.nodes[j].transformFn,
+                            chartData[key][j],
+                            // Check if first iteration (oldChartData==null), or if newly added chart oldChartData[key]==null
+                            (
+                                oldChartData === null ||
+                                oldChartData[key] === null ||
+                                oldChartData[key] === undefined ? null : oldChartData[key][j]
+                            )
+                        );
+
+                    // Otherwise use original value and apply differential and divisor if given,
+                    // in this case we have only one data point per series - located at chartData[key][j][0]
+                    } else {
+                        value = parseFloat(chartData[key][j][0].value);
+
+                        if (elem.nodes[j].display === 'differential') {
+                            if (oldChartData === null ||
+                                oldChartData[key] === null ||
+                                oldChartData[key] === undefined
+                            ) {
+                                continue;
+                            }
+                            value -= oldChartData[key][j][0].value;
+                        }
+
+                        if (elem.nodes[j].valueDivisor) {
+                            value = value / elem.nodes[j].valueDivisor;
+                        }
+                    }
+
+                    // Set y value, if defined
+                    if (value !== undefined) {
+                        elem.chart.series[j].data.push([chartData.x, value]);
+                        if (value > elem.maxYLabel) {
+                            elem.maxYLabel = value;
+                        } else if (elem.maxYLabel === 0) {
+                            elem.maxYLabel = 0.5;
+                        }
+                        // free old data point values and update maxYLabel
+                        if (elem.chart.series[j].data.length > runtime.gridMaxPoints &&
+                            elem.chart.series[j].data[0][0] < runtime.xmin
+                        ) {
+                            // check if the next freeable point is highest
+                            if (elem.maxYLabel <= elem.chart.series[j].data[0][1]) {
+                                elem.chart.series[j].data.splice(0, elem.chart.series[j].data.length - runtime.gridMaxPoints);
+                                elem.maxYLabel = getMaxYLabel(elem.chart.series[j].data);
+                            } else {
+                                elem.chart.series[j].data.splice(0, elem.chart.series[j].data.length - runtime.gridMaxPoints);
+                            }
+                        }
+                        if (elem.title === PMA_messages.strSystemMemory ||
+                            elem.title === PMA_messages.strSystemSwap
+                        ) {
+                            total += value;
+                        }
+                    }
+                }
+
+                // update chart options
+                // keep ticks number/positioning consistent while refreshrate changes
+                var tickInterval = (runtime.xmax - runtime.xmin) / 5;
+                elem.chart.axes.xaxis.ticks = [(runtime.xmax - tickInterval * 4),
+                    (runtime.xmax - tickInterval * 3), (runtime.xmax - tickInterval * 2),
+                    (runtime.xmax - tickInterval), runtime.xmax];
+
+                if (elem.title !== PMA_messages.strSystemCPUUsage &&
+                    elem.title !== PMA_messages.strQueryCacheEfficiency &&
+                    elem.title !== PMA_messages.strSystemMemory &&
+                    elem.title !== PMA_messages.strSystemSwap
+                ) {
+                    elem.chart.axes.yaxis.max = Math.ceil(elem.maxYLabel * 1.1);
+                    elem.chart.axes.yaxis.tickInterval = Math.ceil(elem.maxYLabel * 1.1 / 5);
+                } else if (elem.title === PMA_messages.strSystemMemory ||
+                    elem.title === PMA_messages.strSystemSwap
+                ) {
+                    elem.chart.axes.yaxis.max = Math.ceil(total * 1.1 / 100) * 100;
+                    elem.chart.axes.yaxis.tickInterval = Math.ceil(total * 1.1 / 5);
+                }
+                i++;
+
+                if (runtime.redrawCharts) {
+                    elem.chart.replot();
+                }
+            });
+
+            oldChartData = chartData;
+
+            runtime.refreshTimeout = setTimeout(refreshChartGrid, monitorSettings.gridRefresh);
+        });
+    }
+
+    /* Function to get highest plotted point's y label, to scale the chart,
+     * TODO: make jqplot's autoscale:true work here
+     */
+    function getMaxYLabel (dataValues) {
+        var maxY = dataValues[0][1];
+        $.each(dataValues, function (k, v) {
+            maxY = (v[1] > maxY) ? v[1] : maxY;
+        });
+        return maxY;
+    }
+
+    /* Function that supplies special value transform functions for chart values */
+    function chartValueTransform (name, cur, prev) {
+        switch (name) {
+        case 'cpu-linux':
+            if (prev === null) {
+                return undefined;
+            }
+            // cur and prev are datapoint arrays, but containing
+            // only 1 element for cpu-linux
+            cur = cur[0];
+            prev = prev[0];
+
+            var diff_total = cur.busy + cur.idle - (prev.busy + prev.idle);
+            var diff_idle = cur.idle - prev.idle;
+            return 100 * (diff_total - diff_idle) / diff_total;
+
+        // Query cache efficiency (%)
+        case 'qce':
+            if (prev === null) {
+                return undefined;
+            }
+            // cur[0].value is Qcache_hits, cur[1].value is Com_select
+            var diffQHits = cur[0].value - prev[0].value;
+            // No NaN please :-)
+            if (cur[1].value - prev[1].value === 0) {
+                return 0;
+            }
+
+            return diffQHits / (cur[1].value - prev[1].value + diffQHits) * 100;
+
+        // Query cache usage (%)
+        case 'qcu':
+            if (cur[1].value === 0) {
+                return 0;
+            }
+            // cur[0].value is Qcache_free_memory, cur[1].value is query_cache_size
+            return 100 - cur[0].value / cur[1].value * 100;
+        }
+        return undefined;
+    }
+
+    /* Build list of nodes that need to be retrieved from server.
+     * It creates something like a stripped down version of the runtime.charts object.
+     */
+    function buildRequiredDataList () {
+        runtime.dataList = {};
+        // Store an own id, because the property name is subject of reordering,
+        // thus destroying our mapping with runtime.charts <=> runtime.dataList
+        var chartID = 0;
+        $.each(runtime.charts, function (key, chart) {
+            runtime.dataList[chartID] = [];
+            for (var i = 0, l = chart.nodes.length; i < l; i++) {
+                runtime.dataList[chartID][i] = chart.nodes[i].dataPoints;
+            }
+            runtime.charts[key].chartID = chartID;
+            chartID++;
+        });
+    }
+
+    /* Loads the log table data, generates the table and handles the filters */
+    function loadLogStatistics (opts) {
+        var tableStr = '';
+        var logRequest = null;
+
+        if (! opts.removeVariables) {
+            opts.removeVariables = false;
+        }
+        if (! opts.limitTypes) {
+            opts.limitTypes = false;
+        }
+
+        $('#emptyDialog').dialog({ title: PMA_messages.strAnalysingLogsTitle });
+        $('#emptyDialog').html(PMA_messages.strAnalysingLogs +
+                                ' <img class="ajaxIcon" src="' + pmaThemeImage +
+                                'ajax_clock_small.gif" alt="">');
+        var dlgBtns = {};
+
+        dlgBtns[PMA_messages.strCancelRequest] = function () {
+            if (logRequest !== null) {
+                logRequest.abort();
+            }
+
+            $(this).dialog('close');
+        };
+
+        $('#emptyDialog').dialog({
+            width: 'auto',
+            height: 'auto',
+            buttons: dlgBtns
+        });
+
+        logRequest = $.post(
+            'server_status_monitor.php' + PMA_commonParams.get('common_query'),
+            {
+                ajax_request: true,
+                log_data: 1,
+                type: opts.src,
+                time_start: Math.round(opts.start / 1000),
+                time_end: Math.round(opts.end / 1000),
+                removeVariables: opts.removeVariables,
+                limitTypes: opts.limitTypes
+            },
+            function (data) {
+                var logData;
+                var dlgBtns = {};
+                if (typeof data !== 'undefined' && data.success === true) {
+                    logData = data.message;
+                } else {
+                    return serverResponseError();
+                }
+
+                if (logData.rows.length === 0) {
+                    $('#emptyDialog').dialog({ title: PMA_messages.strNoDataFoundTitle });
+                    $('#emptyDialog').html('<p>' + PMA_messages.strNoDataFound + '</p>');
+
+                    dlgBtns[PMA_messages.strClose] = function () {
+                        $(this).dialog('close');
+                    };
+
+                    $('#emptyDialog').dialog('option', 'buttons', dlgBtns);
+                    return;
+                }
+
+                runtime.logDataCols = buildLogTable(logData, opts.removeVariables);
+
+                /* Show some stats in the dialog */
+                $('#emptyDialog').dialog({ title: PMA_messages.strLoadingLogs });
+                $('#emptyDialog').html('<p>' + PMA_messages.strLogDataLoaded + '</p>');
+                $.each(logData.sum, function (key, value) {
+                    key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+                    if (key === 'Total') {
+                        key = '<b>' + key + '</b>';
+                    }
+                    $('#emptyDialog').append(key + ': ' + value + '<br/>');
+                });
+
+                /* Add filter options if more than a bunch of rows there to filter */
+                if (logData.numRows > 12) {
+                    $('#logTable').prepend(
+                        '<fieldset id="logDataFilter">' +
+                        '    <legend>' + PMA_messages.strFiltersForLogTable + '</legend>' +
+                        '    <div class="formelement">' +
+                        '        <label for="filterQueryText">' + PMA_messages.strFilterByWordRegexp + '</label>' +
+                        '        <input name="filterQueryText" type="text" id="filterQueryText" style="vertical-align: baseline;" />' +
+                        '    </div>' +
+                        ((logData.numRows > 250) ? ' <div class="formelement"><button name="startFilterQueryText" id="startFilterQueryText">' + PMA_messages.strFilter + '</button></div>' : '') +
+                        '    <div class="formelement">' +
+                        '       <input type="checkbox" id="noWHEREData" name="noWHEREData" value="1" /> ' +
+                        '       <label for="noWHEREData"> ' + PMA_messages.strIgnoreWhereAndGroup + '</label>' +
+                        '   </div' +
+                        '</fieldset>'
+                    );
+
+                    $('#noWHEREData').change(function () {
+                        filterQueries(true);
+                    });
+
+                    if (logData.numRows > 250) {
+                        $('#startFilterQueryText').click(filterQueries);
+                    } else {
+                        $('#filterQueryText').keyup(filterQueries);
+                    }
+                }
+
+                dlgBtns[PMA_messages.strJumpToTable] = function () {
+                    $(this).dialog('close');
+                    $(document).scrollTop($('#logTable').offset().top);
+                };
+
+                $('#emptyDialog').dialog('option', 'buttons', dlgBtns);
+            }
+        );
+
+        /* Handles the actions performed when the user uses any of the
+         * log table filters which are the filter by name and grouping
+         * with ignoring data in WHERE clauses
+         *
+         * @param boolean Should be true when the users enabled or disabled
+         *                to group queries ignoring data in WHERE clauses
+        */
+        function filterQueries (varFilterChange) {
+            var cell;
+            var textFilter;
+            var val = $('#filterQueryText').val();
+
+            if (val.length === 0) {
+                textFilter = null;
+            } else {
+                try {
+                    textFilter = new RegExp(val, 'i');
+                    $('#filterQueryText').removeClass('error');
+                } catch (e) {
+                    if (e instanceof SyntaxError) {
+                        $('#filterQueryText').addClass('error');
+                        textFilter = null;
+                    }
+                }
+            }
+
+            var rowSum = 0;
+            var totalSum = 0;
+            var i = 0;
+            var q;
+            var noVars = $('#noWHEREData').prop('checked');
+            var equalsFilter = /([^=]+)=(\d+|((\'|"|).*?[^\\])\4((\s+)|$))/gi;
+            var functionFilter = /([a-z0-9_]+)\(.+?\)/gi;
+            var filteredQueries = {};
+            var filteredQueriesLines = {};
+            var hide = false;
+            var rowData;
+            var queryColumnName = runtime.logDataCols[runtime.logDataCols.length - 2];
+            var sumColumnName = runtime.logDataCols[runtime.logDataCols.length - 1];
+            var isSlowLog = opts.src === 'slow';
+            var columnSums = {};
+
+            // For the slow log we have to count many columns (query_time, lock_time, rows_examined, rows_sent, etc.)
+            var countRow = function (query, row) {
+                var cells = row.match(/<td>(.*?)<\/td>/gi);
+                if (!columnSums[query]) {
+                    columnSums[query] = [0, 0, 0, 0];
+                }
+
+                // lock_time and query_time and displayed in timespan format
+                columnSums[query][0] += timeToSec(cells[2].replace(/(<td>|<\/td>)/gi, ''));
+                columnSums[query][1] += timeToSec(cells[3].replace(/(<td>|<\/td>)/gi, ''));
+                // rows_examind and rows_sent are just numbers
+                columnSums[query][2] += parseInt(cells[4].replace(/(<td>|<\/td>)/gi, ''), 10);
+                columnSums[query][3] += parseInt(cells[5].replace(/(<td>|<\/td>)/gi, ''), 10);
+            };
+
+            // We just assume the sql text is always in the second last column, and that the total count is right of it
+            $('#logTable').find('table tbody tr td:nth-child(' + (runtime.logDataCols.length - 1) + ')').each(function () {
+                var $t = $(this);
+                // If query is a SELECT and user enabled or disabled to group
+                // queries ignoring data in where statements, we
+                // need to re-calculate the sums of each row
+                if (varFilterChange && $t.html().match(/^SELECT/i)) {
+                    if (noVars) {
+                        // Group on => Sum up identical columns, and hide all but 1
+
+                        q = $t.text().replace(equalsFilter, '$1=...$6').trim();
+                        q = q.replace(functionFilter, ' $1(...)');
+
+                        // Js does not specify a limit on property name length,
+                        // so we can abuse it as index :-)
+                        if (filteredQueries[q]) {
+                            filteredQueries[q] += parseInt($t.next().text(), 10);
+                            totalSum += parseInt($t.next().text(), 10);
+                            hide = true;
+                        } else {
+                            filteredQueries[q] = parseInt($t.next().text(), 10);
+                            filteredQueriesLines[q] = i;
+                            $t.text(q);
+                        }
+                        if (isSlowLog) {
+                            countRow(q, $t.parent().html());
+                        }
+                    } else {
+                        // Group off: Restore original columns
+
+                        rowData = $t.parent().data('query');
+                        // Restore SQL text
+                        $t.text(rowData[queryColumnName]);
+                        // Restore total count
+                        $t.next().text(rowData[sumColumnName]);
+                        // Restore slow log columns
+                        if (isSlowLog) {
+                            $t.parent().children('td:nth-child(3)').text(rowData.query_time);
+                            $t.parent().children('td:nth-child(4)').text(rowData.lock_time);
+                            $t.parent().children('td:nth-child(5)').text(rowData.rows_sent);
+                            $t.parent().children('td:nth-child(6)').text(rowData.rows_examined);
+                        }
+                    }
+                }
+
+                // If not required to be hidden, do we need
+                // to hide because of a not matching text filter?
+                if (! hide && (textFilter !== null && ! textFilter.exec($t.text()))) {
+                    hide = true;
+                }
+
+                // Now display or hide this column
+                if (hide) {
+                    $t.parent().css('display', 'none');
+                } else {
+                    totalSum += parseInt($t.next().text(), 10);
+                    rowSum++;
+                    $t.parent().css('display', '');
+                }
+
+                hide = false;
+                i++;
+            });
+
+            // We finished summarizing counts => Update count values of all grouped entries
+            if (varFilterChange) {
+                if (noVars) {
+                    var numCol;
+                    var row;
+                    var $table = $('#logTable').find('table tbody');
+                    $.each(filteredQueriesLines, function (key, value) {
+                        if (filteredQueries[key] <= 1) {
+                            return;
+                        }
+
+                        row =  $table.children('tr:nth-child(' + (value + 1) + ')');
+                        numCol = row.children(':nth-child(' + (runtime.logDataCols.length) + ')');
+                        numCol.text(filteredQueries[key]);
+
+                        if (isSlowLog) {
+                            row.children('td:nth-child(3)').text(secToTime(columnSums[key][0]));
+                            row.children('td:nth-child(4)').text(secToTime(columnSums[key][1]));
+                            row.children('td:nth-child(5)').text(columnSums[key][2]);
+                            row.children('td:nth-child(6)').text(columnSums[key][3]);
+                        }
+                    });
+                }
+
+                $('#logTable').find('table').trigger('update');
+                setTimeout(function () {
+                    $('#logTable').find('table').trigger('sorton', [[[runtime.logDataCols.length - 1, 1]]]);
+                }, 0);
+            }
+
+            // Display some stats at the bottom of the table
+            $('#logTable').find('table tfoot tr')
+                .html('<th colspan="' + (runtime.logDataCols.length - 1) + '">' +
+                      PMA_messages.strSumRows + ' ' + rowSum + '<span class="floatright">' +
+                      PMA_messages.strTotal + '</span></th><th class="right">' + totalSum + '</th>');
+        }
+    }
+
+    /* Turns a timespan (12:12:12) into a number */
+    function timeToSec (timeStr) {
+        var time = timeStr.split(':');
+        return (parseInt(time[0], 10) * 3600) + (parseInt(time[1], 10) * 60) + parseInt(time[2], 10);
+    }
+
+    /* Turns a number into a timespan (100 into 00:01:40) */
+    function secToTime (timeInt) {
+        var hours = Math.floor(timeInt / 3600);
+        timeInt -= hours * 3600;
+        var minutes = Math.floor(timeInt / 60);
+        timeInt -= minutes * 60;
+
+        if (hours < 10) {
+            hours = '0' + hours;
+        }
+        if (minutes < 10) {
+            minutes = '0' + minutes;
+        }
+        if (timeInt < 10) {
+            timeInt = '0' + timeInt;
+        }
+
+        return hours + ':' + minutes + ':' + timeInt;
+    }
+
+    /* Constructs the log table out of the retrieved server data */
+    function buildLogTable (data, groupInserts) {
+        var rows = data.rows;
+        var cols = [];
+        var $table = $('<table class="sortable"></table>');
+        var $tBody;
+        var $tRow;
+        var $tCell;
+
+        $('#logTable').html($table);
+
+        var tempPushKey = function (key, value) {
+            cols.push(key);
+        };
+
+        var formatValue = function (name, value) {
+            if (name === 'user_host') {
+                return value.replace(/(\[.*?\])+/g, '');
+            }
+            return escapeHtml(value);
+        };
+
+        for (var i = 0, l = rows.length; i < l; i++) {
+            if (i === 0) {
+                $.each(rows[0], tempPushKey);
+                $table.append('<thead>' +
+                              '<tr><th class="nowrap">' + cols.join('</th><th class="nowrap">') + '</th></tr>' +
+                              '</thead>'
+                );
+
+                $table.append($tBody = $('<tbody></tbody>'));
+            }
+
+            $tBody.append($tRow = $('<tr class="noclick"></tr>'));
+            var cl = '';
+            for (var j = 0, ll = cols.length; j < ll; j++) {
+                // Assuming the query column is the second last
+                if (j === cols.length - 2 && rows[i][cols[j]].match(/^SELECT/i)) {
+                    $tRow.append($tCell = $('<td class="linkElem">' + formatValue(cols[j], rows[i][cols[j]]) + '</td>'));
+                    $tCell.click(openQueryAnalyzer);
+                } else {
+                    $tRow.append('<td>' + formatValue(cols[j], rows[i][cols[j]]) + '</td>');
+                }
+
+                $tRow.data('query', rows[i]);
+            }
+        }
+
+        $table.append('<tfoot>' +
+                    '<tr><th colspan="' + (cols.length - 1) + '">' + PMA_messages.strSumRows +
+                    ' ' + data.numRows + '<span class="floatright">' + PMA_messages.strTotal +
+                    '</span></th><th class="right">' + data.sum.TOTAL + '</th></tr></tfoot>');
+
+        // Append a tooltip to the count column, if there exist one
+        if ($('#logTable').find('tr:first th:last').text().indexOf('#') > -1) {
+            $('#logTable').find('tr:first th:last').append('&nbsp;' + PMA_getImage('b_help', '', { 'class': 'qroupedQueryInfoIcon' }));
+
+            var tooltipContent = PMA_messages.strCountColumnExplanation;
+            if (groupInserts) {
+                tooltipContent += '<p>' + PMA_messages.strMoreCountColumnExplanation + '</p>';
+            }
+
+            PMA_tooltip(
+                $('img.qroupedQueryInfoIcon'),
+                'img',
+                tooltipContent
+            );
+        }
+
+        $('#logTable').find('table').tablesorter({
+            sortList: [[cols.length - 1, 1]],
+            widgets: ['fast-zebra']
+        });
+
+        $('#logTable').find('table thead th')
+            .append('<div class="sorticon"></div>');
+
+        return cols;
+    }
+
+    /* Opens the query analyzer dialog */
+    function openQueryAnalyzer () {
+        var rowData = $(this).parent().data('query');
+        var query = rowData.argument || rowData.sql_text;
+
+        if (codemirror_editor) {
+            // TODO: somehow PMA_SQLPrettyPrint messes up the query, needs be fixed
+            // query = PMA_SQLPrettyPrint(query);
+            codemirror_editor.setValue(query);
+            // Codemirror is bugged, it doesn't refresh properly sometimes.
+            // Following lines seem to fix that
+            setTimeout(function () {
+                codemirror_editor.refresh();
+            }, 50);
+        } else {
+            $('#sqlquery').val(query);
+        }
+
+        var profilingChart = null;
+        var dlgBtns = {};
+
+        dlgBtns[PMA_messages.strAnalyzeQuery] = function () {
+            loadQueryAnalysis(rowData);
+        };
+        dlgBtns[PMA_messages.strClose] = function () {
+            $(this).dialog('close');
+        };
+
+        $('#queryAnalyzerDialog').dialog({
+            width: 'auto',
+            height: 'auto',
+            resizable: false,
+            buttons: dlgBtns,
+            close: function () {
+                if (profilingChart !== null) {
+                    profilingChart.destroy();
+                }
+                $('#queryAnalyzerDialog').find('div.placeHolder').html('');
+                if (codemirror_editor) {
+                    codemirror_editor.setValue('');
+                } else {
+                    $('#sqlquery').val('');
+                }
+            }
+        });
+    }
+
+    /* Loads and displays the analyzed query data */
+    function loadQueryAnalysis (rowData) {
+        var db = rowData.db || '';
+
+        $('#queryAnalyzerDialog').find('div.placeHolder').html(
+            PMA_messages.strAnalyzing + ' <img class="ajaxIcon" src="' +
+            pmaThemeImage + 'ajax_clock_small.gif" alt="">');
+
+        $.post('server_status_monitor.php' + PMA_commonParams.get('common_query'), {
+            ajax_request: true,
+            query_analyzer: true,
+            query: codemirror_editor ? codemirror_editor.getValue() : $('#sqlquery').val(),
+            database: db,
+            server: PMA_commonParams.get('server')
+        }, function (data) {
+            var i;
+            var l;
+            if (typeof data !== 'undefined' && data.success === true) {
+                data = data.message;
+            }
+            if (data.error) {
+                if (data.error.indexOf('1146') !== -1 || data.error.indexOf('1046') !== -1) {
+                    data.error = PMA_messages.strServerLogError;
+                }
+                $('#queryAnalyzerDialog').find('div.placeHolder').html('<div class="error">' + data.error + '</div>');
+                return;
+            }
+            var totalTime = 0;
+            // Float sux, I'll use table :(
+            $('#queryAnalyzerDialog').find('div.placeHolder')
+                .html('<table width="100%" border="0"><tr><td class="explain"></td><td class="chart"></td></tr></table>');
+
+            var explain = '<b>' + PMA_messages.strExplainOutput + '</b> ' + $('#explain_docu').html();
+            if (data.explain.length > 1) {
+                explain += ' (';
+                for (i = 0; i < data.explain.length; i++) {
+                    if (i > 0) {
+                        explain += ', ';
+                    }
+                    explain += '<a href="#showExplain-' + i + '">' + i + '</a>';
+                }
+                explain += ')';
+            }
+            explain += '<p></p>';
+
+            var tempExplain = function (key, value) {
+                value = (value === null) ? 'null' : escapeHtml(value);
+
+                if (key === 'type' && value.toLowerCase() === 'all') {
+                    value = '<span class="attention">' + value + '</span>';
+                }
+                if (key === 'Extra') {
+                    value = value.replace(/(using (temporary|filesort))/gi, '<span class="attention">$1</span>');
+                }
+                explain += key + ': ' + value + '<br />';
+            };
+
+            for (i = 0, l = data.explain.length; i < l; i++) {
+                explain += '<div class="explain-' + i + '"' + (i > 0 ?  'style="display:none;"' : '') + '>';
+                $.each(data.explain[i], tempExplain);
+                explain += '</div>';
+            }
+
+            explain += '<p><b>' + PMA_messages.strAffectedRows + '</b> ' + data.affectedRows;
+
+            $('#queryAnalyzerDialog').find('div.placeHolder td.explain').append(explain);
+
+            $('#queryAnalyzerDialog').find('div.placeHolder a[href*="#showExplain"]').click(function () {
+                var id = $(this).attr('href').split('-')[1];
+                $(this).parent().find('div[class*="explain"]').hide();
+                $(this).parent().find('div[class*="explain-' + id + '"]').show();
+            });
+
+            if (data.profiling) {
+                var chartData = [];
+                var numberTable = '<table class="queryNums"><thead><tr><th>' + PMA_messages.strStatus + '</th><th>' + PMA_messages.strTime + '</th></tr></thead><tbody>';
+                var duration;
+                var otherTime = 0;
+
+                for (i = 0, l = data.profiling.length; i < l; i++) {
+                    duration = parseFloat(data.profiling[i].duration);
+
+                    totalTime += duration;
+
+                    numberTable += '<tr><td>' + data.profiling[i].state + ' </td><td> ' + PMA_prettyProfilingNum(duration, 2) + '</td></tr>';
+                }
+
+                // Only put those values in the pie which are > 2%
+                for (i = 0, l = data.profiling.length; i < l; i++) {
+                    duration = parseFloat(data.profiling[i].duration);
+
+                    if (duration / totalTime > 0.02) {
+                        chartData.push([PMA_prettyProfilingNum(duration, 2) + ' ' + data.profiling[i].state, duration]);
+                    } else {
+                        otherTime += duration;
+                    }
+                }
+
+                if (otherTime > 0) {
+                    chartData.push([PMA_prettyProfilingNum(otherTime, 2) + ' ' + PMA_messages.strOther, otherTime]);
+                }
+
+                numberTable += '<tr><td><b>' + PMA_messages.strTotalTime + '</b></td><td>' + PMA_prettyProfilingNum(totalTime, 2) + '</td></tr>';
+                numberTable += '</tbody></table>';
+
+                $('#queryAnalyzerDialog').find('div.placeHolder td.chart').append(
+                    '<b>' + PMA_messages.strProfilingResults + ' ' + $('#profiling_docu').html() + '</b> ' +
+                    '(<a href="#showNums">' + PMA_messages.strTable + '</a>, <a href="#showChart">' + PMA_messages.strChart + '</a>)<br/>' +
+                    numberTable + ' <div id="queryProfiling"></div>');
+
+                $('#queryAnalyzerDialog').find('div.placeHolder a[href="#showNums"]').click(function () {
+                    $('#queryAnalyzerDialog').find('#queryProfiling').hide();
+                    $('#queryAnalyzerDialog').find('table.queryNums').show();
+                    return false;
+                });
+
+                $('#queryAnalyzerDialog').find('div.placeHolder a[href="#showChart"]').click(function () {
+                    $('#queryAnalyzerDialog').find('#queryProfiling').show();
+                    $('#queryAnalyzerDialog').find('table.queryNums').hide();
+                    return false;
+                });
+
+                profilingChart = PMA_createProfilingChart(
+                    'queryProfiling',
+                    chartData
+                );
+
+                // $('#queryProfiling').resizable();
+            }
+        });
+    }
+
+    /* Saves the monitor to localstorage */
+    function saveMonitor () {
+        var gridCopy = {};
+
+        $.each(runtime.charts, function (key, elem) {
+            gridCopy[key] = {};
+            gridCopy[key].nodes = elem.nodes;
+            gridCopy[key].settings = elem.settings;
+            gridCopy[key].title = elem.title;
+            gridCopy[key].series = elem.series;
+            gridCopy[key].maxYLabel = elem.maxYLabel;
+        });
+
+        if (isStorageSupported('localStorage')) {
+            window.localStorage.monitorCharts = JSON.stringify(gridCopy);
+            window.localStorage.monitorSettings = JSON.stringify(monitorSettings);
+            window.localStorage.monitorVersion = monitorProtocolVersion;
+        }
+
+        $('a[href="#clearMonitorConfig"]').show();
+    }
+});
+
+// Run the monitor once loaded
+AJAX.registerOnload('server_status_monitor.js', function () {
+    $('a[href="#pauseCharts"]').trigger('click');
+});
+
+function serverResponseError () {
+    var btns = {};
+    btns[PMA_messages.strReloadPage] = function () {
+        window.location.reload();
+    };
+    $('#emptyDialog').dialog({ title: PMA_messages.strRefreshFailed });
+    $('#emptyDialog').html(
+        PMA_getImage('s_attention') +
+        PMA_messages.strInvalidResponseExplanation
+    );
+    $('#emptyDialog').dialog({ buttons: btns });
+}
+
+/* Destroys all monitor related resources */
+function destroyGrid () {
+    if (runtime.charts) {
+        $.each(runtime.charts, function (key, value) {
+            try {
+                value.chart.destroy();
+            } catch (err) {}
+        });
+    }
+
+    try {
+        runtime.refreshRequest.abort();
+    } catch (err) {}
+    try {
+        clearTimeout(runtime.refreshTimeout);
+    } catch (err) {}
+    $('#chartGrid').html('');
+    runtime.charts = null;
+    runtime.chartAI = 0;
+    monitorSettings = null; // TODO:this not global variable
+}

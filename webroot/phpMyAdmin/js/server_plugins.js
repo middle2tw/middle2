@@ -1,1 +1,16 @@
-var pma_theme_image;AJAX.registerOnload("server_plugins.js",function(){$("#pluginsTabs").tabs({cookie:{name:"pma_serverStatusTabs",expires:1},show:function(b,c){$("#topmenu").menuResizer("resize");$(c.panel).closest(".ui-tabs").find("> div").not(c.panel).css("display","none");$(c.panel).css("display","block")}});var a=$("#plugins_plugins table:has(tbody tr + tr)");a.tablesorter({sortList:[[0,0]],widgets:["zebra"]});a.find("thead th").append('<img class="sortableIcon" src="'+pma_theme_image+'cleardot.gif" alt="">')});
+/* vim: set expandtab sw=4 ts=4 sts=4: */
+/**
+ * Functions used in server plugins pages
+ */
+AJAX.registerOnload('server_plugins.js', function () {
+    // Make columns sortable, but only for tables with more than 1 data row
+    var $tables = $('#plugins_plugins table:has(tbody tr + tr)');
+    $tables.tablesorter({
+        sortList: [[0, 0]],
+        headers: {
+            1: { sorter: false }
+        }
+    });
+    $tables.find('thead th')
+        .append('<div class="sorticon"></div>');
+});

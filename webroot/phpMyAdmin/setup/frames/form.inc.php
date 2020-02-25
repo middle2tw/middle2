@@ -6,31 +6,20 @@
  * @package PhpMyAdmin-Setup
  */
 
+use PhpMyAdmin\Config\Forms\Setup\SetupFormList;
+use PhpMyAdmin\Core;
+use PhpMyAdmin\Setup\FormProcessing;
+
 if (!defined('PHPMYADMIN')) {
     exit;
 }
 
-/**
- * Core libraries.
- */
-require_once './libraries/config/Form.class.php';
-require_once './libraries/config/FormDisplay.class.php';
-require_once './setup/lib/form_processing.lib.php';
-
-require './libraries/config/setup.forms.php';
-
-$formset_id = filter_input(INPUT_GET, 'formset');
-$mode = filter_input(INPUT_GET, 'mode');
-if (! isset($forms[$formset_id])) {
-    PMA_fatalError(__('Incorrect formset, check $formsets array in setup/frames/form.inc.php'));
+$formset_id = Core::isValid($_GET['formset'], 'scalar') ? $_GET['formset'] : null;
+$mode = isset($_GET['mode']) ? $_GET['mode'] : null;
+$form_class = SetupFormList::get($formset_id);
+if (is_null($form_class)) {
+    Core::fatalError(__('Incorrect form specified!'));
 }
-
-if (isset($GLOBALS['strConfigFormset_' . $formset_id])) {
-    echo '<h2>' . $GLOBALS['strConfigFormset_' . $formset_id] . '</h2>';
-}
-$form_display = new FormDisplay();
-foreach ($forms[$formset_id] as $form_name => $form) {
-    $form_display->registerForm($form_name, $form);
-}
-process_formset($form_display);
-?>
+echo '<h2>' , $form_class::getName() , '</h2>';
+$form_display = new $form_class($GLOBALS['ConfigFile']);
+FormProcessing::process($form_display);
