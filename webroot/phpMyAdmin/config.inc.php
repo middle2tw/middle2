@@ -32,6 +32,7 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
     $addon_member->username = getenv('MYSQL_USER');
     $addon_member->password = getenv('MYSQL_PASS');
     $addon_member->verbose = 'Main';
+    $addon_member->project = '';
 
     $addon_members = array($addon_member);
 
@@ -43,6 +44,7 @@ if (preg_match('/phpMyAdmin2/', $_SERVER['REQUEST_URI'])) { // 管理者模式
         $addon_member->username = getenv('MYSQL_USERDB_USER');
         $addon_member->password = getenv('MYSQL_USERDB_PASS');
         $addon_member->verbose = Machine::find_by_ip(ip2long($ip))->name;
+        $addon_member->project = '';
         $addon_members[] = $addon_member;
     }
 
@@ -61,9 +63,9 @@ foreach ($addon_members as $addon_member) {
     /* Server parameters */
     $cfg['Servers'][$i]['host'] = $addon_member->addon->host;
     $cfg['Servers'][$i]['user'] = $addon_member->username;
-    if (property_exists($addon_member, 'project') and $addon_member->project) {
+    if ($addon_member->project) {
         $cfg['Servers'][$i]['verbose'] = $addon_member->project->name . '(' . $addon_member->project->getEAV('note') . ')';
-    } elseif ($addon_member->verbose) {
+    } elseif (property_exists($addon_member, 'verbose') and $addon_member->verbose) {
         $cfg['Servers'][$i]['verbose'] = $addon_member->verbose;
     }
     if (property_exists($addon_member, 'readonly') and $addon_member->readonly) {
