@@ -104,7 +104,6 @@ class CronJob extends Pix_Table
 
     public static function loopCronWorker()
     {
-        Pix_Table::$_save_memory = true;
         $stats = array(
             'last_action_time' => date('c', time()), // 最近反應時間，隨時更新，會有另一隻 cron 檢查超過 60 秒沒反應就該警告
             'start_time' => date('c', time()), // 開始執行時間
