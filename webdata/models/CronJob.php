@@ -125,7 +125,7 @@ class CronJob extends Pix_Table
                     $pid = pcntl_fork();
 
                     if ($pid) {
-                        Logger::logOne(array('category' => 'cron', 'message' => 'fork from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
+                        Logger::logOne(array('category' => 'cron', 'message' => time() . ' fork from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
                         $stats['crons'][$pid] = array(
                             'pid' => $pid,
                             'project' => $cronjob->project->name,
@@ -158,7 +158,7 @@ class CronJob extends Pix_Table
                     $output->stdout = mb_substr($output->stdout, mb_strlen($output->stderr) - 128);
                     //print_r($output);
                     //echo "\n";
-                    Logger::logOne(array('category' => 'cron', 'message' => 'fork cron finish from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
+                    Logger::logOne(array('category' => 'cron', 'message' => time() . ' fork cron finish from PID=' . getmypid() . ', new PID=' . $pid . ", project={$cronjob->project->name} job={$cronjob->job}"));
                     exit;
                 }
             }
