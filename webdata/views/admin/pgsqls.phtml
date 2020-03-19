@@ -1,0 +1,78 @@
+<?php
+$database_hosts = Hisoku::getPgsqlServers();
+$this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scroll');
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<?php foreach ($database_hosts as $database_host) { ?>
+<h1><?= $this->escape($database_host) ?></h1>
+<?php
+$db = new Pix_Table_Db_Adapter_PgSQL(array(
+    'host' => $database_host,
+    'port' => getenv('PGSQL_USERDB_PORT'),
+    'user' => getenv('PGSQL_USERDB_USER'),
+    'password' => getenv('PGSQL_USERDB_PASS'),
+));
+$res = $db->query("SELECT datname, pg_database_size(datname) as database_size FROM pg_database");
+$db_sizes = array();
+$databases = array();
+while ($row = $res->fetch_assoc()) {
+    $db_sizes[$row['datname']] = $row['database_size'];
+    $databases[] = $row['datname'];
+}
+$res->free_result();
+
+usort($databases, function($db1, $db2) use ($db_sizes) {
+    return $db_sizes[$db2] - $db_sizes[$db1];
+});
+
+?>
+<table class="table">
+    <tr>
+        <td>Database</td>
+        <td>Project</td>
+        <td>Usage</td>
+    </tr>
+    <?php foreach ($databases as $db) { ?>
+    <?php list(, $user) = explode('_', $db); ?>
+    <tr>
+        <td><?= $this->escape($db) ?></td>
+        <td>
+            <?php if ($user and $project = Project::search(array('name' => $user))->first()) { ?>
+            <a href="/project/detail/<?= $project->name ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
+            <?php } ?>
+        </td>
+        <td class="usage" data-value="<?= intval($db_sizes[$db]) ?>"><?= number_format(intval($db_sizes[$db])) ?></td>
+    </tr>
+    <?php } ?>
+</table>
+<hr>
+<?php } ?>
+<script>
+var usage_format = 'full';
+$('.usage').click(function(){
+    usage_format = ('full' == usage_format) ? 'simple' : 'full';
+
+    $('.usage').each(function(){
+        var value = $(this).attr('data-value');
+        if (usage_format == 'full') {
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(value)) {
+                value = value.replace(rgx, '$1' + ',' + '$2');
+            }
+            $(this).text(value);
+        } else {
+            if (value < 1024) {
+                $(this).text(value);
+            } else if (value < 1024 * 1024) {
+                $(this).text(Math.floor(value / 1024.0) + 'KB');
+            } else if (value < 1024 * 1024 * 1024) {
+                $(this).text(Math.floor(value / 1024.0 / 1024) + 'MB');
+            } else {
+                $(this).text(Math.floor(value / 1024.0 / 1024 / 1024) + 'GB');
+            }
+        }
+    });
+});
+</script>
+<?= $this->partial('/common/footer.phtml', $this) ?>

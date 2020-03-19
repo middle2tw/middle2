@@ -28,6 +28,10 @@ class AdminController extends Pix_Controller
     {
     }
 
+    public function pgsqlsAction()
+    {
+    }
+
     public function loadbalancersAction()
     {
     }
