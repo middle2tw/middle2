@@ -203,7 +203,7 @@ class CronJob extends Pix_Table
                         error_log("php-fpm: Worker {$workerjob->project->name}: {$workerjob->job}");
                     }
                     Hisoku::alert("Middle2 Worker Notice", "Project {$workerjob->project->name} run worker {$workerjob->job}, with commit change");
-                    $node->markAsUnused('commit change');
+                    $node->markAsUnused('commit change from runWorker');
                     $node->resetNode();
                     $workerjob->runJob();
                     exit;
