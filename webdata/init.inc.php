@@ -38,6 +38,5 @@ if (MEMCACHE_PRIVATE_HOST) {
             array('host' => MEMCACHE_PRIVATE_HOST, 'port' => MEMCACHE_PRIVATE_PORT, 'weight' => 1), // 256M
         ),
     ));
-    Pix_Table::setCache(new Pix_Cache);
 }
 
