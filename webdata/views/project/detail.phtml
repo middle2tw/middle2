@@ -29,15 +29,6 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
     Note: <input type="text" name="note" value="<?= $this->escape($this->project->getEAV('note')) ?>">
     <button type="submit">SAVE</button>
 </form>
-<form method="post" action="/project/edittemplate/<?= $this->project->name ?>">
-    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
-    Template: <select name="template">
-        <?php foreach (Project::getTemplates() as $template => $template_desc) { ?>
-        <option value="<?= $template ?>"<?= $template == $this->project->getTemplate() ? ' selected="selected"' : '' ?>><?= $this->escape($template_desc) ?></option>
-        <?php } ?>
-    </select>
-    <button type="submit">SAVE</button>
-</form>
 <h3 id="deployment">deployment:</h3>
 <ul>
     <li><code>git remote add middle2 git@<?= GIT_SERVER ?>:<?= $this->project->name ?></code></li>
