@@ -13,11 +13,18 @@ $db = new Pix_Table_Db_Adapter_PgSQL(array(
     'user' => getenv('PGSQL_USERDB_USER'),
     'password' => getenv('PGSQL_USERDB_PASS'),
 ));
-$res = $db->query("SELECT datname, pg_database_size(datname) as database_size FROM pg_database");
+$machine_id = Machine::find_by_ip(ip2long($database_host))->machine_id;
+$status = json_decode(MachineStatus::search(array('machine_id' => $machine_id))->max('updated_at')->status);
+
+$res = $db->query("SELECT datname, pg_database_size(datname) as database_size, oid FROM pg_database");
 $db_sizes = array();
+$db_times = array();
 $databases = array();
 while ($row = $res->fetch_assoc()) {
     $db_sizes[$row['datname']] = $row['database_size'];
+    if (property_exists($status->pgsql_info, $row['oid'])) {
+        $db_times[$row['datname']] = $status->pgsql_info->{$row['oid']};
+    }
     $databases[] = $row['datname'];
 }
 $res->free_result();
@@ -32,6 +39,7 @@ usort($databases, function($db1, $db2) use ($db_sizes) {
         <td>Database</td>
         <td>Project</td>
         <td>Usage</td>
+        <td>Updated_at</td>
     </tr>
     <?php foreach ($databases as $db) { ?>
     <?php list(, $user) = explode('_', $db); ?>
@@ -43,6 +51,9 @@ usort($databases, function($db1, $db2) use ($db_sizes) {
             <?php } ?>
         </td>
         <td class="usage" data-value="<?= intval($db_sizes[$db]) ?>"><?= number_format(intval($db_sizes[$db])) ?></td>
+        <td>
+            <?= $this->partial('/helper/counttime.phtml', array('time' => $db_times[$db])) ?>
+        </td>
     </tr>
     <?php } ?>
 </table>
