@@ -7,16 +7,21 @@ $this->body_tags = array('data-target' => '.bs-docs-sidebar', 'data-spy' => 'scr
 <?php foreach ($database_hosts as $database_host) { ?>
 <h1><?= $this->escape($database_host) ?></h1>
 <?php
-$db = new Pix_Table_Db_Adapter_PgSQL(array(
-    'host' => $database_host,
-    'port' => getenv('PGSQL_USERDB_PORT'),
-    'user' => getenv('PGSQL_USERDB_USER'),
-    'password' => getenv('PGSQL_USERDB_PASS'),
-));
-$machine_id = Machine::find_by_ip(ip2long($database_host))->machine_id;
-$status = json_decode(MachineStatus::search(array('machine_id' => $machine_id))->max('updated_at')->status);
 
-$res = $db->query("SELECT datname, pg_database_size(datname) as database_size, oid FROM pg_database");
+try {
+    $db = new Pix_Table_Db_Adapter_PgSQL(array(
+        'host' => $database_host,
+        'port' => getenv('PGSQL_USERDB_PORT'),
+        'user' => getenv('PGSQL_USERDB_USER'),
+        'password' => getenv('PGSQL_USERDB_PASS'),
+    ));
+    $machine_id = Machine::find_by_ip(ip2long($database_host))->machine_id;
+    $status = json_decode(MachineStatus::search(array('machine_id' => $machine_id))->max('updated_at')->status);
+    $res = $db->query("SELECT datname, pg_database_size(datname) as database_size, oid FROM pg_database");
+} catch (Exception $e) {
+    echo "Error: " . htmlspecialchars($e->getMessage());
+    continue;
+}
 $db_sizes = array();
 $db_times = array();
 $databases = array();
