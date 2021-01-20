@@ -111,6 +111,8 @@ class Addon_PgSQLDB extends Pix_Table
             'project_id' => $project->id,
             'host' => $host,
             'database' => $database,
+            'user_name' => '',
+            'password' => '',
         ));
         $addon->addProject($project, false);
         $addon->saveProjectVariable($key);
