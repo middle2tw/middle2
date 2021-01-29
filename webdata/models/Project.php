@@ -212,6 +212,11 @@ class ProjectRow extends Pix_Table_Row
         $c->delete("Project:processing:{$this->id}");
         return $choosed_nodes;
     }
+
+    public function getCommitLog()
+    {
+        return GitHelper::getLatestCommitLog($this);
+    }
 }
 
 class Project extends Pix_Table

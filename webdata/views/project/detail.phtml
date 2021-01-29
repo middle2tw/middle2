@@ -17,6 +17,7 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
         <li> <a href="#addon">Addon</a> </li>
         <li> <a href="#member">Members</a> </li>
         <li> <a href="#node-status">Node Status</a> </li>
+        <li> <a href="#commit-log">Commit Log</a> </li>
         <li> <a href="#access-log">Access Log</a> </li>
         <li> <a href="#error-log">Error Log</a> </li>
         <li> <a href="#node-log">Node Log</a> </li>
@@ -219,6 +220,12 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     <?php } ?>
 </ol>
 <hr>
+<h3 id="commit-log">Commit Log</h3>
+<div>
+    <?= nl2br($this->escape($this->project->getCommitLog())) ?>
+</div>
+<hr>
+
 <h3 id="node-status">Node Status</h3>
 <table class="table">
     <thead>

@@ -34,6 +34,19 @@ class GitHelper
         return $show_result;
     }
 
+    public static function getLatestCommitLog($project, $branch = 'HEAD')
+    {
+        // XXX: should through ssh
+        $absolute_path = '/srv/git/git/' . $project->id . '.git';
+        if (!file_exists($absolute_path)) {
+            throw new Exception('project not found: ' . $project->name);
+        }
+
+        chdir($absolute_path);
+        $git_log_cmd = `git log -n 3 {$branch}`;
+        return trim($git_log_cmd);
+    }
+
     /**
      * buildDockerProjectBase 建立這個 project 自己的額外檔案，這個 method 必需以 git 帳號身份執行
      * 
