@@ -16,7 +16,7 @@ class MachineStatusRow extends Pix_Table_Row
     {
         $obj = $this->getObject();
         usort($obj->disk, function($a, $b) {
-            return $b->disk_total - $a->disk_total;
+            return intval($b->disk_total) - intval($a->disk_total);
         });
 
         return $obj->disk;
@@ -26,6 +26,7 @@ class MachineStatusRow extends Pix_Table_Row
     {
         $obj = $this->getObject();
         if (!preg_match('#,  load average: ([0-9.]*), ([0-9.]*), ([0-9.]*)#', $obj->process, $matches)) {
+            return array(-1, -1, -1);
             throw new Exception("process info not found");
         }
 
