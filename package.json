@@ -21,8 +21,8 @@
   "homepage": "https://github.com/ronnywang/hisoku",
   "dependencies": {
     "forever": "^0.15.2",
-    "memcache": "^0.3.0",
-    "mysql": "^2.13",
+    "memcache-client": "*",
+    "mysql": "^2.18.1",
     "scribe": "0.0.9",
     "ssh2": "^0.5.0"
   }
