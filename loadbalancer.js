@@ -1,7 +1,7 @@
 var http = require('http');
 var https = require('https');
 var Scribe = require('scribe').Scribe;
-var Memcache = require('memcache');
+const MemcacheClient = require("memcache-client");
 var mysql = require('mysql');
 var SSH2 = require('ssh2');
 var fs = require('fs');
@@ -67,13 +67,15 @@ var webnodeConfig = function(config){
 };
 
 var config = loadConfig();
-fs.writeFile('/tmp/middle2.pid', process.pid);
+fs.writeFileSync('/tmp/middle2.pid', process.pid);
 
 if (!config.MEMCACHE_PRIVATE_PORT) {
     throw "need MEMCACHE_PRIVATE_PORT";
 }
-var memcache = new Memcache.Client(config.MEMCACHE_PRIVATE_PORT, config.MEMCACHE_PRIVATE_HOST);
-memcache.connect();
+const memcache = new MemcacheClient({
+     server: config.MEMCACHE_PRIVATE_HOST + ':' + config.MEMCACHE_PRIVATE_PORT,
+    ignoreNotStored: true
+ });
 
 if (!config.MYSQL_HOST) {
     throw "need MYSQL_HOST";
@@ -731,7 +733,7 @@ var http_request_callback = function(protocol){
 
             var too_many_idle_connections = false;
 
-            if (project_connections[options.project.name] > 20) {
+            if (project_connections[options.project.name] > 20 && options.project.name != 'tainan-hsi-919521') {
                 var idle_connections = 0;
                 var now = (new Date()).getTime();
                 for (var id in request_pools) {
@@ -777,10 +779,14 @@ var http_request_callback = function(protocol){
             }
 
             var now = Math.floor((new Date()).getTime() / 1000);
-            memcache.increment('Project:access_count:' + options.project.id, 1);
-            memcache.set('Project:access_at:' + options.project.id,  now);
-            memcache.increment('WebNode:access_count:' + options.host + ':' + options.port);
-            memcache.set('WebNode:access_at:' + options.host + ':' + options.port, now);
+            memcache.incr('Project:access_count:' + options.project.id, 1).catch((e) => {
+                memcache.set('Project:access_count:' + options.project.id, 1);
+            });
+            memcache.set('Project:access_at:' + options.project.id,  now).catch((e) => console.log(e));
+            memcache.incr('WebNode:access_count:' + options.host + ':' + options.port, 1).catch((e) => {
+                memcache.set('WebNode:access_count:' + options.host + ':' + options.port, 1);
+            });
+            memcache.set('WebNode:access_at:' + options.host + ':' + options.port, now).catch((e) => console.log(e));
             if (typeof(project_connections[options.project.name]) === 'undefined') {
                 project_connections[options.project.name] = 0;
             }
