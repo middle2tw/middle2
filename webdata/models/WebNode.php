@@ -155,15 +155,13 @@ class WebNodeRow extends Pix_Table_Row
      */
     public function getAccessAt()
     {
-        $c = new Pix_Cache;
-        return max($this->access_at, intval($c->get("WebNode:access_at:{$this->ip}:{$this->port}")));
+        $cache = WebNode::getServerAccessCache();
+        return max($this->access_at, property_exists($cache->webnode_access_at, "{$this->ip}:{$this->port}") ? intval($cache->webnode_access_at->{"{$this->ip}:{$this->port}"}) : 0);
     }
 
     public function updateAccessAt()
     {
-        $c = new Pix_Cache;
-        $cache_key = "WebNode:access_at:{$this->ip}:{$this->port}";
-        $c->set($cache_key, time());
+        $this->update(array('access_at' => time()));
     }
 
     /**
@@ -414,5 +412,23 @@ class WebNode extends Pix_Table
             $ret = curl_exec($curl);
             curl_close($curl);
         }
+    }
+
+    protected static $_access_cache = null;
+    public static function getServerAccessCache()
+    {
+        if (!is_null(self::$_access_cache) and (time() - self::$_access_cache->time < 5)) {
+            return self::$_access_cache;
+        }
+
+        $curl = curl_init('http://localhost/');
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: healthcheck'));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $content = curl_exec($curl);
+        $obj = json_decode($content);
+        $obj->access_cache->time = time();
+        self::$_access_cache = $obj->access_cache;
+        return self::$_access_cache;
+
     }
 }

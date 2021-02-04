@@ -155,6 +155,12 @@ var lb_core = {};
 lb_core.cache = {};
 
 var project_connections = {};
+var access_cache = {
+    project_access_count: {},
+    project_access_at: {},
+    webnode_access_count: {},
+    webnode_access_at: {},
+};
 var mapping_cache = {'project-name-to-id': {}, 'project-domain-to-id': {}, 'project-to-webnode': {}};
 
 lb_core.getBackendHost2 = function(host, port, current_request, callback){
@@ -635,6 +641,7 @@ var http_request_callback = function(protocol){
                 start_time: start_time,
                 recent_logs: recent_logs,
                 project_connections: project_connections,
+                access_cache: access_cache,
             };
             if (main_request.url.indexOf('mapping_cache') >= 0) {
                 ret['mapping_cache'] = mapping_cache;
@@ -779,6 +786,18 @@ var http_request_callback = function(protocol){
             }
 
             var now = Math.floor((new Date()).getTime() / 1000);
+            
+            if ('undefined' === typeof(access_cache.project_access_count[options.project.id])) {
+                access_cache.project_access_count[options.project.id] = 0;
+            }
+            access_cache.project_access_count[options.project.id] ++;
+            access_cache.project_access_at[options.project.id] = now;
+            if ('undefined' === typeof(access_cache.webnode_access_count[options.host + ':' + options.port])) {
+                access_cache.webnode_access_count[options.host + ':' + options.port] = 0;
+            }
+            access_cache.webnode_access_count[options.host + ':' + options.port] ++;
+            access_cache.webnode_access_at[options.host + ':' + options.port] = now;
+
             memcache.incr('Project:access_count:' + options.project.id, 1).catch((e) => {
                 memcache.set('Project:access_count:' + options.project.id, 1);
             });
