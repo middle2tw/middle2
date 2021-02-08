@@ -58,7 +58,7 @@ class ProjectRow extends Pix_Table_Row
 
         $project_config = json_decode($this->config);
         $project_group = property_exists($project_config, 'node-group') ? $project_config->{'node-group'} : '';
-        
+        WebNode::getDb()->query("BEGIN");
         $node_pools = array();
         foreach (WebNode::search(array('project_id' => 0, 'status' => WebNode::STATUS_UNUSED)) as $webnode) {
             $node_pools[] = $webnode;
@@ -101,6 +101,7 @@ class ProjectRow extends Pix_Table_Row
         $random_node = array_shift($node_pools);
             
         if (!$random_node) {
+            WebNode::getDb()->query("ROLLBACK");
             throw new Exception('free node not found');
         }
 
@@ -111,6 +112,7 @@ class ProjectRow extends Pix_Table_Row
             'access_at' => 0,
             'status' => WebNode::STATUS_CRONPROCESSING,
         ));
+        WebNode::getDb()->query("COMMIT");
 
         $node_id = $random_node->port - 20000;
         $ip = long2ip($random_node->ip);
