@@ -211,7 +211,11 @@ class ProjectRow extends Pix_Table_Row
 
     public function getCommitLog()
     {
-        return GitHelper::getLatestCommitLog($this);
+        try {
+            return GitHelper::getLatestCommitLog($this);
+        } catch (Exception $e) {
+            return array();
+        }
     }
 }
 
