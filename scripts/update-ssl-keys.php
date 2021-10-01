@@ -29,8 +29,7 @@ while ($domain = fgets($fp)) {
     $config->ca = $matches[0];
     preg_match($cert_pattern, trim(file_get_contents("certs/{$domain}/cert.pem")), $matches);
     $config->cert = $matches[0];
-    preg_match($key_pattern, trim(file_get_contents("certs/{$domain}/privkey.pem")), $matches);
-    $config->key = $matches[0];
+    $config->key = trim(file_get_contents("certs/{$domain}/privkey.pem"));
     if ($k = SSLKey::find($domain)) {
         $k->update(array(
             'config' => json_encode($config),
@@ -61,15 +60,13 @@ while ($domains = fgets($fp)) {
         }
 
         $cert_pattern = '/-----BEGIN CERTIFICATE-----[^-]+-----END CERTIFICATE-----/s';
-        $key_pattern = '/-----BEGIN RSA PRIVATE KEY-----[^-]+-----END RSA PRIVATE KEY-----/s';
 
         $config = new StdClass;
         preg_match_all($cert_pattern, trim(file_get_contents("certs/{$first_domain}/fullchain.pem")), $matches);
         $config->ca = $matches[0];
         preg_match($cert_pattern, trim(file_get_contents("certs/{$first_domain}/cert.pem")), $matches);
         $config->cert = $matches[0];
-        preg_match($key_pattern, trim(file_get_contents("certs/{$first_domain}/privkey.pem")), $matches);
-        $config->key = $matches[0];
+        $config->key = trim(file_get_contents("certs/{$first_domain}/privkey.pem"));
         if ($k = SSLKey::find($domain)) {
             $k->update(array(
                 'config' => json_encode($config),
