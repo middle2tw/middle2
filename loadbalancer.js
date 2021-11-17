@@ -256,6 +256,9 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 };
 
 lb_core._getNodesByProject = function(project, current_request, callback){
+    if (project.config['maintaince']) { // project is disabled
+        return callback({success: false, message: 'Maintainance', code: 503});
+    }
     if ('undefined' === typeof(request_pools[current_request])) {
         return callback({success: false, message: 'Connection error', code: 500});
     }
