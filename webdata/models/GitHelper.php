@@ -72,7 +72,7 @@ class GitHelper
         }
 
         $actions = array();
-        foreach (array('requirements.txt', 'Gemfile', 'package.json') as $file) {
+        foreach (array('requirements.txt', 'Gemfile', 'package.json', 'composer.json') as $file) {
             if ($info = self::getGitFileInfo($file, $branch)) {
                 $actions[] = array(
                     'file' => $file,
@@ -142,6 +142,8 @@ class GitHelper
                     self::system_without_error("docker exec --tty container-{$project->name} sh -c 'cd /srv/web; bundle install --without development test'");
                 } elseif ($action['file'] == 'package.json') {
                     self::system_without_error("docker exec --tty container-{$project->name} env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin sh -c 'cd /srv/web; npm install --unsafe-perm'");
+                } elseif ($action['file'] == 'composer.json') {
+                    self::system_without_error("docker exec --tty container-{$project->name} sh -c 'cd /srv/web; composer install'");
                 }
             } catch (Exception $e) {
                 self::system_without_error("docker stop container-{$project->name}");
