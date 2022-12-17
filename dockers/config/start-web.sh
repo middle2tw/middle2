@@ -20,6 +20,8 @@ elif [ -f "/srv/web/web.rb" ]; then
 # ruby
     export RACK_ENV=production
     ruby web.rb -p 80 > ${LOG_FILE} 2>&1 &
+elif [ -f "/srv/web/artisan"]; then
+    php artisan serve --port=80 2>&1 &
 #elif [ -f "/srv/web/index.php" ]; then
 else
 # build /srv/env.conf
