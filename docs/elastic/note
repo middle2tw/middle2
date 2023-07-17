@@ -1,0 +1,23 @@
+- ec2 init
+    - add a aws host (Amazon Linux 2, t4g.medium, 8G+80G disk)
+    - add elastic ip
+    - security group allow port 22 (dev server), port 9200 (anywhere), port 80 (anywhere)
+    - Volumes add "create snapshot lifecycle policy"
+- install software
+    - init: ref: https://github.com/middle2tw/config/blob/master/linode-debian9-init.sh
+    - sudo yum install cronie php-cli python3-pip -y
+    - add /srv/config/config.php MAINPAGE_DOMAIN
+    - add /etc/crontab update-machine-status
+    - fdisk, mkfs.xfs, fstab add by uuid
+    - https://www.elastic.co/guide/en/elasticsearch/reference/8.8/rpm.html#rpm-repo
+    - move /var/lib/elasticsearch to /srv/data/
+    - pip3 install certbot
+    - sudo certbot certonly --standalone -d elastic-1.middle2.com --post-hook "cp /etc/letsencrypt/live/elastic-1.middle2.com/\*.pem /etc/elasticsearch/certs; chmod 644 /etc/elasticsearch/certs/\*.pem; systemctl reload elasticsearch"
+    - /etc/crontab
+      - 0 0 * * * root certbot renew --quiet --post-hook "cp /etc/letsencrypt/live/elastic-1.middle2.com/\*.pem /etc/elasticsearch/certs; chmod 644 /etc/elasticsearch/certs/\*.pem; systemctl reload elasticsearch"
+    - vim /etc/elasticsearch/elasticsearch.yml
+        xpack.security.http.ssl:
+            enabled: true
+            key: /etc/elasticsearch/certs/privkey.pem
+            certificate: /etc/elasticsearch/certs/fullchain.pem
+
