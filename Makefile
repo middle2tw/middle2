@@ -1,4 +1,4 @@
-HOSTS?= `./scripts/getip dev loadbalancer nodes mysql pgsql search`
+HOSTS?= `./scripts/getip dev loadbalancer nodes mysql pgsql search elastic`
 
 all:
 	@git pull -v

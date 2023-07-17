@@ -34,7 +34,7 @@ class ProjectController extends Pix_Controller
         $enable_addons = array(
             'mysql' => count(Machine::getMachinesByGroup('mysql')),
             'pgsql' => count(Machine::getMachinesByGroup('pgsql')),
-            'search' => count(Machine::getMachinesByGroup('search')),
+            'elastic' => count(Machine::getMachinesByGroup('elastic')),
         );
         $this->view->project = $project;
         $this->view->enable_addons = $enable_addons;
@@ -211,14 +211,14 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
-    public function addelasticaddonAction()
+    public function addelastic2addonAction()
     {
         if (Hisoku::getStoken() != $_POST['sToken']) {
             // TODO: log it
             return $this->alert('error', '/');
         }
 
-        if (!count(Machine::getMachinesByGroup('search'))) {
+        if (!count(Machine::getMachinesByGroup('elastic'))) {
             return $this->alert('目前未支援 ElasticSearch', '/');
         }
 
@@ -231,15 +231,13 @@ class ProjectController extends Pix_Controller
             return $this->alert('Project not found', '/');
         }
 
-        $key = is_scalar($_POST['key']) ? $_POST['key'] : 'SEARCH_URL';
-
         if ($addon_id) {
-            if (!$addon = Addon_Elastic::find(intval($addon_id))) {
+            if (!$addon = Addon_Elastic2::find(intval($addon_id))) {
                 return $this->alert('Addon not found', '/');
             }
-            $addon->saveProjectVariable($key);
+            $addon->saveProjectVariable();
         } else {
-            Addon_Elastic::addDB($project, $key);
+            Addon_Elastic2::addDB($project);
         }
 
         return $this->redirect('/project/detail/' . $project->name);

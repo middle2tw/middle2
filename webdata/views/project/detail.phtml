@@ -171,7 +171,7 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
 
     <?php if ($addon = Addon_Elastic::search(array('project_id' => $this->project->id))->first()) { ?>
     <li>
-    [ElasticSearch] <?= $addon->getSearchURL() ?>
+    [ElasticSearch(old)] <?= $addon->getSearchURL() ?>
     <ul>
         <li>注意，此網址請勿外流，這網址可直接修改刪除 elasticsearch 內容</li>
         <li>
@@ -185,14 +185,27 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </ul>
     </li>
     <?php } ?>
+    <?php if ($addon = Addon_Elastic2::search(array('project_id' => $this->project->id))->first()) { ?>
+    <li>
+    [ElasticSearch] <?= $addon->getURL() ?>
+    <ul>
+        <li>
+        <form method="post" action="/project/addelastic2addon/<?= $this->project->name ?>/<?= $addon->id ?>">
+            <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+            <button type="submit">Add Variable</button>
+        </form>
+        </li>
+    </ul>
+    </li>
+    <?php } ?>
     <li>
     Add:
     <?php $addon_mysql_attrs = $this->enable_addons['mysql'] ? '' : 'disabled="disabled" title="目前未支援 MySQL"' ?>
     <?php $addon_pgsql_attrs = $this->enable_addons['pgsql'] ? '' : 'disabled="disabled" title="目前未支援 PgSQL"' ?>
-    <?php $addon_search_attrs = $this->enable_addons['search'] ? '' : 'disabled="disabled" title="目前未支援 ElasticSearch"' ?>
+    <?php $addon_elastic_attrs = $this->enable_addons['elastic'] ? '' : 'disabled="disabled" title="目前未支援 ElasticSearch"' ?>
     <button class="post-link" href="/project/addmysqladdon/<?= $this->project->name ?>"<?= $addon_mysql_attrs ?>>MySQL</button>
     <button class="post-link" href="/project/addpgsqladdon/<?= $this->project->name ?>"<?= $addon_pgsql_attrs ?>>PgSQL</button>
-    <button class="post-link" href="/project/addelasticaddon/<?= $this->project->name ?>"<?= $addon_search_attrs ?>>ElasticSearch</button>
+    <button class="post-link" href="/project/addelastic2addon/<?= $this->project->name ?>"<?= $addon_elastic_attrs ?>>ElasticSearch</button>
     </li>
 </ol>
 <hr>
