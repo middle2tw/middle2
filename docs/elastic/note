@@ -20,4 +20,4 @@
             enabled: true
             key: /etc/elasticsearch/certs/privkey.pem
             certificate: /etc/elasticsearch/certs/fullchain.pem
-
+    - /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic --url https://elastic-1.middle2.com:9200
