@@ -2,6 +2,11 @@
 
 class Addon_Elastic2Row extends Pix_Table_Row
 {
+    public function removeElastic()
+    {
+        Elastic::dropUser($this->user);
+    }
+
     public function updateElastic()
     {
         Elastic::login($this->getURL(), getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD'));
@@ -65,7 +70,7 @@ class Addon_Elastic2 extends Pix_Table
 
         // TODO: from config
         $host = 'elastic-1.middle2.com';
-        $prefix = Hisoku::uniqid(10);
+        $prefix = strtolower(Hisoku::uniqid(10));
         $password = Hisoku::uniqid(20);
 
         $addon = self::insert(array(

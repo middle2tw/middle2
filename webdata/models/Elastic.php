@@ -42,6 +42,30 @@ class Elastic
         return $ret;
     }
 
+    public static function getUsers()
+    {
+        $users = [];
+        $roles = [];
+        $ret = new StdClass;
+        foreach (self::esQuery('/_security/user/') as $data) {
+            if (!preg_match('#.*-.*-.*#', $data->username)) {
+                continue;
+            }
+            $users[$data->username] = new StdClass;
+            $users[$data->username]->user_name = $data->username;
+            foreach ($data->roles as $role) {
+                $roles[$role] = $role;
+            }
+        } 
+        foreach (self::esQuery('/_security/role/') as $role_name => $data) {
+            if (!array_key_exists($role_name, $roles)) {
+                continue;
+            }
+            $users[$role_name]->prefix = $data->indices[0]->names[0];
+        } 
+        return $users;
+    }
+
     public static function createUser($user, $password, $prefix)
     {
         self::esQuery('/_security/role/' . $user, 'PUT', json_encode([
@@ -58,5 +82,11 @@ class Elastic
             'password' => $password,
             'roles' => [$user],
         ]));
+    }
+
+    public static function dropUser($user)
+    {
+        self::esQuery('/_security/user/' . $user, 'DELETE', '');
+        self::esQuery('/_security/role/' . $user, 'DELETE', '');
     }
 }
