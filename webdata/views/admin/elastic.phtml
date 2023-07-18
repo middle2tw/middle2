@@ -22,18 +22,39 @@
                 <h3><?= $this->escape($machine->name) ?></h3>
 <?php
 Elastic::login('https://elastic-1.middle2.com:9200', getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD')); // TODO: change url
+$indices = Elastic::esQuery('/_cat/indices?format=json');
 ?>
             <table class="table">
                 <thead>
                     <tr>
                         <th>Index</th>
+                        <th>Health</th>
+                        <th>status</th>
+                        <th>docs.count</th>
+                        <th>docs.deleted</th>
+                        <th>store.size</th>
+                        <th>pri.store.size</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php foreach (Elastic::getUsers() as $user_data) { ?>
+                <?php $prefix = rtrim($user_data->prefix, '*') ?>
                 <tr>
-                    <td>User: <?= $this->escape($user_data->user_name) ?>, Prefix: <?= $this->escape($user_data->prefix) ?></td>
+                    <td colspan="7">
+                        <h2>User: <?= $this->escape($user_data->user_name) ?>, Prefix: <?= $this->escape($prefix) ?></h2></td>
                 </tr>
+                <?php foreach ($indices as $index) { ?>
+                    <?php if (strpos($index->index, $prefix) !== 0) { continue; } ?>
+                    <tr>
+                        <td><?= $this->escape(str_replace($prefix, '', $index->index)) ?></td>
+                        <td><?= $this->escape($index->health) ?></td>
+                        <td><?= $this->escape($index->status) ?></td>
+                        <td><?= $this->escape($index->{'docs.count'}) ?></td>
+                        <td><?= $this->escape($index->{'docs.deleted'}) ?></td>
+                        <td><?= $this->escape($index->{'store.size'}) ?></td>
+                        <td><?= $this->escape($index->{'pri.store.size'}) ?></td>
+                    </tr>
+                    <?php } ?>
                 <?php } ?>
                 </tbody>
             </table>
