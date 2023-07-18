@@ -1,0 +1,46 @@
+<?= $this->partial('/common/header.phtml', $this) ?>
+<?= $this->partial('/admin/header.phtml', $this) ?>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2 bs-docs-sidebar">
+            <!--Sidebar content-->
+            <ul class="nav nav-list affix bs-docs-sidenav">
+                <?php foreach (Machine::getMachinesByGroup('elastic') as $machine) { ?>
+                <li>
+                <a href="#node-<?= $this->escape($machine->machine_id) ?>">
+                    <i class="icon-chevron-right"></i>
+                    <?= $this->escape($machine->name) ?>
+                </a>
+                </li>
+                <?php } ?>
+            </ul>
+        </div>
+        <div class="span10">
+            <!--Body content-->
+            <?php foreach (Machine::getMachinesByGroup('elastic') as $machine) { ?>
+            <div id="node-<?= $this->escape($machine->machine_id) ?>">
+                <h3><?= $this->escape($machine->name) ?></h3>
+<?php
+Elastic::login('https://elastic-1.middle2.com:9200', getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD')); // TODO: change url
+?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach (Elastic::getUsers() as $user_data) { ?>
+                <tr>
+                    <td>User: <?= $this->escape($user_data->user_name) ?>, Prefix: <?= $this->escape($user_data->prefix) ?></td>
+                </tr>
+                <?php } ?>
+                </tbody>
+            </table>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<script><!--
+//--></script>
+<?= $this->partial('/common/footer.phtml', $this) ?>

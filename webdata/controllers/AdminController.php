@@ -264,6 +264,11 @@ class AdminController extends Pix_Controller
     {
     }
 
+    public function elasticAction()
+    {
+    }
+
+
     public function machinelogAction()
     {
         list(, /*admin*/, /*machinelog*/, $machine_id, $time) = explode('/', $this->getURI());
