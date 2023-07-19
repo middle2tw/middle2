@@ -175,6 +175,7 @@ class FirewallGenerator
             ),
             'ALL' => array(
                 array('22', array('dev')),
+                array('10050', array('dev')), // add zabbix
             ),
         );
     }
