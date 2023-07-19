@@ -36,7 +36,6 @@ class Elastic
         curl_close($curl);
         $ret = json_decode($content);
         if (is_object($ret) and property_exists($ret, 'error')) {
-            print_r($ret->error);
             throw new Exception(json_encode($ret->error->root_cause), $ret->status);
         }
         return $ret;
