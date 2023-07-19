@@ -46,7 +46,7 @@ $indices = Elastic::esQuery('/_cat/indices?format=json');
                 <?php foreach ($indices as $index) { ?>
                     <?php if (strpos($index->index, $prefix) !== 0) { continue; } ?>
                     <tr>
-                        <td><?= $this->escape(str_replace($prefix, '', $index->index)) ?></td>
+                        <td><a target="_blank" href="/admin/elasticindex/?machine=<?= urlencode($machine->machine_id) ?>&index=<?= urlencode($index->index) ?>"><?= $this->escape(str_replace($prefix, '', $index->index)) ?></a></td>
                         <td><?= $this->escape($index->health) ?></td>
                         <td><?= $this->escape($index->status) ?></td>
                         <td><?= $this->escape($index->{'docs.count'}) ?></td>

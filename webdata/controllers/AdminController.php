@@ -268,6 +268,28 @@ class AdminController extends Pix_Controller
     {
     }
 
+    public function elasticindexAction()
+    {
+        if (!$machine = Machine::find(intval($_GET['machine']))) {
+            return $this->json(0);
+        }
+        if (!$index = $_GET['index']) {
+            return $this->json(0);
+        }
+        if (strpos($index, '/') !== false or strpos($index, '?') !== false) {
+            return $this->json(0);
+        }
+        Elastic::login('https://elastic-1.middle2.com:9200', getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD')); // TODO: change url
+        try {
+            return $this->json(Elastic::esQuery('/' . $_GET['index'] . '/'));
+        } catch (Exception $e) {
+            return $this->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
 
     public function machinelogAction()
     {
