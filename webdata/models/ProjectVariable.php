@@ -37,7 +37,7 @@ class ProjectVariableRow extends Pix_Table_Row
             case 'Addon_Elastic2-ELASTIC_PASSWORD':
                 return Addon_Elastic2::find(array(intval($id)))->password;
             case 'Addon_Elastic2-ELASTIC_PREFIX':
-                return Addon_Elastic2::find(array(intval($id)))->prefix;
+                return Addon_Elastic2::find(array(intval($id)))->prefix . '_';
             }
             // TODO
         } else {
