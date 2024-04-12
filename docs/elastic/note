@@ -1,7 +1,7 @@
 - ec2 init
     - add a aws host (Amazon Linux 2, t4g.medium, 8G+80G disk)
     - add elastic ip
-    - security group allow port 22 (dev server), port 9200 (anywhere), port 80 (anywhere)
+    - security group allow port 22 (dev server), port 9200 (anywhere), port 443 (anywhere), port 80 (anywhere)
     - Volumes add "create snapshot lifecycle policy"
 - install software
     - init: ref: https://github.com/middle2tw/config/blob/master/linode-debian9-init.sh
@@ -21,3 +21,15 @@
             key: /etc/elasticsearch/certs/privkey.pem
             certificate: /etc/elasticsearch/certs/fullchain.pem
     - /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic --url https://elastic-1.middle2.com:9200
+## install apache
+- sudo yum install httpd python3-certbot-apache
+- sudo systemctl start httpd
+- wget 'https://kojipkgs.fedoraproject.org//packages/cronolog/1.6.2/39.fc40/aarch64/cronolog-1.6.2-39.fc40.aarch64.rpm'
+- sudo rpm -i cronolog-1.6.2-39.fc40.aarch64.rpm
+- add /etc/httpd/conf.d/vhost.conf
+  - <VirtualHost *:80>
+     DocumentRoot /var/www/html
+</VirtualHost>
+- sudo certbot --apache --domain kibana.middle2.com
+- sudo rm /etc/httpd/conf.d/vhost.conf /etc/httpd/conf.d/vhost-le-ssl.conf
+- sudo ln -s /srv/code/hisoku/config/elastic-1.middle2.com.conf /etc/httpd/conf.d/
