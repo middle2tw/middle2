@@ -154,7 +154,7 @@ class GitHelper
 
         self::system_without_error("docker stop container-{$project->name}");
         self::system_without_error("docker commit --message {$commit_id} container-{$project->name} {$docker_registry}/image-{$project->name}");
-        self::system_without_error("docker --config /srv/config/docker push {$docker_registry}/image-{$project->name}");
+        self::system_without_error("docker --config /srv/config/docker push --quiet {$docker_registry}/image-{$project->name}");
         self::system_without_error("docker rm container-{$project->name}");
 
         return $commit_id;
