@@ -63,10 +63,16 @@ class SSHServe
 
         if ($type == 'error') {
             $category = "app-{$project_name}-error";
+            $fp = popen("tail -f /srv/logs/scribed/{$category}/{$category}_current", 'r');
+            while ($line = fgets($fp)) {
+                list($ip, $port, $log) = explode(' ', $line, 3);
+                echo urldecode($log);
+            }
+            fclose($fp);
         } else {
             $category = "app-{$project_name}";
+            system("tail -f /srv/logs/scribed/{$category}/{$category}_current");
         }
-        system("tail -f /srv/logs/scribed/{$category}/{$category}_current");
     }
 
     public function tunnelCommand($command, $args)
