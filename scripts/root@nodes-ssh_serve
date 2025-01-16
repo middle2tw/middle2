@@ -89,7 +89,7 @@ function main()
         mkdir($weblog_dir, 0777, true);
 
         $cmd = "ssh git@" . GIT_SERVER . " build-docker-project-image " . $project_name;
-        $build_image_result = `$cmd`;
+        $build_image_result = strval(`$cmd`);
         if (!preg_match('#success:(.*)#', $build_image_result, $matches)) {
             return error('build project base failed: ' . $project_name);
         }
