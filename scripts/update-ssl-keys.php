@@ -12,6 +12,9 @@ while ($domain = fgets($fp)) {
     if (!$domain = trim($domain)) {
         continue;
     }
+    if (strpos($domain, '#') === 0) {
+        continue;
+    }
 
     if (!is_dir("certs/{$domain}")) {
         throw new Exception("domain {$domain} not found");
