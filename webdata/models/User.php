@@ -19,7 +19,7 @@ class UserRow extends Pix_Table_Row
             throw new InvalidArgumentException('invalid key, there should be 3 terms in key');
         }
         list($type, $body, $user) = $terms;
-        if (!in_array($type, array('ssh-rsa', 'ssh-dsa'))) {
+        if (!in_array($type, array('ssh-rsa', 'ssh-dsa', 'ssh-ed25519'))) {
             throw new InvalidArgumentException('invalid ssh type, first term must be ssh-rsa or ssh-dsa');
         }
 
