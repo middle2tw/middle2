@@ -69,7 +69,7 @@ class Addon_Elastic2 extends Pix_Table
         }
 
         // TODO: from config
-        $host = 'elastic-1.middle2.com';
+        $host = 'elastic-2.middle2.com';
         $prefix = strtolower(Hisoku::uniqid(10));
         $password = Hisoku::uniqid(20);
 
