@@ -21,7 +21,7 @@
             <div id="node-<?= $this->escape($machine->machine_id) ?>">
                 <h3><?= $this->escape($machine->name) ?></h3>
 <?php
-Elastic::login('https://elastic-1.middle2.com:9200', getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD')); // TODO: change url
+Elastic::login('https://elastic-2.middle2.com:9200', getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD')); // TODO: change url
 $indices = Elastic::esQuery('/_cat/indices?format=json');
 ?>
             <table class="table">
