@@ -355,6 +355,10 @@ class WebNode extends Pix_Table
                     trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
                     $node->markAsUnused('no alive process');
                 }
+                if (is_array($processes) and 1 == count($processes) and $processes[0]->comm == 'init') {
+                    trigger_error("{$node->ip}:{$node->port} had no alive process, release it", E_USER_WARNING);
+                    $node->markAsUnused('no alive process');
+                }
             }
 
             // 如果是 cronnode ，在 access 過後超過 60 秒沒有任何 process ，把他切回 wait mode
