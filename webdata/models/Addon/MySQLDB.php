@@ -88,7 +88,7 @@ class Addon_MySQLDB extends Pix_Table
 
         $project_config = json_decode($project->config);
         $project_group = property_exists($project_config, 'node-group') ? $project_config->{'node-group'} : '';
-        if ($project_group and $ips = Machine::getIPsByGroup('mysql_' . $project_group)) {
+        if ($project_group and $ips = Hisoku::getIPsByGroup('mysql_' . $project_group)) {
         } else {
             $ips = array();
             foreach (Machine::getMachinesByGroup('mysql') as $machine) {
