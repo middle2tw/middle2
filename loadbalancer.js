@@ -17,6 +17,7 @@ var loadConfig = function(){
     while (match = regex.exec(content)) {
         ret[match[1]] = match[2];
     }
+
     return ret;
 };
 
@@ -460,7 +461,10 @@ var http_request_callback = function(protocol){
     return function(main_request, main_response){
     var le_matches = main_request.url.match("/\.well-known/acme-challenge/([0-9a-zA-Z-_]*)");
     if (le_matches && fs.existsSync(config.LE_ROOT + '/' + le_matches[1])) {
-        main_response.write(fs.readFileSync(config.LE_ROOT + '/' + le_matches[1]));
+        try {
+            main_response.write(fs.readFileSync(config.LE_ROOT + '/' + le_matches[1]));
+        } catch (e) {
+        }
         main_response.end();
         return;
     }
