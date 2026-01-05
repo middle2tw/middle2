@@ -23,6 +23,10 @@ $logs = '';
 
 error_log('checking');
 while (false !== ($log = fgets($fp))) {
+    if (strpos($log, '" 503')) {
+        // skip 503
+        continue;
+    }
     $logs .= trim($log) . "\n";
     $count ++;
 }
