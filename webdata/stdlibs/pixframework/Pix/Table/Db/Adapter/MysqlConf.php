@@ -12,6 +12,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
 {
     protected $_config;
     public static $_connect_version = 1;
+    protected $affected_rows;
 
     public function __get($name)
     {
