@@ -138,6 +138,8 @@ class FirewallGenerator
             ),
             'elastic_search' => array(
                 array('9200', array('node', 'mainpage')),
+                array('9300', array('elastic_search'),
+                array('80', array('PUBLIC')),
             ),
             'mainpage' => array(
                 array('9999', array('loadbalancer')),
