@@ -36,11 +36,6 @@ class Hisoku
         return self::getIPsByGroup('pgsql');
     }
 
-    public static function getSearchServers()
-    {
-        return self::getIPsByGroup('search');
-    }
-
     public static function getLoginUser()
     {
         if ($u = User::find(intval(Pix_Session::get('user')))) {

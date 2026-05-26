@@ -90,7 +90,7 @@ class FirewallGenerator
             $this->_addServer($ip, 'scribe');
         }
 
-        foreach (Hisoku::getSearchServers() as $ip) {
+        foreach (Hisoku::getIPsByGroup('elastic') as $ip) {
             $this->_addServer($ip, 'elastic_search');
         }
 

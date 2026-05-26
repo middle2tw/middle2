@@ -260,10 +260,6 @@ class AdminController extends Pix_Controller
         return $this->alert('add machine done!', '/admin/machines');
     }
 
-    public function searchesAction()
-    {
-    }
-
     public function elasticAction()
     {
     }
