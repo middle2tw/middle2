@@ -554,6 +554,29 @@ class ProjectController extends Pix_Controller
         return $this->redirect('/project/detail/' . $project->name);
     }
 
+    public function setmaintainceAction()
+    {
+        if (Hisoku::getStoken() != $_POST['sToken']) {
+            return $this->alert('error', '/');
+        }
+
+        if (!$this->user->isAdmin()) {
+            return $this->alert('Permission denied', '/');
+        }
+
+        list(, /*project*/, /*setmaintaince*/, $name) = explode('/', $this->getURI());
+        if (!$project = Project::find_by_name($name)) {
+            return $this->alert('Project not found', '/');
+        }
+
+        $config = json_decode($project->config, true) ?: array();
+        $config['maintaince'] = intval($_POST['maintaince']) ? 1 : 0;
+        $project->update(array('config' => json_encode($config)));
+        WebNode::cleanLoadBalancerCache();
+
+        return $this->redirect('/project/detail/' . $project->name);
+    }
+
     public function getlogAction()
     {
         list(, /*project*/, /*getlog*/, $name, $type) = explode('/', $this->getURI());

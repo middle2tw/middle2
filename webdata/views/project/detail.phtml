@@ -16,6 +16,7 @@ $this->title = $this->project->name . (($note = $this->project->getEAV('note')) 
         <li> <a href="#config-file">Config File</a> </li>
         <li> <a href="#addon">Addon</a> </li>
         <li> <a href="#member">Members</a> </li>
+        <?php if ($this->user->isAdmin()) { ?><li> <a href="#admin">Admin</a> </li><?php } ?>
         <li> <a href="#node-status">Node Status</a> </li>
         <li> <a href="#commit-log">Commit Log</a> </li>
         <li> <a href="#access-log">Access Log</a> </li>
@@ -232,6 +233,23 @@ putenv('<?= $this->escape($variable->key) ?>=<?= $this->escape($variable->getVal
     </form>
     <?php } ?>
 </ol>
+<?php if ($this->user->isAdmin()) { ?>
+<hr>
+<h3 id="admin">Admin</h3>
+<?php $project_config = json_decode($this->project->config, true) ?: array(); ?>
+<?php $is_maintaince = !empty($project_config['maintaince']); ?>
+<p>
+    Maintenance Mode:
+    <strong><?= $is_maintaince ? '<span style="color:red">ON (503)</span>' : '<span style="color:green">OFF</span>' ?></strong>
+</p>
+<form method="post" action="/project/setmaintaince/<?= $this->project->name ?>">
+    <input type="hidden" name="sToken" value="<?= Hisoku::getStoken() ?>">
+    <input type="hidden" name="maintaince" value="<?= $is_maintaince ? 0 : 1 ?>">
+    <button type="submit" class="btn <?= $is_maintaince ? 'btn-success' : 'btn-danger' ?>">
+        <?= $is_maintaince ? 'Disable Maintenance (resume 200)' : 'Enable Maintenance (force 503)' ?>
+    </button>
+</form>
+<?php } ?>
 <hr>
 <h3 id="commit-log">Commit Log</h3>
 <div>
