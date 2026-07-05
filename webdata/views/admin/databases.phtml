@@ -45,7 +45,7 @@ $res->free_result();
         <td><?= $this->escape($db) ?></td>
         <td>
             <?php if ($user and $project = Project::search(array('name' => $user))->first()) { ?>
-            <a href="/admin/project/<?= $project->id ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
+            <a href="/project/detail/<?= $project->name ?>" title="<?= $this->escape($project->getEAV('note')) ?>"><?= $project->name ?></a>
             <?php } ?>
         </td>
         <td class="usage" data-value="<?= intval($db_sizes[$db]) ?>"><?= number_format(intval($db_sizes[$db])) ?></td>
