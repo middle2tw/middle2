@@ -23,6 +23,19 @@
 <?php
 Elastic::login('https://elastic-2.middle2.com:9200', getenv('ELASTIC_ADMIN_USER'), getenv('ELASTIC_ADMIN_PASSWORD')); // TODO: change url
 $indices = Elastic::esQuery('/_cat/indices?format=json');
+$parse_es_size = function($size_str) {
+    if (preg_match('/^([0-9.]+)(kb|mb|gb|tb|b)?$/i', trim($size_str), $m)) {
+        $n = floatval($m[1]);
+        switch (strtolower($m[2])) {
+            case 'kb': return $n * 1024;
+            case 'mb': return $n * 1024 ** 2;
+            case 'gb': return $n * 1024 ** 3;
+            case 'tb': return $n * 1024 ** 4;
+            default:   return $n;
+        }
+    }
+    return 0;
+};
 ?>
             <table class="table">
                 <thead>
@@ -43,8 +56,15 @@ $indices = Elastic::esQuery('/_cat/indices?format=json');
                     <td colspan="7">
                         <h2>User: <?= $this->escape($user_data->user_name) ?>, Prefix: <?= $this->escape($prefix) ?></h2></td>
                 </tr>
-                <?php foreach ($indices as $index) { ?>
-                    <?php if (strpos($index->index, $prefix) !== 0) { continue; } ?>
+                <?php
+                $user_indices = array_values(array_filter((array)$indices, function($index) use ($prefix) {
+                    return strpos($index->index, $prefix) === 0;
+                }));
+                usort($user_indices, function($a, $b) use ($parse_es_size) {
+                    return $parse_es_size($b->{'store.size'}) <=> $parse_es_size($a->{'store.size'});
+                });
+                ?>
+                <?php foreach ($user_indices as $index) { ?>
                     <tr>
                         <td><a target="_blank" href="/admin/elasticindex/?machine=<?= urlencode($machine->machine_id) ?>&index=<?= urlencode($index->index) ?>"><?= $this->escape(str_replace($prefix, '', $index->index)) ?></a></td>
                         <td><?= $this->escape($index->health) ?></td>
