@@ -42,9 +42,10 @@ class GitHelper
             throw new Exception('project not found: ' . $project->name);
         }
 
-        chdir($absolute_path);
-        $git_log_cmd = `git log -n 3 {$branch}`;
-        return trim($git_log_cmd);
+        $cmd = 'git -c ' . escapeshellarg('safe.directory=' . $absolute_path)
+            . ' --git-dir=' . escapeshellarg($absolute_path)
+            . ' log -n 3 ' . escapeshellarg($branch) . ' 2>/dev/null';
+        return trim(`$cmd`);
     }
 
     /**
