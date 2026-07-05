@@ -50,7 +50,19 @@ $parse_es_size = function($size_str) {
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach (Elastic::getUsers() as $user_data) { ?>
+                <?php
+                $users = array_values(Elastic::getUsers());
+                foreach ($users as &$user_data) {
+                    $p = rtrim($user_data->prefix, '*');
+                    $user_data->_total_size = array_sum(array_map(
+                        function($idx) use ($parse_es_size) { return $parse_es_size($idx->{'store.size'}); },
+                        array_filter((array)$indices, function($idx) use ($p) { return strpos($idx->index, $p) === 0; })
+                    ));
+                }
+                unset($user_data);
+                usort($users, function($a, $b) { return $b->_total_size <=> $a->_total_size; });
+                ?>
+                <?php foreach ($users as $user_data) { ?>
                 <?php $prefix = rtrim($user_data->prefix, '*') ?>
                 <tr>
                     <td colspan="7">
