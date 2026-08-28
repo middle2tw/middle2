@@ -96,7 +96,7 @@ $this->title = 'NodeServers Info :: ';
                             <?= $this->escape(implode(',', array_map(function($user_id) { return User::find($user_id)->name; }, $project_members[$node->project->id]))) ?>
                             <?php } ?>
                         </td>
-                        <td><?= $this->escape($node->getStatusWord()) ?></td>
+                        <td style="max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="<?= $this->escape($node->getStatusWord()) ?>"><?= $this->escape($node->getStatusWord()) ?></td>
                         <td>
                             <?php if ($node->project) { ?>
                             <?= $this->partial('helper/counttime.phtml', array('time' => $node->start_at)) ?>
