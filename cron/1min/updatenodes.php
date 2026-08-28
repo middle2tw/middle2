@@ -1,17 +1,23 @@
 #!/usr/bin/env php
 <?php
 
+include(__DIR__ . '/../../webdata/init.inc.php');
 define('LOCK_FILE', '/tmp/hisoku-updatenodes');
 $fp = fopen(LOCK_FILE, 'w+');
 if (!flock($fp, LOCK_EX | LOCK_NB)) {
-    throw new Exception(LOCK_FILE . ' is locking');
+    list($time, $pid) = explode(' ', file_get_contents(LOCK_FILE . '.pid'));
+    if ($time < time() - 3600) {
+        file_put_contents(LOCK_FILE . '.pid', time() . ' ' . $pid);
+        Hisoku::alert("Middle2 Cron error", "updatenodes is locking since " . date('Y/m/d H:i:s', $time));
+    }
+    exit;
 }
 
 ftruncate($fp, 0);      // truncate file
+file_put_contents(LOCK_FILE . '.pid', time() . ' ' . getmypid());
 fwrite($fp, getmypid());
 fflush($fp);            // flush output before releasing the lock
 
-include(__DIR__ . '/../../webdata/init.inc.php');
 WebNode::updateNodeInfo();
 
 flock($fp, LOCK_UN);    // release the lock

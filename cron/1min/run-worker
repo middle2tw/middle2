@@ -10,7 +10,8 @@ if (!flock($fp, LOCK_EX | LOCK_NB)) {
         file_put_contents(LOCK_FILE . '.pid', time() . ' ' . $pid);
         Hisoku::alert("Middle2 Cron error", "Cron is locking since " . date('Y/m/d H:i:s', $time));
     }
-    throw new Exception(LOCK_FILE . ' is locking');
+    // 上一輪還沒跑完，這輪安靜跳過即可；真的卡超過 1 小時已經上面 alert 過了，不需要再寄信
+    exit;
 }
 
 ftruncate($fp, 0);      // truncate file

@@ -21,7 +21,6 @@ fseek($fp, $cursor);
 $count = 0;
 $logs = '';
 
-error_log('checking');
 while (false !== ($log = fgets($fp))) {
     if (strpos($log, '" 503')) {
         // skip 503
