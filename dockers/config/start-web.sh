@@ -23,7 +23,7 @@ elif [ -f "/srv/web/web.rb" ]; then
 elif [ -f "/srv/web/artisan" ]; then
     echo 'APP_KEY=' > /srv/web/.env
     php artisan key:generate
-    php artisan serve --port=80 --host=0.0.0.0 2>&1 &
+    php artisan serve --port=80 --host=0.0.0.0 >> ${LOG_FILE} 2>&1 &
 #elif [ -f "/srv/web/index.php" ]; then
 else
 # build /srv/env.conf
