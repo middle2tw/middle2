@@ -1,12 +1,19 @@
 [Unit]
 Description=Middle2 Load Balancer
 After=network.target memcached.service apache2.service
+# never stop restarting: with the default limit (5 starts in 10s) a burst of
+# crashes left the site down until someone restarted it by hand
+StartLimitIntervalSec=0
 
 [Service]
 ExecStart=/usr/bin/node /srv/code/hisoku/loadbalancer.js
 ExecReload=/bin/bash -c "/bin/kill -1 `cat /tmp/middle2.pid`"
 ExecStop=/bin/kill -s KILL $MAINPID
 Restart=always
+RestartSec=2
+# the journal on this host only keeps a few hours, keep crash traces here
+StandardOutput=append:/var/log/m2-lb.log
+StandardError=append:/var/log/m2-lb.log
 
 [Install]
 WantedBy=multi-user.target

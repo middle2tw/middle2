@@ -186,6 +186,9 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
 
     if (host.indexOf(config.APP_SUFFIX) > 0) {
         var project_name = host.split(config.APP_SUFFIX)[0];
+        if (typeof(request_pools[current_request]) === 'undefined') {
+            return callback({success: false, message: 'Connection error', code: 500});
+        }
         request_pools[current_request].state = 'get-project-from-domain';
         var project = mapping_cache['project-name-to-id'][project_name];
         if ('undefined' !== typeof(project)) {
@@ -196,6 +199,10 @@ lb_core.getBackendHost2 = function(host, port, current_request, callback){
         }
 
         mysql_one_time_query("SELECT * FROM `project` WHERE `name` = ?", [project_name], function(err, rows, fields){
+            // the client may have aborted while we were waiting for MySQL
+            if (typeof(request_pools[current_request]) === 'undefined') {
+                return callback({success: false, message: 'Connection error', code: 500});
+            }
             if ('undefined' == typeof(rows) && err) {
                 console.log("Database error, select project detail from project name failed: " + JSON.stringify(err));
                 return callback({success: false, message: 'Database error', code: 500});
