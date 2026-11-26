@@ -325,10 +325,11 @@ lb_core._getNodesByProject = function(project, current_request, callback){
     });
 };
 
-// dotfiles (except .well-known) and WordPress paths
+// dotfiles (except .well-known) and WordPress paths. Only a letter after the
+// dot counts, real urls do have segments like /id/.24876375 or /view/.<name>
 var is_scanner_path = function(url){
     var path = String(url || '').split('?')[0];
-    if (path.match(/\/\.(?!well-known(\/|$))[^\/]/)) {
+    if (path.match(/\/\.(?!well-known(\/|$))[A-Za-z_]/)) {
         return true;
     }
     return !!path.match(/^\/(wp-(admin|content|includes|login\.php|config)|xmlrpc\.php)/i);
