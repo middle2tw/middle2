@@ -397,6 +397,51 @@ class WebNode extends Pix_Table
         }
 
         WebNode::releaseIdleNodesUnderPressure();
+        WebNode::recycleLongRunningNodes();
+    }
+
+    // node 跑超過這個秒數就重開，避免 memory leak 一直累積，也讓 node 換成新的 image
+    const RECYCLE_AGE = 1209600; // 14 天
+    // 只在離峰時段重開 (小時, [開始, 結束))
+    const RECYCLE_HOUR_START = 3;
+    const RECYCLE_HOUR_END = 6;
+
+    /**
+     * recycleLongRunningNodes 離峰時段每次最多重開一個跑最久的 WebNode / Wait node，
+     * 空的 node 不夠時就不做，因為重開後下一個 request 需要一個空 node 來啟動
+     *
+     * @return void
+     */
+    public static function recycleLongRunningNodes()
+    {
+        $hour = intval(date('G'));
+        if ($hour < self::RECYCLE_HOUR_START or $hour >= self::RECYCLE_HOUR_END) {
+            return;
+        }
+
+        $free = 0;
+        $oldest = null;
+        foreach (WebNode::search(1) as $node) {
+            if (in_array($node->status, array(WebNode::STATUS_UNUSED, WebNode::STATUS_OVER))) {
+                $free ++;
+                continue;
+            }
+            if (!in_array($node->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WAIT)) or !$node->project) {
+                continue;
+            }
+            if (time() - $node->start_at < self::RECYCLE_AGE) {
+                continue;
+            }
+            if (is_null($oldest) or $node->start_at < $oldest->start_at) {
+                $oldest = $node;
+            }
+        }
+
+        if (is_null($oldest) or $free < self::PRESSURE_MIN_FREE) {
+            return;
+        }
+        $days = floor((time() - $oldest->start_at) / 86400);
+        $oldest->markAsUnused("recycle, running {$days} days");
     }
 
     // 空的 node 少於這個數量時，就不等一小時，提早釋放閒置的 node
