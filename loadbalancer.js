@@ -292,6 +292,11 @@ lb_core._getNodesByProject = function(project, current_request, callback){
 
         request_pools[current_request].state = 'get-webnode-from-project-done';
         if (!rows.length) {
+            // vulnerability scanners probe these on every domain, don't start
+            // a sleeping project (and hold a node for an hour) for them
+            if (is_scanner_path(request_pools[current_request].url)) {
+                return callback({success: false, message: 'Not found', code: 404});
+            }
             request_pools[current_request].state = 'init-new-node';
             return lb_core._initNewNodes(project, callback);
         }
@@ -320,6 +325,15 @@ lb_core._getNodesByProject = function(project, current_request, callback){
     });
 };
 
+// dotfiles (except .well-known) and WordPress paths
+var is_scanner_path = function(url){
+    var path = String(url || '').split('?')[0];
+    if (path.match(/\/\.(?!well-known(\/|$))[^\/]/)) {
+        return true;
+    }
+    return !!path.match(/^\/(wp-(admin|content|includes|login\.php|config)|xmlrpc\.php)/i);
+};
+
 var init_pools = {};
 var init_running = false;
 
@@ -345,10 +359,10 @@ var run_init = function(){
                 return callback({success: false, message: 'Database error', code: 500});
             }
             if (rows.length == 0) {
-                callbacks.map(function(callback){
-                        callback({success: false, message: 'No empty node', code: 503});
-                });
-                return;
+                // go through callback so the pool entry is removed and the
+                // next project gets its turn, otherwise init_running stays
+                // true and no node is ever started again
+                return callback({success: false, message: 'No empty node', code: 503});
             }
 
             filtered_rows = rows.filter(function(row){
@@ -491,6 +505,13 @@ var http_request_callback = function(protocol){
             'Location': 'https://' + host + main_request.url
         });
         main_response.end();
+        return;
+    }
+
+    // remoteAddress is undefined once the client socket is gone, and passing
+    // it on as x-forwarded-for makes http.request throw and kills the process
+    if (!main_request.socket.remoteAddress) {
+        main_request.socket.destroy();
         return;
     }
 

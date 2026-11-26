@@ -395,6 +395,51 @@ class WebNode extends Pix_Table
                 $node->resetNode();
             }
         }
+
+        WebNode::releaseIdleNodesUnderPressure();
+    }
+
+    // 空的 node 少於這個數量時，就不等一小時，提早釋放閒置的 node
+    const PRESSURE_MIN_FREE = 6;
+    // 提早釋放時，只釋放閒置超過這個秒數的 node
+    const PRESSURE_MIN_IDLE = 900;
+
+    /**
+     * releaseIdleNodesUnderPressure 爬蟲會把很多專案叫醒，讓每個 node 都佔滿一小時，
+     * 空的 node 不夠時，從閒置最久的 WebNode / Wait node 開始釋放，確保新的 request 有 node 可以用
+     *
+     * @return void
+     */
+    public static function releaseIdleNodesUnderPressure()
+    {
+        $free = 0;
+        $candidates = array();
+        foreach (WebNode::search(1) as $node) {
+            if (in_array($node->status, array(WebNode::STATUS_UNUSED, WebNode::STATUS_OVER))) {
+                $free ++;
+                continue;
+            }
+            if (!in_array($node->status, array(WebNode::STATUS_WEBNODE, WebNode::STATUS_WAIT)) or !$node->project) {
+                continue;
+            }
+            $idle = time() - $node->getAccessAt();
+            if ($idle < self::PRESSURE_MIN_IDLE) {
+                continue;
+            }
+            if ($node->status == WebNode::STATUS_WEBNODE and $project = $node->project and $project->getEAV('always-alive')) {
+                continue;
+            }
+            $candidates[] = array($idle, $node);
+        }
+
+        if ($free >= self::PRESSURE_MIN_FREE) {
+            return;
+        }
+        usort($candidates, function($a, $b) { return $b[0] - $a[0]; });
+        foreach (array_slice($candidates, 0, self::PRESSURE_MIN_FREE - $free) as $candidate) {
+            list($idle, $node) = $candidate;
+            $node->markAsUnused("low free nodes, idle {$idle}s");
+        }
     }
 
     public static function getNodeTypeByStatus($status)
